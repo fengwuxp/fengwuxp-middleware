@@ -14,7 +14,6 @@
 package com.wuxp.mybatisplus.processor;
 
 import com.mysema.codegen.SimpleCompiler;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Assertions;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -40,14 +39,14 @@ public abstract class AbstractProcessorTest {
         return classes;
     }
 
-    protected void process(Class<? extends AbstractProcessor> processorClass, List<String> classes, String target) throws IOException {
-        compile(processorClass, classes, "generated-test-sources/test-annotations");
+    protected void process(Class<? extends AbstractProcessor> processorClass, List<String> classes) throws IOException {
+        compile(processorClass, classes);
     }
 
-    protected void compile(Class<? extends AbstractProcessor> processorClass, List<String> classes, String target) throws IOException {
+    protected void compile(Class<? extends AbstractProcessor> processorClass, List<String> classes) throws IOException {
         List<String> options = new ArrayList<String>(classes.size() + 3);
         options.add("-s");
-        options.add("target/" + target);
+        options.add("target/generated-test-sources/test-annotations");
         options.add("-proc:only");
         options.add("-processor");
         options.add(processorClass.getName());

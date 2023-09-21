@@ -1,5 +1,6 @@
 package com.wuxp.mybatisplus.processor;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -12,6 +13,7 @@ class MybatisPlusEntityClassProcessorTests extends AbstractProcessorTest {
 
     @Test
     void testProcess() throws Exception {
-        process(MybatisPlusEntityClassProcessor.class, CLASSES, "entities");
+        process(MybatisPlusEntityClassProcessor.class, CLASSES);
+        Assertions.assertNotNull(PACKAGE_PATH);
     }
 }

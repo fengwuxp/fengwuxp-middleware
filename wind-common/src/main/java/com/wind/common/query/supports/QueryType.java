@@ -1,4 +1,4 @@
-package com.wind.common.api;
+package com.wind.common.query.supports;
 
 
 import com.wind.common.enums.DescriptiveEnum;
@@ -13,7 +13,7 @@ import lombok.Getter;
 public enum QueryType implements DescriptiveEnum {
 
 
-    QUERY_NUM("查询总数"),
+    COUNT_TOTAL("统计总数"),
 
     QUERY_RESET("查询结果集"),
 
@@ -22,7 +22,7 @@ public enum QueryType implements DescriptiveEnum {
     private final String desc;
 
     public boolean isCountTotal() {
-        return this.equals(QUERY_NUM) || this.equals(QUERY_BOTH);
+        return this.equals(COUNT_TOTAL) || this.equals(QUERY_BOTH);
     }
 
     public boolean isQueryResult() {

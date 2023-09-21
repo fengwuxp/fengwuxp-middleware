@@ -1,6 +1,6 @@
 package com.wind.server.web.restful;
 
-import com.wind.common.api.Pagination;
+import com.wind.common.query.supports.Pagination;
 import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.ExceptionCode;
 import com.wind.server.web.supports.ApiResp;

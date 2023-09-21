@@ -1,4 +1,4 @@
-package com.wind.common.api;
+package com.wind.common.query.supports;
 
 
 import com.wind.common.enums.DescriptiveEnum;
