@@ -1,8 +1,9 @@
 package com.wind.server.web.restful;
 
-import com.wind.common.query.supports.Pagination;
 import com.wind.common.exception.AssertUtils;
+import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.common.exception.ExceptionCode;
+import com.wind.common.query.supports.Pagination;
 import com.wind.server.web.supports.ApiResp;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -48,62 +49,60 @@ public final class RestfulApiRespFactory {
     /*-------------------- 4xx -------------------*/
 
     public static <T> ApiResp<T> badRequest() {
-        return badRequest("请求参数有误");
+        return badRequest(DefaultExceptionCode.BAD_REQUEST.getCode());
     }
 
     public static <T> ApiResp<T> badRequest(String errorMessage) {
-        return of(HttpStatus.BAD_REQUEST, null, ExceptionCode.DEFAULT_ERROR, errorMessage);
+        return of(HttpStatus.BAD_REQUEST, null, DefaultExceptionCode.BAD_REQUEST, errorMessage);
     }
 
     public static <T> ApiResp<T> notFound() {
-        return notFound("请求目标未找到");
+        return notFound(DefaultExceptionCode.NOT_FOUND.getDesc());
     }
 
     public static <T> ApiResp<T> notFound(String errorMessage) {
-        return of(HttpStatus.NOT_FOUND, null, ExceptionCode.DEFAULT_ERROR, errorMessage);
+        return of(HttpStatus.NOT_FOUND, null, DefaultExceptionCode.NOT_FOUND, errorMessage);
     }
+
+    public static <T> ApiResp<T> unAuthorized() {
+        return unAuthorized("未登录，请先登录");
+    }
+
 
     public static <T> ApiResp<T> unAuthorized(String errorMessage) {
-        return unAuthorized(ExceptionCode.DEFAULT_ERROR, errorMessage);
+        return unAuthorized(null, errorMessage);
     }
 
-    public static <T> ApiResp<T> unAuthorized(ExceptionCode code, String errorMessage) {
-        return unAuthorized(null, code, errorMessage);
+    public static <T> ApiResp<T> unAuthorized(T data, String errorMessage) {
+        return of(HttpStatus.UNAUTHORIZED, data, DefaultExceptionCode.UNAUTHORIZED, errorMessage);
     }
 
-    public static <T> ApiResp<T> unAuthorized(T data, ExceptionCode code, String errorMessage) {
-        return of(HttpStatus.UNAUTHORIZED, data, code, errorMessage);
-    }
 
     public static <T> ApiResp<T> forBidden() {
-        return forBidden(ExceptionCode.DEFAULT_ERROR, "无权限访问该资源");
+        return forBidden("无权限访问该资源");
     }
 
     public static <T> ApiResp<T> forBidden(String errorMessage) {
-        return forBidden(ExceptionCode.DEFAULT_ERROR, errorMessage);
+        return forBidden(null, errorMessage);
     }
 
-    public static <T> ApiResp<T> forBidden(ExceptionCode code, String errorMessage) {
-        return forBidden(null, code, errorMessage);
-    }
-
-    public static <T> ApiResp<T> forBidden(T data, ExceptionCode code, String errorMessage) {
-        return of(HttpStatus.FORBIDDEN, data, code, errorMessage);
+    public static <T> ApiResp<T> forBidden(T data, String errorMessage) {
+        return of(HttpStatus.FORBIDDEN, data, DefaultExceptionCode.FORBIDDEN, errorMessage);
     }
 
 
     /*-------------------- business handle error -------------------*/
 
     public static <T> ApiResp<T> error() {
-        return forBidden(ExceptionCode.DEFAULT_ERROR, "请求处理出现错误");
+        return error("请求处理出现错误");
     }
 
     public static <T> ApiResp<T> error(String errorMessage) {
-        return forBidden(ExceptionCode.DEFAULT_ERROR, errorMessage);
+        return error(DefaultExceptionCode.COMMON_ERROR, errorMessage);
     }
 
     public static <T> ApiResp<T> error(ExceptionCode code, String errorMessage) {
-        return forBidden(null, code, errorMessage);
+        return error(null, code, errorMessage);
     }
 
     public static <T> ApiResp<T> error(T data, ExceptionCode code, String errorMessage) {

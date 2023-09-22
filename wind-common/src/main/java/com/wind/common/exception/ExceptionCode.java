@@ -6,14 +6,16 @@ import com.wind.common.enums.DescriptiveEnum;
 import static com.wind.common.WindConstants.SUCCESSFUL_CODE;
 
 /**
- * 异常码描述接口，建议用枚举实现
+ * 异常码描述接口，不同的业务场景可以实现该接口做扩展。
+ * 建议用枚举实现
  *
  * @author wuxp
+ * @see DefaultExceptionCode
  */
 public interface ExceptionCode extends DescriptiveEnum {
 
     /**
-     * 成功
+     * 表示成功的 code
      */
     ExceptionCode SUCCESSFUL = new ExceptionCode() {
         @Override
@@ -27,20 +29,6 @@ public interface ExceptionCode extends DescriptiveEnum {
         }
     };
 
-    /**
-     * 通用错误
-     */
-    ExceptionCode DEFAULT_ERROR = new ExceptionCode() {
-        @Override
-        public String getCode() {
-            return WindConstants.DEFAULT_ERROR_CODE;
-        }
-
-        @Override
-        public String getDesc() {
-            return "失败";
-        }
-    };
 
     /**
      * @return 异常码

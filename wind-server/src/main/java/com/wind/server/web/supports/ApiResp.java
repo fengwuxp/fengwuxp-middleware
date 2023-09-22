@@ -36,7 +36,6 @@ public interface ApiResp<T> extends Serializable {
      */
     boolean isSuccess();
 
-
     /**
      * @return 错误码
      */

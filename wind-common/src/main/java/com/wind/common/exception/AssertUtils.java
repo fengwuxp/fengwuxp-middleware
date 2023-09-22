@@ -56,7 +56,7 @@ public final class AssertUtils {
      */
     public static void state(boolean expression, Supplier<String> messageSupplier) {
         if (!expression) {
-            throw new BaseException(nullSafeGet(messageSupplier));
+            throw BaseException.common(nullSafeGet(messageSupplier));
         }
     }
 
@@ -82,7 +82,7 @@ public final class AssertUtils {
      */
     public static void isTrue(boolean expression, String message) {
         if (!expression) {
-            throw new BaseException(message);
+            throw BaseException.common(message);
         }
     }
 
@@ -101,7 +101,7 @@ public final class AssertUtils {
      */
     public static void isTrue(boolean expression, Supplier<String> messageSupplier) {
         if (!expression) {
-            throw new BaseException(nullSafeGet(messageSupplier));
+            throw BaseException.common(nullSafeGet(messageSupplier));
         }
     }
 
@@ -126,7 +126,7 @@ public final class AssertUtils {
      */
     public static void isNull(@Nullable Object object, String message) {
         if (object != null) {
-            throw new BaseException(message);
+            throw BaseException.common(message);
         }
     }
 
@@ -144,7 +144,7 @@ public final class AssertUtils {
      */
     public static void isNull(@Nullable Object object, Supplier<String> messageSupplier) {
         if (object != null) {
-            throw new BaseException(nullSafeGet(messageSupplier));
+            throw BaseException.common(nullSafeGet(messageSupplier));
         }
     }
 
@@ -168,7 +168,7 @@ public final class AssertUtils {
      */
     public static void notNull(@Nullable Object object, String message) {
         if (object == null) {
-            throw new BaseException(message);
+            throw BaseException.common(message);
         }
     }
 
@@ -187,7 +187,7 @@ public final class AssertUtils {
      */
     public static void notNull(@Nullable Object object, Supplier<String> messageSupplier) {
         if (object == null) {
-            throw new BaseException(nullSafeGet(messageSupplier));
+            throw BaseException.common(nullSafeGet(messageSupplier));
         }
     }
 
@@ -213,7 +213,7 @@ public final class AssertUtils {
      */
     public static void hasLength(@Nullable String text, String message) {
         if (!StringUtils.hasLength(text)) {
-            throw new BaseException(message);
+            throw BaseException.common(message);
         }
     }
 
@@ -234,7 +234,7 @@ public final class AssertUtils {
      */
     public static void hasLength(@Nullable String text, Supplier<String> messageSupplier) {
         if (!StringUtils.hasLength(text)) {
-            throw new BaseException(nullSafeGet(messageSupplier));
+            throw BaseException.common(nullSafeGet(messageSupplier));
         }
     }
 
@@ -262,7 +262,7 @@ public final class AssertUtils {
      */
     public static void hasText(@Nullable String text, String message) {
         if (!StringUtils.hasText(text)) {
-            throw new BaseException(message);
+            throw BaseException.common(message);
         }
     }
 
@@ -283,7 +283,7 @@ public final class AssertUtils {
      */
     public static void hasText(@Nullable String text, Supplier<String> messageSupplier) {
         if (!StringUtils.hasText(text)) {
-            throw new BaseException(nullSafeGet(messageSupplier));
+            throw BaseException.common(nullSafeGet(messageSupplier));
         }
     }
 
@@ -311,7 +311,7 @@ public final class AssertUtils {
     public static void doesNotContain(@Nullable String textToSearch, String substring, String message) {
         if (StringUtils.hasLength(textToSearch) && StringUtils.hasLength(substring) &&
                 textToSearch.contains(substring)) {
-            throw new BaseException(message);
+            throw BaseException.common(message);
         }
     }
 
@@ -331,7 +331,7 @@ public final class AssertUtils {
     public static void doesNotContain(@Nullable String textToSearch, String substring, Supplier<String> messageSupplier) {
         if (StringUtils.hasLength(textToSearch) && StringUtils.hasLength(substring) &&
                 textToSearch.contains(substring)) {
-            throw new BaseException(nullSafeGet(messageSupplier));
+            throw BaseException.common(nullSafeGet(messageSupplier));
         }
     }
 
@@ -357,7 +357,7 @@ public final class AssertUtils {
      */
     public static void notEmpty(@Nullable Object[] array, String message) {
         if (ObjectUtils.isEmpty(array)) {
-            throw new BaseException(message);
+            throw BaseException.common(message);
         }
     }
 
@@ -376,7 +376,7 @@ public final class AssertUtils {
      */
     public static void notEmpty(@Nullable Object[] array, Supplier<String> messageSupplier) {
         if (ObjectUtils.isEmpty(array)) {
-            throw new BaseException(nullSafeGet(messageSupplier));
+            throw BaseException.common(nullSafeGet(messageSupplier));
         }
     }
 
@@ -404,7 +404,7 @@ public final class AssertUtils {
         if (array != null) {
             for (Object element : array) {
                 if (element == null) {
-                    throw new BaseException(message);
+                    throw BaseException.common(message);
                 }
             }
         }
@@ -427,7 +427,7 @@ public final class AssertUtils {
         if (array != null) {
             for (Object element : array) {
                 if (element == null) {
-                    throw new BaseException(nullSafeGet(messageSupplier));
+                    throw BaseException.common(nullSafeGet(messageSupplier));
                 }
             }
         }
@@ -455,7 +455,7 @@ public final class AssertUtils {
      */
     public static void notEmpty(@Nullable Collection<?> collection, String message) {
         if (CollectionUtils.isEmpty(collection)) {
-            throw new BaseException(message);
+            throw BaseException.common(message);
         }
     }
 
@@ -475,7 +475,7 @@ public final class AssertUtils {
      */
     public static void notEmpty(@Nullable Collection<?> collection, Supplier<String> messageSupplier) {
         if (CollectionUtils.isEmpty(collection)) {
-            throw new BaseException(nullSafeGet(messageSupplier));
+            throw BaseException.common(nullSafeGet(messageSupplier));
         }
     }
 
@@ -505,7 +505,7 @@ public final class AssertUtils {
         if (collection != null) {
             for (Object element : collection) {
                 if (element == null) {
-                    throw new BaseException(message);
+                    throw BaseException.common(message);
                 }
             }
         }
@@ -528,7 +528,7 @@ public final class AssertUtils {
         if (collection != null) {
             for (Object element : collection) {
                 if (element == null) {
-                    throw new BaseException(nullSafeGet(messageSupplier));
+                    throw BaseException.common(nullSafeGet(messageSupplier));
                 }
             }
         }
@@ -545,7 +545,7 @@ public final class AssertUtils {
      */
     public static void notEmpty(@Nullable Map<?, ?> map, String message) {
         if (CollectionUtils.isEmpty(map)) {
-            throw new BaseException(message);
+            throw BaseException.common(message);
         }
     }
 
@@ -564,7 +564,7 @@ public final class AssertUtils {
      */
     public static void notEmpty(@Nullable Map<?, ?> map, Supplier<String> messageSupplier) {
         if (CollectionUtils.isEmpty(map)) {
-            throw new BaseException(nullSafeGet(messageSupplier));
+            throw BaseException.common(nullSafeGet(messageSupplier));
         }
     }
 
@@ -699,7 +699,7 @@ public final class AssertUtils {
         if (defaultMessage) {
             result = result + ("Object of class [" + className + "] must be an instance of " + type);
         }
-        throw new BaseException(result);
+        throw BaseException.common(result);
     }
 
     private static void assignableCheckFailed(Class<?> superType, @Nullable Class<?> subType, @Nullable String msg) {
@@ -716,7 +716,7 @@ public final class AssertUtils {
         if (defaultMessage) {
             result = result + (subType + " is not assignable to " + superType);
         }
-        throw new BaseException(result);
+        throw BaseException.common(result);
     }
 
     private static boolean endsWithSeparator(String msg) {
