@@ -14,7 +14,8 @@ public final class WindConstants {
     public static final String SPACE = " ";
     public static final String TAB = "\t";
     public static final String DOT = ".";
-    public static final String HASHTAG = "#";
+    public static final String AT = "@";
+    public static final String SHARP = "#";
     public static final String DOUBLE_DOT = "..";
     public static final String SLASH = "/";
     public static final String BACKSLASH = "\\";
