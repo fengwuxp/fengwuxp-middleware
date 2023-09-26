@@ -2,6 +2,7 @@ package com.wind.server.web.filters;
 
 import com.google.common.collect.ImmutableSet;
 import com.wind.common.utils.IpAddressUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -34,9 +35,10 @@ public class RequestSourceIpFilter extends OncePerRequestFilter {
     );
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
 
         request.setAttribute(HTTP_REQUEST_IP_ATTR_NAME, getRequestSourceIp(request));
+        chain.doFilter(request, response);
     }
 
     /**

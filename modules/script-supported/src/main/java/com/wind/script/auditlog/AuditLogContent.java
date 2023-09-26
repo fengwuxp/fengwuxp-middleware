@@ -63,6 +63,12 @@ public class AuditLogContent {
     @Nullable
     private final Object resourceId;
 
+    /**
+     * 异常
+     */
+    @Nullable
+    private final Throwable throwable;
+
     @Nullable
     @SuppressWarnings("unchecked")
     public <T> T getVariable(String key) {

@@ -10,6 +10,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -21,13 +22,13 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
- * 通过 Spring Expression 记录审计日志
+ * 通过 Spring Expression 构建审计日志
  *
  * @author wuxp
  * @date 2023-09-23 06:26
  **/
 @Slf4j
-public class ScriptAuditLogRecorder {
+public class ScriptAuditLogBuilder {
 
 
     /**
@@ -52,11 +53,11 @@ public class ScriptAuditLogRecorder {
 
     private final Supplier<Map<String, Object>> contextVariablesSupplier;
 
-    protected ScriptAuditLogRecorder(AuditLogRecorder auditLogRecorder) {
+    protected ScriptAuditLogBuilder(AuditLogRecorder auditLogRecorder) {
         this(auditLogRecorder, Collections::emptyMap);
     }
 
-    protected ScriptAuditLogRecorder(AuditLogRecorder auditLogRecorder, Supplier<Map<String, Object>> contextVariablesSupplier) {
+    protected ScriptAuditLogBuilder(AuditLogRecorder auditLogRecorder, Supplier<Map<String, Object>> contextVariablesSupplier) {
         this.auditLogRecorder = auditLogRecorder;
         this.contextVariablesSupplier = contextVariablesSupplier;
     }
@@ -71,7 +72,7 @@ public class ScriptAuditLogRecorder {
      * @param throwable         执行抛出的异常，没有则为空
      */
     public void recordLog(Object[] arguments, @Nullable Object methodReturnValue, Method method, @Nullable Throwable throwable) {
-        AuditLogContent content = buildLogContent(arguments, methodReturnValue, method);
+        AuditLogContent content = buildLogContent(arguments, methodReturnValue, method, throwable);
         if (content == null) {
             return;
         }
@@ -80,7 +81,7 @@ public class ScriptAuditLogRecorder {
 
     @VisibleForTesting
     @Nullable
-    AuditLogContent buildLogContent(Object[] arguments, @Nullable Object methodReturnValue, Method method) {
+    AuditLogContent buildLogContent(Object[] arguments, @Nullable Object methodReturnValue, Method method, Throwable throwable) {
         AuditLog auditLog = method == null ? null : method.getAnnotation(AuditLog.class);
         if (auditLog == null) {
             return null;
@@ -92,13 +93,22 @@ public class ScriptAuditLogRecorder {
         return AuditLogContent.builder()
                 .args(arguments)
                 .resultValue(methodReturnValue)
-                .log(SpringExpressionExecutor.eval(auditLog.value(), evaluationContext))
+                .log(evalLog(auditLog.value(), evaluationContext, throwable))
                 .group(auditLog.group())
                 .type(auditLog.resourceType())
                 .operation(auditLog.operation())
                 .resourceId(SpringExpressionExecutor.evalIfErrorOfNullable(auditLog.resourceId(), evaluationContext))
                 .contextVariables(Collections.unmodifiableMap(variables))
+                .throwable(throwable)
                 .build();
+    }
+
+    protected String evalLog(String expression, EvaluationContext context, Throwable throwable) {
+        if (throwable == null) {
+            return SpringExpressionExecutor.eval(expression, context);
+        }
+        String message = throwable.getMessage();
+        return StringUtils.hasLength(message) ? message : "Unknown Error";
     }
 
     /**

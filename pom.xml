@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>2.3.12.RELEASE</version>
+        <version>2.7.16</version>
     </parent>
 
     <groupId>com.wind.middleware</groupId>
@@ -21,6 +21,7 @@
         <module>wind-common</module>
         <module>tools/mybatis-plus-annotation-processor</module>
         <module>modules/script-supported</module>
+        <module>wind-security</module>
     </modules>
 
     <properties>
@@ -40,14 +41,17 @@
         <maven-deploy-plugin.version>3.1.0</maven-deploy-plugin.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
 
+        <mysql.version>8.0.33</mysql.version>
         <mybatis.version>3.5.3</mybatis.version>
         <mybatis-plus.version>3.5.3</mybatis-plus.version>
         <commons-io.version>2.13.0</commons-io.version>
-        <commons-lang.version>2.3</commons-lang.version>
+        <commons-lang3.version>3.10</commons-lang3.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <redisson.version>3.23.5</redisson.version>
         <guava.version>32.0.1-jre</guava.version>
         <fastjson.version>2.0.40</fastjson.version>
+        <j2v8.version>4.6.0</j2v8.version>
+        <google-zxing.version>3.5.2</google-zxing.version>
     </properties>
 
     <dependencies>
@@ -73,6 +77,11 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>com.wind.script</groupId>
+                <artifactId>script-supported</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.wind.common</groupId>
                 <artifactId>wind-common</artifactId>
                 <version>${revision}</version>
@@ -81,6 +90,16 @@
                 <groupId>com.wind.server</groupId>
                 <artifactId>wind-server</artifactId>
                 <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.security.core</groupId>
+                <artifactId>wind-security-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.wuxp.mybatisplus</groupId>
@@ -128,25 +147,47 @@
                 <version>${mapstruct.version}</version>
             </dependency>
             <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>${commons-lang.version}</version>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
             </dependency>
-            <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>javase</artifactId>
+                <version>${google-zxing.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.eclipsesource.j2v8</groupId>
+                <artifactId>j2v8_linux_x86_64</artifactId>
+                <version>${j2v8.version}</version>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>com.eclipsesource.j2v8</groupId>
+                <artifactId>j2v8_win32_x86_64</artifactId>
+                <version>${j2v8.version}</version>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>com.eclipsesource.j2v8</groupId>
+                <artifactId>j2v8_macosx_x86_64</artifactId>
+                <version>${j2v8.version}</version>
+                <optional>true</optional>
             </dependency>
         </dependencies>
     </dependencyManagement>

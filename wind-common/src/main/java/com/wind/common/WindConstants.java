@@ -36,6 +36,9 @@ public final class WindConstants {
     public static final String EMPTY_JSON_ARRAY = "[]";
 
 
+    public static final String DEFAULT_TEXT = "default";
+
+
     /**
      * 统一表示成功的 code
      */
@@ -50,6 +53,12 @@ public final class WindConstants {
      * 配置前缀
      */
     public static final String WIND_SERVER_PROPERTIES_PREFIX = "wind.server";
+
+
+    /**
+     * 控制器日志拦截开启表达式
+     */
+    public static final String CONTROLLER_ASPECT_LOG_EXPRESSION = "wind.server.controller-aspect-log.expression";
 
 
 }

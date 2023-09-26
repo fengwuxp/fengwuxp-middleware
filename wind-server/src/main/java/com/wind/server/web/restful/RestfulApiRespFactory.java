@@ -110,11 +110,11 @@ public final class RestfulApiRespFactory {
     }
 
     private static <T> ApiResp<T> of(HttpStatus httpStatus, T data, ExceptionCode code, String errorMessage) {
-        return new DefaultRestfulApiRespImpl<>(httpStatus, data, code, errorMessage);
+        return new ImmutableApiResp<>(httpStatus, data, code, errorMessage);
     }
 
 
-    static final class DefaultRestfulApiRespImpl<T> implements ApiResp<T>, Serializable {
+    static final class ImmutableApiResp<T> implements ApiResp<T>, Serializable {
 
         private static final long serialVersionUID = -7557721954943132992L;
 
@@ -140,7 +140,7 @@ public final class RestfulApiRespFactory {
         @Getter
         private final String errorMessage;
 
-        DefaultRestfulApiRespImpl(HttpStatus httpStatus, T data, ExceptionCode errorCode, String errorMessage) {
+        ImmutableApiResp(HttpStatus httpStatus, T data, ExceptionCode errorCode, String errorMessage) {
             AssertUtils.notNull(httpStatus, "argument httpStatus must not null");
             AssertUtils.notNull(errorCode, "argument errorCode must not null");
             this.httpStatus = httpStatus;

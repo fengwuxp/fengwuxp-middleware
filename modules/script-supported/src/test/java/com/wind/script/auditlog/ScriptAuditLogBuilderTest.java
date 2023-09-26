@@ -12,8 +12,8 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
-class ScriptAuditLogRecorderTest {
-    private final SimpleScriptAuditLogRecorder logAspectRecorder = new SimpleScriptAuditLogRecorder();
+class ScriptAuditLogBuilderTest {
+    private final SimpleScriptAuditLogBuilder logAspectRecorder = new SimpleScriptAuditLogBuilder();
 
     private final ExampleService exampleService = new ExampleService();
 
@@ -25,7 +25,7 @@ class ScriptAuditLogRecorderTest {
     void testEvalLogContent() {
         User user = exampleService.getUser("张三", "hhh", 22);
         Assertions.assertNotNull(getUserMethod);
-        AuditLogContent content = logAspectRecorder.buildLogContent(new Object[]{"张三", "hhh", 22}, user, getUserMethod);
+        AuditLogContent content = logAspectRecorder.buildLogContent(new Object[]{"张三", "hhh", 22}, user, getUserMethod, null);
         Assertions.assertEquals("获取用户 张三，p1 = hhh , p2 = 22", content.getLog());
         Assertions.assertEquals(1L, content.getResourceId());
         Assertions.assertEquals("用户", content.getGroup());
@@ -33,8 +33,16 @@ class ScriptAuditLogRecorderTest {
 
     @Test
     void testEvalLogContentWithNoneAnnotation() {
-        AuditLogContent result = logAspectRecorder.buildLogContent(new Object[]{}, null, testMethod);
+        AuditLogContent result = logAspectRecorder.buildLogContent(new Object[]{}, null, testMethod, null);
         Assertions.assertNull(result);
+    }
+
+    @Test
+    void testEvalLogContentWithError() {
+        String testError = "test error";
+        AuditLogContent result = logAspectRecorder.buildLogContent(new Object[]{}, null, getUserMethod, BaseException.common(testError));
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(testError, result.getLog());
     }
 
 
@@ -42,17 +50,17 @@ class ScriptAuditLogRecorderTest {
     void testEvalLogContentWithThrowable() {
         String errorMessage = "test";
         logAspectRecorder.recordLog(new Object[]{"", "", 2}, null, getUserMethod, BaseException.common(errorMessage));
-        Throwable throwable = SimpleScriptAuditLogRecorder.THROWABLE.get();
+        Throwable throwable = SimpleScriptAuditLogBuilder.THROWABLE.get();
         Assertions.assertEquals(errorMessage, throwable.getMessage());
     }
 
-    static class SimpleScriptAuditLogRecorder extends ScriptAuditLogRecorder {
+    static class SimpleScriptAuditLogBuilder extends ScriptAuditLogBuilder {
 
         private static final AtomicReference<AuditLogContent> AUDIT_LOG_CONTENT = new AtomicReference<>();
         private static final AtomicReference<Throwable> THROWABLE = new AtomicReference<>();
 
-        public SimpleScriptAuditLogRecorder() {
-            super(SimpleScriptAuditLogRecorder::mockRecord);
+        public SimpleScriptAuditLogBuilder() {
+            super(SimpleScriptAuditLogBuilder::mockRecord);
         }
 
         private static void mockRecord(AuditLogContent content, @Nullable Throwable throwable) {

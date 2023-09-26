@@ -22,7 +22,7 @@ public final class AssertUtils {
     }
 
     /**
-     * Assert a boolean expression, throwing an {@code IllegalStateException}
+     * Assert a boolean expression, throwing an {@code BaseException}
      * if the expression evaluates to {@code false}.
      * <p>Call {@link #isTrue} if you wish to throw an {@code BaseException}
      * on an assertion failure.
@@ -30,7 +30,7 @@ public final class AssertUtils {
      *
      * @param expression a boolean expression
      * @param message    the exception message to use if the assertion fails
-     * @throws IllegalStateException if {@code expression} is {@code false}
+     * @throws BaseException if {@code expression} is {@code false}
      */
     public static void state(boolean expression, String message) {
         if (!expression) {
@@ -39,7 +39,7 @@ public final class AssertUtils {
     }
 
     /**
-     * Assert a boolean expression, throwing an {@code IllegalStateException}
+     * Assert a boolean expression, throwing an {@code BaseException}
      * if the expression evaluates to {@code false}.
      * <p>Call {@link #isTrue} if you wish to throw an {@code BaseException}
      * on an assertion failure.
@@ -61,7 +61,7 @@ public final class AssertUtils {
     }
 
     /**
-     * Assert a boolean expression, throwing an {@code IllegalStateException}
+     * Assert a boolean expression, throwing an {@code BaseException}
      * if the expression evaluates to {@code false}.
      *
      * @deprecated as of 4.3.7, in favor of {@link #state(boolean, String)}

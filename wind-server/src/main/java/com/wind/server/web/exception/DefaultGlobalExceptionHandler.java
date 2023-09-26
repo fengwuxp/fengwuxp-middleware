@@ -28,14 +28,14 @@ import static com.wind.common.WindConstants.WIND_SERVER_PROPERTIES_PREFIX;
 
 
 /**
- * 全局异常处理
+ * 默认全局异常处理
  *
  * @author wxup
  */
 @Slf4j
-@ConditionalOnProperty(prefix = WIND_SERVER_PROPERTIES_PREFIX, value = "enable-global-exception", havingValue = "true")
+@ConditionalOnProperty(prefix = WIND_SERVER_PROPERTIES_PREFIX, name = "enable-global-exception", havingValue = "true", matchIfMissing = true)
 @RestControllerAdvice()
-public class GlobalExceptionHandler {
+public class DefaultGlobalExceptionHandler {
 
     /**
      * 参数校验异常处理
