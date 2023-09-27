@@ -26,11 +26,11 @@ public final class RestfulApiRespFactory {
 
     /*-------------------- 2xx -------------------*/
 
-    public static <T> ApiResp<T> successful() {
-        return successful(null);
+    public static <T> ApiResp<T> ok() {
+        return ok(null);
     }
 
-    public static <T> ApiResp<T> successful(T data) {
+    public static <T> ApiResp<T> ok(T data) {
         return of(HttpStatus.OK, data, ExceptionCode.SUCCESSFUL, null);
     }
 
@@ -42,7 +42,7 @@ public final class RestfulApiRespFactory {
      * @return ApiResp<T>
      */
     public static <T> ApiResp<Pagination<T>> pagination(Pagination<T> pagination) {
-        return successful(pagination);
+        return ok(pagination);
     }
 
 
