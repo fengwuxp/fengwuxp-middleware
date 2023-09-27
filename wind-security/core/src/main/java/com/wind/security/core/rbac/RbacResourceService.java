@@ -20,7 +20,7 @@ public interface RbacResourceService {
      * @key 权限 id
      * @value 权限内容
      */
-    @NotEmpty()
+    @NotEmpty
     List<RbacResource.Permission> getAllPermissions();
 
     /**
@@ -35,7 +35,7 @@ public interface RbacResourceService {
      * @key 权限 id
      * @value 权限内容
      */
-    @NotEmpty()
+    @NotEmpty
     List<RbacResource.Role> getAllRoles();
 
     /**

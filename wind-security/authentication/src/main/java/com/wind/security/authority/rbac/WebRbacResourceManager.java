@@ -2,8 +2,8 @@ package com.wind.security.authority.rbac;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.wind.security.core.rbac.RbacRefreshEvent;
 import com.wind.security.core.rbac.RbacResource;
+import com.wind.security.core.rbac.RbacResourceChangeEvent;
 import com.wind.security.core.rbac.RbacResourceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  * @date 2023-09-26 08:31
  **/
 @Slf4j
-public class WebRbacResourceManager implements ApplicationListener<RbacRefreshEvent> {
+public class WebRbacResourceManager implements ApplicationListener<RbacResourceChangeEvent> {
 
     private final RbacResourceService rbacResourceService;
 
@@ -103,7 +103,7 @@ public class WebRbacResourceManager implements ApplicationListener<RbacRefreshEv
      */
     public Set<String> getUserRoles(String userId) {
         Set<String> result = userRoleCaches.get(userId, rbacResourceService::findRolesByUserId);
-        return result == null ? Collections.emptySet(): Collections.unmodifiableSet(result);
+        return result == null ? Collections.emptySet() : Collections.unmodifiableSet(result);
     }
 
     private String findRole(String permissionId) {
@@ -117,9 +117,10 @@ public class WebRbacResourceManager implements ApplicationListener<RbacRefreshEv
     }
 
     @Override
-    public void onApplicationEvent(@NonNull RbacRefreshEvent event) {
-        log.info("refresh rbac cache = {}", event);
+    public void onApplicationEvent(@NonNull RbacResourceChangeEvent event) {
+        log.info("refresh rbac cache , type ={} , ids = {}", event.getResourceType().getName(), event.getResourceIds());
         if (event.getResourceType() == RbacResource.Permission.class) {
+            // 权限内容变更
             event.getResourceIds().forEach(id -> {
                 RbacResource.Permission permission = rbacResourceService.findPermissionById(id);
                 if (permission == null) {
@@ -130,6 +131,7 @@ public class WebRbacResourceManager implements ApplicationListener<RbacRefreshEv
             });
         }
         if (event.getResourceType() == RbacResource.Role.class) {
+            // 角色关联的权限变更
             event.getResourceIds().forEach(id -> {
                 RbacResource.Role role = rbacResourceService.findRoleById(id);
                 if (role == null) {
@@ -141,7 +143,7 @@ public class WebRbacResourceManager implements ApplicationListener<RbacRefreshEv
         }
 
         if (event.getResourceType() == RbacResource.User.class) {
-            // 清除
+            // 用户关联的角色变更
             event.getResourceIds().forEach(userRoleCaches::invalidate);
         }
     }
@@ -159,7 +161,7 @@ public class WebRbacResourceManager implements ApplicationListener<RbacRefreshEv
         } catch (Exception exception) {
             log.error("refresh rbac resource error, message = {}", exception.getMessage(), exception);
         } finally {
-            scheduleRefresh(cacheRefreshInterval.getSeconds() - 5);
+            scheduleRefresh(cacheRefreshInterval.getSeconds());
         }
     }
 
@@ -189,7 +191,7 @@ public class WebRbacResourceManager implements ApplicationListener<RbacRefreshEv
         return Caffeine.newBuilder()
                 .executor(scheduledExecutor)
                 // 设置最后一次写入或访问后经过固定时间过期
-                .expireAfterWrite(cacheEffectiveTime)
+                .expireAfterWrite(cacheEffectiveTime.getSeconds() + 10, TimeUnit.SECONDS)
                 // 初始的缓存空间大小
                 .initialCapacity(100)
                 // 缓存的最大条数
