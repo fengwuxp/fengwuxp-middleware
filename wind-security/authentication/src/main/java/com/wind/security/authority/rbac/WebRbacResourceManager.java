@@ -118,7 +118,7 @@ public class WebRbacResourceManager implements ApplicationListener<RbacResourceC
 
     @Override
     public void onApplicationEvent(@NonNull RbacResourceChangeEvent event) {
-        log.info("refresh rbac cache , type ={} , ids = {}", event.getResourceType().getName(), event.getResourceIds());
+        log.info("refresh rbac cache , type = {} , ids = {}", event.getResourceType().getName(), event.getResourceIds());
         if (event.getResourceType() == RbacResource.Permission.class) {
             // 权限内容变更
             event.getResourceIds().forEach(id -> {

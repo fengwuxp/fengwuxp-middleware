@@ -2,6 +2,7 @@ package com.wind.server.logging;
 
 import com.wind.script.auditlog.AuditLogRecorder;
 import com.wind.script.auditlog.ScriptAuditLogBuilder;
+import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -40,6 +41,7 @@ public class WebAuditLogBuilder extends ScriptAuditLogBuilder {
                 result.put(name, attribute);
             }
         }
+        result.put(HttpHeaders.USER_AGENT, httpRequest.getHeader(HttpHeaders.USER_AGENT));
         return Collections.unmodifiableMap(result);
     }
 

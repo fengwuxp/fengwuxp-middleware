@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 
 /**
@@ -21,7 +22,7 @@ public final class ControllerLogAspect implements MethodInterceptor {
     private final ScriptAuditLogBuilder auditLogBuilder;
 
     @Override
-    public Object invoke(MethodInvocation invocation) throws Throwable {
+    public Object invoke(@Nonnull MethodInvocation invocation) throws Throwable {
         if (log.isDebugEnabled()) {
             log.debug("请求方法：{}，参数：{}", getRequestMethodDesc(invocation.getMethod()), invocation.getArguments());
         }

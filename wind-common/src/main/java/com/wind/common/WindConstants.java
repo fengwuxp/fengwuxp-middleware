@@ -45,11 +45,9 @@ public final class WindConstants {
     public static final String SUCCESSFUL_CODE = "0";
 
     /**
-     * 默认表示失败的 code
+     * 未知 text
      */
-    public static final String DEFAULT_ERROR_CODE = "-1";
-
-    public static final String UNKNOWN ="unknown";
+    public static final String UNKNOWN = "unknown";
 
     /**
      * 配置前缀
