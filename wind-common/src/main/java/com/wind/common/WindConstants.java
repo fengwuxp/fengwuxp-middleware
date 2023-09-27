@@ -49,6 +49,8 @@ public final class WindConstants {
      */
     public static final String DEFAULT_ERROR_CODE = "-1";
 
+    public static final String UNKNOWN ="unknown";
+
     /**
      * 配置前缀
      */

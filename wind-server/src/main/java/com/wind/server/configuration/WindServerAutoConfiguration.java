@@ -5,12 +5,14 @@ import com.wind.script.auditlog.AuditLogRecorder;
 import com.wind.script.auditlog.ScriptAuditLogBuilder;
 import com.wind.server.logging.ControllerLogAspect;
 import com.wind.server.logging.WebAuditLogBuilder;
+import com.wind.server.web.exception.RespfulErrorAttributes;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.support.DefaultBeanFactoryPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,7 +25,12 @@ import static com.wind.common.WindConstants.WIND_SERVER_PROPERTIES_PREFIX;
  **/
 @Configuration
 @ConditionalOnProperty(prefix = WIND_SERVER_PROPERTIES_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
-public class WindLogAutoConfiguration {
+public class WindServerAutoConfiguration {
+
+    @Bean
+    public RespfulErrorAttributes respfulErrorAttributes(){
+        return new RespfulErrorAttributes(new DefaultErrorAttributes());
+    }
 
     @Bean
     @ConditionalOnBean(AuditLogRecorder.class)
