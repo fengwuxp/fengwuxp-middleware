@@ -25,14 +25,8 @@ public class WinSecurityProperties {
     private boolean enabled = true;
 
     /**
-     * jwt
-     */
-    private JwtProperties jwt;
-
-    /**
      * rbac 缓存失效时间
      */
     private Duration rbacCacheEffectiveTime = Duration.ofMinutes(5);
-
 
 }

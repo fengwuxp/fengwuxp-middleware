@@ -43,8 +43,6 @@ public class SimpleCaptchaGenerateChecker implements CaptchaGenerateChecker {
         this(cacheManager, WindConstants.DEFAULT_TEXT.toUpperCase(), (type)->15);
     }
 
-
-
     @Override
     public void preCheck(String owner, Captcha.CaptchaType type) {
         String key = String.format("%s_%s", owner, ISO_8601_EXTENDED_DATE_FORMAT.format(new Date()));

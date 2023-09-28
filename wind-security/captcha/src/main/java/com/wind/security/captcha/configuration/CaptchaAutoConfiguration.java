@@ -7,15 +7,21 @@ import com.wind.security.captcha.CaptchaStorage;
 import com.wind.security.captcha.DefaultCaptchaManager;
 import com.wind.security.captcha.SimpleCaptchaGenerateChecker;
 import com.wind.security.captcha.email.EmailCaptchaContentProvider;
+import com.wind.security.captcha.email.EmailCaptchaProperties;
 import com.wind.security.captcha.mobile.MobilePhoneCaptchaContentProvider;
+import com.wind.security.captcha.mobile.MobilePhoneCaptchaProperties;
 import com.wind.security.captcha.picture.PictureCaptchaContentProvider;
+import com.wind.security.captcha.picture.PictureCaptchaProperties;
 import com.wind.security.captcha.picture.PictureGenerator;
+import com.wind.security.captcha.qrcode.QrCodeCaptchaProperties;
 import com.wind.security.captcha.storage.CacheCaptchaStorage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,21 +33,49 @@ import java.util.Collection;
  **/
 @Configuration
 @EnableConfigurationProperties(value = {CaptchaProperties.class})
-@ConditionalOnBean({CacheManager.class})
 @ConditionalOnProperty(prefix = CaptchaProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class CaptchaAutoConfiguration {
 
     @Bean
-    @ConditionalOnBean({CaptchaStorage.class, CaptchaGenerateChecker.class})
-    public DefaultCaptchaManager defaultCaptchaManager(Collection<CaptchaContentProvider> delegates, CaptchaStorage captchaStorage,
-                                                       CaptchaGenerateChecker generateLimiter, CaptchaProperties properties) {
-        return new DefaultCaptchaManager(delegates, captchaStorage, generateLimiter, properties.isVerificationIgnoreCase());
+    @ConfigurationProperties(prefix = CaptchaProperties.PREFIX + ".mobile-phone")
+    public MobilePhoneCaptchaProperties mobilePhoneCaptchaProperties() {
+        return new MobilePhoneCaptchaProperties();
     }
 
     @Bean
-    @ConditionalOnBean({CaptchaStorage.class})
-    public DefaultCaptchaManager defaultCaptchaManager(Collection<CaptchaContentProvider> delegates, CaptchaStorage captchaStorage, CaptchaProperties properties) {
-        return new DefaultCaptchaManager(delegates, captchaStorage, properties.isVerificationIgnoreCase());
+    @ConfigurationProperties(prefix = CaptchaProperties.PREFIX + ".email")
+    public EmailCaptchaProperties emailCaptchaProperties() {
+        return new EmailCaptchaProperties();
+    }
+
+    @Bean
+    @ConfigurationProperties(prefix = CaptchaProperties.PREFIX + ".picture")
+    public PictureCaptchaProperties pictureCaptchaProperties() {
+        return new PictureCaptchaProperties();
+    }
+
+    @Bean
+    @ConfigurationProperties(prefix = CaptchaProperties.PREFIX + ".qr-code")
+    public QrCodeCaptchaProperties qrCodeCaptchaProperties() {
+        return new QrCodeCaptchaProperties();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(CacheManager.class)
+    public CacheManager cacheManager() {
+        return new ConcurrentMapCacheManager();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(CaptchaStorage.class)
+    public CacheCaptchaStorage cacheCaptchaStorage(CacheManager cacheManager, CaptchaProperties properties) {
+        return new CacheCaptchaStorage(cacheManager, properties.getGroup());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(CaptchaGenerateChecker.class)
+    public SimpleCaptchaGenerateChecker simpleCaptchaGenerateChecker(CacheManager cacheManager, CaptchaProperties properties) {
+        return new SimpleCaptchaGenerateChecker(cacheManager, WindConstants.DEFAULT_TEXT.toUpperCase(), properties::getMxAllowGenerateTimesOfUserWithDay);
     }
 
     @Bean
@@ -63,17 +97,12 @@ public class CaptchaAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean(CacheManager.class)
-    @ConditionalOnMissingBean(CacheCaptchaStorage.class)
-    public CacheCaptchaStorage cacheCaptchaStorage(CacheManager cacheManager, CaptchaProperties properties) {
-        return new CacheCaptchaStorage(cacheManager, properties.getGroup());
+    @ConditionalOnBean({CaptchaContentProvider.class, CaptchaStorage.class, CaptchaGenerateChecker.class})
+    public DefaultCaptchaManager defaultCaptchaManager(Collection<CaptchaContentProvider> delegates, CaptchaStorage captchaStorage,
+                                                       CaptchaGenerateChecker generateLimiter, CaptchaProperties properties) {
+        return new DefaultCaptchaManager(delegates, captchaStorage, generateLimiter, properties.isVerificationIgnoreCase());
     }
 
-    @Bean
-    @ConditionalOnBean(CacheManager.class)
-    @ConditionalOnMissingBean(CaptchaGenerateChecker.class)
-    public CaptchaGenerateChecker simpleCaptchaGenerateChecker(CacheManager cacheManager, CaptchaProperties properties) {
-        return new SimpleCaptchaGenerateChecker(cacheManager, WindConstants.DEFAULT_TEXT.toUpperCase(), properties::getMxAllowGenerateTimesOfUserWithDay);
-    }
+
 }
 
