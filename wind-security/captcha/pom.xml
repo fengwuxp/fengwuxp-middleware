@@ -9,9 +9,7 @@
         <version>${revision}</version>
     </parent>
 
-    <groupId>com.wind.security.captcha</groupId>
     <artifactId>wind-security-captcha</artifactId>
-
 
     <dependencies>
         <dependency>

@@ -2,11 +2,8 @@ package com.wind.server.logging;
 
 import com.wind.script.auditlog.AuditLogRecorder;
 import com.wind.script.auditlog.ScriptAuditLogBuilder;
+import com.wind.server.utils.HttpServletRequestUtils;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
@@ -27,7 +24,7 @@ public class WebAuditLogBuilder extends ScriptAuditLogBuilder {
     }
 
     private static Map<String, Object> getRequestVariables() {
-        HttpServletRequest httpRequest = getHttpServletRequest();
+        HttpServletRequest httpRequest = HttpServletRequestUtils.getContextRequestOfNullable();
         if (httpRequest == null) {
             return Collections.emptyMap();
         }
@@ -45,12 +42,4 @@ public class WebAuditLogBuilder extends ScriptAuditLogBuilder {
         return Collections.unmodifiableMap(result);
     }
 
-    @Nullable
-    private static HttpServletRequest getHttpServletRequest() {
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        if (requestAttributes == null) {
-            return null;
-        }
-        return ((ServletRequestAttributes) requestAttributes).getRequest();
-    }
 }
