@@ -8,6 +8,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
+import com.wind.common.exception.AssertUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
@@ -57,7 +58,9 @@ public final class JwtTokenCodec {
             Jwt jwt = jwtDecoder.decode(jwtToken);
             Map<String, Object> claims = jwt.getClaims();
             T user = JSON.to(classType, claims.get(AUTHENTICATION_VARIABLE_NAME));
-            return new JwtTokenPayload<>(jwt.getSubject(), user);
+            Instant expiresAt = jwt.getExpiresAt();
+            AssertUtils.notNull(expiresAt, "jwt token expire must not null");
+            return new JwtTokenPayload<>(jwt.getSubject(), user, expiresAt.getEpochSecond());
         }
         return null;
     }
@@ -112,9 +115,12 @@ public final class JwtTokenCodec {
      * @return 用户 id
      */
     @Nullable
-    public String parseRefreshToken(String refreshToken) {
+    public <T> JwtTokenPayload<T> parseRefreshToken(String refreshToken) {
         if (StringUtils.hasLength(refreshToken)) {
-            return jwtDecoder.decode(refreshToken).getSubject();
+            Jwt jwt = jwtDecoder.decode(refreshToken);
+            Instant expiresAt = jwt.getExpiresAt();
+            AssertUtils.notNull(expiresAt, "jwt token expire must not null");
+            return new JwtTokenPayload<>(jwt.getSubject(), null, expiresAt.getEpochSecond());
         }
         return null;
     }

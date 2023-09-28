@@ -11,7 +11,6 @@
 
     <artifactId>wind-security-authentication</artifactId>
 
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.security</groupId>

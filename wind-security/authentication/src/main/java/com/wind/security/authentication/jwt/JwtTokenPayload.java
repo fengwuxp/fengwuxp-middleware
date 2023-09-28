@@ -14,4 +14,9 @@ public final class JwtTokenPayload<T> {
     private final String userId;
 
     private final T user;
+
+    /**
+     * token 过期时间戳
+     */
+    private final Long expireTime;
 }

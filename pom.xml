@@ -97,6 +97,16 @@
                 <version>${revision}</version>
             </dependency>
             <dependency>
+                <groupId>com.wind.security</groupId>
+                <artifactId>wind-security-captcha</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.security</groupId>
+                <artifactId>wind-security-authentication</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.version}</version>
@@ -280,7 +290,8 @@
                         <version>${maven-source-plugin.version}</version>
                         <executions>
                             <execution>
-                                <phase>compile</phase>
+                                <id>attach-sources</id>
+                                <phase>package</phase>
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>

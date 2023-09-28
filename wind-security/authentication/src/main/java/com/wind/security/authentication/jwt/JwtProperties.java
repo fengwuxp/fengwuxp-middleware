@@ -43,7 +43,7 @@ public class JwtProperties {
     /**
      * Generate token to set expire time
      */
-    private Duration effectiveTime = Duration.ofHours(12);
+    private Duration effectiveTime = Duration.ofHours(4);
 
     /**
      * refresh jwt token 有效天数
