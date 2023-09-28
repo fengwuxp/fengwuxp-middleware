@@ -13,6 +13,7 @@ import com.wind.security.captcha.mobile.MobilePhoneCaptchaProperties;
 import com.wind.security.captcha.picture.PictureCaptchaContentProvider;
 import com.wind.security.captcha.picture.PictureCaptchaProperties;
 import com.wind.security.captcha.picture.PictureGenerator;
+import com.wind.security.captcha.picture.SimplePictureGenerator;
 import com.wind.security.captcha.qrcode.QrCodeCaptchaProperties;
 import com.wind.security.captcha.storage.CacheCaptchaStorage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -79,7 +80,14 @@ public class CaptchaAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(PictureGenerator.class)
+    public SimplePictureGenerator simplePictureGenerator() {
+        return new SimplePictureGenerator();
+    }
+
+    @Bean
     @ConditionalOnBean({PictureGenerator.class})
+    @ConditionalOnMissingBean(PictureCaptchaContentProvider.class)
     public PictureCaptchaContentProvider pictureCaptchaContentProvider(CaptchaProperties properties, PictureGenerator pictureGenerator) {
         return new PictureCaptchaContentProvider(properties.getPicture(), pictureGenerator);
     }
