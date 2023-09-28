@@ -3,7 +3,6 @@ package com.wind.security.core.rbac;
 import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
@@ -28,7 +27,7 @@ public interface RbacResourceService {
      * @return 权限
      */
     @Nullable
-    RbacResource.Permission findPermissionById(Serializable permissionId);
+    RbacResource.Permission findPermissionById(String permissionId);
 
     /**
      * @return 获取所有的 rbac 角色
@@ -43,7 +42,7 @@ public interface RbacResourceService {
      * @return 角色
      */
     @Nullable
-    RbacResource.Role findRoleById(Serializable roleId);
+    RbacResource.Role findRoleById(String roleId);
 
     /**
      * 获取用户拥有的角色
@@ -52,6 +51,6 @@ public interface RbacResourceService {
      * @return 角色列表
      */
     @NotEmpty()
-    Set<String> findRolesByUserId(Serializable userId);
+    Set<String> findRolesByUserId(String userId);
 
 }
