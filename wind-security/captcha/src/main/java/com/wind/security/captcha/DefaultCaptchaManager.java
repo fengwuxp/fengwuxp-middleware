@@ -23,16 +23,24 @@ public class DefaultCaptchaManager {
     @VisibleForTesting
     private final CaptchaStorage captchaStorage;
 
+    private final CaptchaGenerateChecker generateChecker;
+
     /**
      * 验证时忽略大小写
      */
     private final boolean verificationIgnoreCase;
 
-    public DefaultCaptchaManager(Collection<CaptchaContentProvider> delegates, CaptchaStorage captchaStorage) {
-        this(delegates, captchaStorage, true);
+    public DefaultCaptchaManager(Collection<CaptchaContentProvider> delegates, CaptchaStorage captchaStorage, boolean verificationIgnoreCase) {
+        this(delegates, captchaStorage, (owner, type) -> {}, verificationIgnoreCase);
+    }
+
+    public DefaultCaptchaManager(Collection<CaptchaContentProvider> delegates, CaptchaStorage captchaStorage, CaptchaGenerateChecker generateChecker) {
+        this(delegates, captchaStorage, generateChecker, true);
     }
 
     public Captcha generate(Captcha.CaptchaType type, Captcha.CaptchaUseScene useScene, String owner) {
+        // 检查是否允许生成验证码
+        generateChecker.preCheck(owner, type);
         CaptchaContentProvider delegate = getDelegate(type, useScene);
         CaptchaValue captchaValue = delegate.getValue(owner, useScene);
         ImmutableCaptcha result = ImmutableCaptcha.builder()

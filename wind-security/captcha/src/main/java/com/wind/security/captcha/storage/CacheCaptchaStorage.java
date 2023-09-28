@@ -7,6 +7,7 @@ import com.wind.security.captcha.CaptchaStorage;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.lang.NonNull;
 
 /**
  * @author wuxp
@@ -33,20 +34,21 @@ public class CacheCaptchaStorage implements CaptchaStorage {
 
     @Override
     public void store(Captcha captcha) {
-        getCache(captcha.getType(), captcha.getUseScene()).put(captcha.getOwner(), captcha);
+        requiredCache(captcha.getType(), captcha.getUseScene()).put(captcha.getOwner(), captcha);
     }
 
     @Override
     public Captcha get(Captcha.CaptchaType type, Captcha.CaptchaUseScene useScene, String key) {
-        return getCache(type, useScene).get(key, Captcha.class);
+        return requiredCache(type, useScene).get(key, Captcha.class);
     }
 
     @Override
     public void remove(Captcha.CaptchaType type, Captcha.CaptchaUseScene useScene, String key) {
-        getCache(type, useScene).evict(key);
+        requiredCache(type, useScene).evict(key);
     }
 
-    private Cache getCache(Captcha.CaptchaType captchaTyp, Captcha.CaptchaUseScene useScene) {
+    @NonNull
+    private Cache requiredCache(Captcha.CaptchaType captchaTyp, Captcha.CaptchaUseScene useScene) {
         String name = String.format("%s_%s_%s_%s", group, captchaTyp.name(), useScene.name(), CACHE_CAPTCHA_STORE_KEY);
         Cache result = cacheManager.getCache(name);
         AssertUtils.notNull(result, String.format("获取验证码 Cache 失败，CacheName = %s", name));

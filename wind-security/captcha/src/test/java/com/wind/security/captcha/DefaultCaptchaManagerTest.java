@@ -2,7 +2,6 @@ package com.wind.security.captcha;
 
 import com.wind.common.exception.BaseException;
 import com.wind.security.captcha.mobile.MobilePhoneCaptchaContentProvider;
-import com.wind.security.captcha.mobile.MobilePhoneCaptchaLimiter;
 import com.wind.security.captcha.mobile.MobilePhoneCaptchaProperties;
 import com.wind.security.captcha.picture.PictureCaptchaContentProvider;
 import com.wind.security.captcha.picture.PictureCaptchaProperties;
@@ -21,13 +20,14 @@ import java.util.Collection;
 
 class DefaultCaptchaManagerTest {
 
-    private  DefaultCaptchaManager captchaManager;
+    private DefaultCaptchaManager captchaManager;
 
     private final static int TEST_MX_ALLOW_GENERATE_TIMES_OF_USER_WITH_DAY = 15;
 
     @BeforeEach
-    void setup(){
-        captchaManager = new DefaultCaptchaManager(getProviders(), getCaptchaStorage());
+    void setup() {
+        CaptchaGenerateChecker checker = new SimpleCaptchaGenerateChecker(new ConcurrentMapCacheManager(), "test", type -> TEST_MX_ALLOW_GENERATE_TIMES_OF_USER_WITH_DAY);
+        captchaManager = new DefaultCaptchaManager(getProviders(), getCaptchaStorage(), checker);
     }
 
     @Test
@@ -37,7 +37,7 @@ class DefaultCaptchaManagerTest {
 
     @Test
     void testMobileCaptchaWhitPaas() {
-        assertCaptchaPaas(SimpleCaptchaType.MOBILE);
+        assertCaptchaPaas(SimpleCaptchaType.MOBILE_PHONE);
     }
 
     @Test
@@ -63,7 +63,7 @@ class DefaultCaptchaManagerTest {
 
     @Test
     void testMobileCaptchaWithError() {
-        assertCaptchaError(SimpleCaptchaType.MOBILE, 5);
+        assertCaptchaError(SimpleCaptchaType.MOBILE_PHONE, 5);
     }
 
     @Test
@@ -75,10 +75,10 @@ class DefaultCaptchaManagerTest {
     void testMobileCaptchaGenerateLimit() {
         String owner = RandomStringUtils.randomAlphanumeric(11);
         for (int i = 0; i < TEST_MX_ALLOW_GENERATE_TIMES_OF_USER_WITH_DAY; i++) {
-            Captcha captcha = captchaManager.generate(SimpleCaptchaType.MOBILE, SimpleUseScene.LOGIN, owner);
+            Captcha captcha = captchaManager.generate(SimpleCaptchaType.MOBILE_PHONE, SimpleUseScene.LOGIN, owner);
             Assertions.assertNotNull(captcha);
         }
-        BaseException exception = Assertions.assertThrows(BaseException.class, () -> captchaManager.generate(SimpleCaptchaType.MOBILE, SimpleUseScene.REGISTER, owner));
+        BaseException exception = Assertions.assertThrows(BaseException.class, () -> captchaManager.generate(SimpleCaptchaType.MOBILE_PHONE, SimpleUseScene.REGISTER, owner));
         Assertions.assertEquals("已超过每天允许发送的最大次数", exception.getMessage());
     }
 
@@ -102,7 +102,7 @@ class DefaultCaptchaManagerTest {
     private Collection<CaptchaContentProvider> getProviders() {
         return Arrays.asList(
                 new PictureCaptchaContentProvider(new PictureCaptchaProperties(), new SimplePictureGenerator()),
-                new MobilePhoneCaptchaContentProvider(new MobilePhoneCaptchaProperties(), new MobilePhoneCaptchaLimiter(new ConcurrentMapCacheManager(), "test", TEST_MX_ALLOW_GENERATE_TIMES_OF_USER_WITH_DAY)),
+                new MobilePhoneCaptchaContentProvider(new MobilePhoneCaptchaProperties()),
                 new QrCodeCaptchaContentProvider(() -> "100", new QrCodeCaptchaProperties())
         );
     }

@@ -3,7 +3,6 @@ package com.wind.security.captcha.mobile;
 import com.wind.common.WindConstants;
 import com.wind.security.captcha.Captcha;
 import com.wind.security.captcha.CaptchaContentProvider;
-import com.wind.security.captcha.CaptchaGenerateLimiter;
 import com.wind.security.captcha.CaptchaValue;
 import com.wind.security.captcha.SimpleCaptchaType;
 import lombok.AllArgsConstructor;
@@ -23,13 +22,6 @@ public class MobilePhoneCaptchaContentProvider implements CaptchaContentProvider
 
     private final MobilePhoneCaptchaProperties properties;
 
-    private final CaptchaGenerateLimiter limiter;
-
-    public MobilePhoneCaptchaContentProvider(MobilePhoneCaptchaProperties properties) {
-        this(properties, (owner, type) -> {
-        });
-    }
-
     @Override
     public Duration getEffectiveTime() {
         return properties.getEffectiveTime();
@@ -42,7 +34,6 @@ public class MobilePhoneCaptchaContentProvider implements CaptchaContentProvider
 
     @Override
     public CaptchaValue getValue(String owner, Captcha.CaptchaUseScene useScene) {
-        limiter.checkAllowGenerate(owner, SimpleCaptchaType.MOBILE);
         return CaptchaValue.of(genCaptchaValue(), WindConstants.EMPTY);
     }
 
@@ -56,6 +47,6 @@ public class MobilePhoneCaptchaContentProvider implements CaptchaContentProvider
 
     @Override
     public boolean supports(Captcha.CaptchaType type, Captcha.CaptchaUseScene useScene) {
-        return Objects.equals(type, SimpleCaptchaType.MOBILE);
+        return Objects.equals(type, SimpleCaptchaType.MOBILE_PHONE);
     }
 }

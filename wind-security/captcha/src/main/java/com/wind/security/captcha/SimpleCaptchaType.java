@@ -12,8 +12,9 @@ import lombok.Getter;
 public enum SimpleCaptchaType implements Captcha.CaptchaType {
 
 
-    MOBILE("短信验证码"),
+    MOBILE_PHONE("短信验证码"),
 
+    EMAIL("邮箱验证码"),
 
     PICTURE("图片验证码"),
 
