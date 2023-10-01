@@ -22,6 +22,7 @@
         <module>tools/mybatis-plus-annotation-processor</module>
         <module>modules/script-supported</module>
         <module>wind-security</module>
+        <module>modules/payment</module>
     </modules>
 
     <properties>
@@ -52,6 +53,7 @@
         <fastjson.version>2.0.40</fastjson.version>
         <j2v8.version>4.6.0</j2v8.version>
         <google-zxing.version>3.5.2</google-zxing.version>
+        <alipay-sdk.version>4.38.90.ALL</alipay-sdk.version>
     </properties>
 
     <dependencies>
@@ -79,6 +81,22 @@
             <dependency>
                 <groupId>com.wind.script</groupId>
                 <artifactId>script-supported</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.alipay.sdk/alipay-sdk-java -->
+            <dependency>
+                <groupId>com.alipay.sdk</groupId>
+                <artifactId>alipay-sdk-java</artifactId>
+                <version>${alipay-sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.payment</groupId>
+                <artifactId>wind-payment-plugin-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.payment</groupId>
+                <artifactId>wind-payment-plugin-alipay</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
