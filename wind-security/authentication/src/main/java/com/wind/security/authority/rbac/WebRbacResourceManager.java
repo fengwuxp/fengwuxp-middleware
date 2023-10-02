@@ -5,11 +5,13 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.wind.security.core.rbac.RbacResource;
 import com.wind.security.core.rbac.RbacResourceChangeEvent;
 import com.wind.security.core.rbac.RbacResourceService;
+import com.wind.security.web.utils.RequestMatcherUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -41,7 +43,7 @@ public class WebRbacResourceManager implements ApplicationListener<RbacResourceC
      * @key 权限表示
      * @value 权限匹配器
      */
-    private final Cache<String, Set<AntPathRequestMatcher>> permissionCaches;
+    private final Cache<String, Set<RequestMatcher>> permissionCaches;
 
     /**
      * 角色权限关系缓存
@@ -77,7 +79,7 @@ public class WebRbacResourceManager implements ApplicationListener<RbacResourceC
      * @key 请求权限匹配器
      * }
      */
-    public Map<String, Set<AntPathRequestMatcher>> getRequestPermissionMatchers() {
+    public Map<String, Set<RequestMatcher>> getRequestPermissionMatchers() {
         return permissionCaches.asMap();
     }
 
@@ -166,24 +168,11 @@ public class WebRbacResourceManager implements ApplicationListener<RbacResourceC
     }
 
     private void putPermissionCaches(RbacResource.Permission permission) {
-        permissionCaches.put(permission.getId(), convertMatchers(permission.getAttributes()));
+        permissionCaches.put(permission.getId(), RequestMatcherUtils.convertMatchers(permission.getAttributes()));
     }
 
     private void putRoleCaches(RbacResource.Role role) {
         rolePermissionCaches.put(role.getId(), role.getPermissions());
-    }
-
-    private Set<AntPathRequestMatcher> convertMatchers(Set<String> patterns) {
-        return patterns
-                .stream()
-                .map(pattern -> {
-                    if (pattern.contains(" ")) {
-                        String[] parts = pattern.split(" ");
-                        return new AntPathRequestMatcher(parts[1], parts[0]);
-                    }
-                    return new AntPathRequestMatcher(pattern);
-                })
-                .collect(Collectors.toSet());
     }
 
 

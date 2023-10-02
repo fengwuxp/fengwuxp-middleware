@@ -20,6 +20,10 @@ public class ApplicationContextUtils implements ApplicationContextAware {
         return getContext().getBean(classType);
     }
 
+    public static String getProperty(String key) {
+        return getContext().getEnvironment().getProperty(key, String.class);
+    }
+
     @NonNull
     public static ApplicationContext getContext() {
         AssertUtils.notNull(CONTEXT, "context not init");

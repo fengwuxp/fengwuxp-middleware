@@ -50,6 +50,41 @@ public final class WindConstants {
     public static final String UNKNOWN = "unknown";
 
     /**
+     * 开发环境
+     */
+    public static final String DEV = "dev";
+
+    /**
+     * 集成测试环境
+     */
+    public static final String SIT = "sit";
+
+    /**
+     * 联调（稳定）环境
+     */
+    public static final String STABLE = "stable";
+
+    /**
+     * 用户验收测试环境
+     */
+    public static final String UAT = "uat";
+
+    /**
+     * 预付（灰度）环境
+     */
+    public static final String PRE = "pre";
+
+    /**
+     * 生产环境
+     */
+    public static final String PROD = "prod";
+
+    /**
+     * 应用当前激活的环境
+     */
+    public static final String SPRING_PROFILES_ACTIVE = "spring.profiles.active";
+
+    /**
      * 配置前缀
      */
     public static final String WIND_SERVER_PROPERTIES_PREFIX = "wind.server";

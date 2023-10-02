@@ -1,11 +1,12 @@
 package com.wind.security.authority.rbac;
 
+import com.wind.security.web.utils.RequestMatcherUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.ObjectUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -75,12 +76,10 @@ public class WebRbacRoleSecurityMetadataSource implements FilterInvocationSecuri
      */
     private String[] matchesRequestPermissions(HttpServletRequest request) {
         Set<String> permissionIds = new HashSet<>();
-        for (Map.Entry<String, Set<AntPathRequestMatcher>> entry : rbacResourceManager.getRequestPermissionMatchers().entrySet()) {
-            String id = entry.getKey();
-            Set<AntPathRequestMatcher> requestMatchers = entry.getValue();
-            if (requestMatchers.stream().anyMatch(requestMatcher -> requestMatcher.matches(request))) {
+        for (Map.Entry<String, Set<RequestMatcher>> entry : rbacResourceManager.getRequestPermissionMatchers().entrySet()) {
+            if (RequestMatcherUtils.matches(entry.getValue(), request)) {
                 // 权限匹配  TODO 减少匹配次数
-                permissionIds.add(id);
+                permissionIds.add(entry.getKey());
                 break;
             }
         }
