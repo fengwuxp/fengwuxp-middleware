@@ -80,4 +80,9 @@ public class PrePaymentOrderRequest implements Serializable {
      * 主题
      */
     private String subject;
+
+    /**
+     * 支付场景说明
+     */
+    private String sceneInfo;
 }

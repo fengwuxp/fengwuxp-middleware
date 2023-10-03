@@ -44,7 +44,7 @@ public class AppAlipayPaymentPlugin extends AbstractAlipayPaymentPlugin {
         model.setBody(normalizationBody(request.getDescription()));
         model.setTimeoutExpress(getExpireTimeOrUseDefault( request.getExpireTime()));
         model.setSubject(request.getSubject());
-        model.setTotalAmount(PaymentTransactionUtils.fen2Yun(request.getOrderAmount()).toString());
+        model.setTotalAmount(PaymentTransactionUtils.feeToYun(request.getOrderAmount()).toString());
         req.setBizModel(model);
         req.setNotifyUrl(request.getNotifyUrl());
         req.setReturnUrl(request.getReturnUrl());

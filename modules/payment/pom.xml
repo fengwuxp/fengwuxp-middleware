@@ -17,6 +17,7 @@
     <modules>
         <module>core</module>
         <module>alipay</module>
+        <module>wechat</module>
     </modules>
 
 </project>

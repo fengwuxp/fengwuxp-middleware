@@ -6,7 +6,7 @@ import com.alipay.api.domain.AlipayTradePrecreateModel;
 import com.alipay.api.request.AlipayTradePrecreateRequest;
 import com.alipay.api.response.AlipayTradePrecreateResponse;
 import com.wind.common.exception.DefaultExceptionCode;
-import com.wind.payment.alipay.response.AliPayQrCodeTradePayResult;
+import com.wind.payment.alipay.response.AliPayQrCodeTransactionPayResult;
 import com.wind.payment.core.PaymentTransactionException;
 import com.wind.payment.core.request.PrePaymentOrderRequest;
 import com.wind.payment.core.response.PrePaymentOrderResponse;
@@ -39,7 +39,7 @@ public class QrCodeAlipayPaymentPlugin extends AbstractAlipayPaymentPlugin {
         model.setBody(normalizationBody(request.getDescription()));
         model.setTimeoutExpress(getExpireTimeOrUseDefault(request.getExpireTime()));
         model.setSubject(request.getSubject());
-        model.setTotalAmount(PaymentTransactionUtils.fen2Yun(request.getOrderAmount()).toString());
+        model.setTotalAmount(PaymentTransactionUtils.feeToYun(request.getOrderAmount()).toString());
         req.setBizModel(model);
         req.setNotifyUrl(request.getNotifyUrl());
         req.setReturnUrl(request.getReturnUrl());
@@ -57,7 +57,7 @@ public class QrCodeAlipayPaymentPlugin extends AbstractAlipayPaymentPlugin {
                 result.setTransactionNo(response.getOutTradeNo())
                         .setUseSandboxEnv(this.isUseSandboxEnv())
                         .setOrderAmount(request.getOrderAmount())
-                        .setResult(new AliPayQrCodeTradePayResult(response.getQrCode(), response.getOutTradeNo()))
+                        .setResult(new AliPayQrCodeTransactionPayResult(response.getQrCode(), response.getOutTradeNo()))
                         .setRawResponse(response);
             } else {
                 throw new PaymentTransactionException(DefaultExceptionCode.COMMON_ERROR, String.format("支付宝二维码支付交易失败，transactionNo = %s。" +

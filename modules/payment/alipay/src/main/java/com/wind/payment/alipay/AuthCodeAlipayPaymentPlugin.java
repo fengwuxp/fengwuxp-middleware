@@ -45,7 +45,7 @@ public class AuthCodeAlipayPaymentPlugin extends AbstractAlipayPaymentPlugin {
         model.setBody(normalizationBody(request.getDescription()));
         model.setTimeoutExpress(getExpireTimeOrUseDefault(request.getExpireTime()));
         model.setSubject(request.getSubject());
-        model.setTotalAmount(PaymentTransactionUtils.fen2Yun(request.getOrderAmount()).toString());
+        model.setTotalAmount(PaymentTransactionUtils.feeToYun(request.getOrderAmount()).toString());
         model.setOutTradeNo(request.getTransactionNo());
         model.setScene(authCodeRequest.getScene());
         model.setAuthCode(authCodeRequest.getAuthCode());
@@ -65,7 +65,7 @@ public class AuthCodeAlipayPaymentPlugin extends AbstractAlipayPaymentPlugin {
                 result.setTransactionNo(response.getOutTradeNo())
                         .setOutTransactionNo(response.getTradeNo())
                         .setUseSandboxEnv(this.isUseSandboxEnv())
-                        .setOrderAmount(PaymentTransactionUtils.yuanToFen(response.getTotalAmount()))
+                        .setOrderAmount(PaymentTransactionUtils.yuanToFee(response.getTotalAmount()))
                         .setRawResponse(response);
             } else {
                 throw new PaymentTransactionException(DefaultExceptionCode.COMMON_ERROR, String.format("支付宝授权码支付交易失败，transactionNo = %s。" +

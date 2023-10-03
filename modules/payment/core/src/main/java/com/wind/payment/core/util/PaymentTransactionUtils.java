@@ -1,6 +1,7 @@
 package com.wind.payment.core.util;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * @author wuxp
@@ -14,15 +15,14 @@ public final class PaymentTransactionUtils {
         throw new AssertionError();
     }
 
-
     /**
      * 分转换为元
      *
-     * @param fen 分
+     * @param fee 分
      * @return 元
      */
-    public static BigDecimal fen2Yun(Integer fen) {
-        return new BigDecimal(fen).divide(MULTIPLIER).setScale(2, BigDecimal.ROUND_HALF_UP);
+    public static BigDecimal feeToYun(Integer fee) {
+        return new BigDecimal(fee).divide(MULTIPLIER, RoundingMode.HALF_UP).setScale(2, RoundingMode.HALF_UP);
     }
 
     /**
@@ -31,8 +31,8 @@ public final class PaymentTransactionUtils {
      * @param yuan 元
      * @return 分
      */
-    public static int yuanToFen(String yuan) {
-        return yuanToFen(new BigDecimal(yuan));
+    public static int yuanToFee(String yuan) {
+        return yuanToFee(new BigDecimal(yuan));
     }
 
     /**
@@ -41,7 +41,7 @@ public final class PaymentTransactionUtils {
      * @param yuan 元
      * @return 分
      */
-    public static int yuanToFen(BigDecimal yuan) {
+    public static int yuanToFee(BigDecimal yuan) {
         return yuan.multiply(MULTIPLIER).intValue();
     }
 

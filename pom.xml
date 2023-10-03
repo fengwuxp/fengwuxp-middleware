@@ -6,6 +6,7 @@
 
 
     <parent>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies -->
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>2.7.16</version>
@@ -42,6 +43,8 @@
         <maven-deploy-plugin.version>3.1.0</maven-deploy-plugin.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
 
+        <spring-boot.version>2.7.16</spring-boot.version>
+        <spring-commons.version>3.1.6</spring-commons.version>
         <mysql.version>8.0.33</mysql.version>
         <mybatis.version>3.5.3</mybatis.version>
         <mybatis-plus.version>3.5.3</mybatis-plus.version>
@@ -54,6 +57,7 @@
         <j2v8.version>4.6.0</j2v8.version>
         <google-zxing.version>3.5.2</google-zxing.version>
         <alipay-sdk.version>4.38.90.ALL</alipay-sdk.version>
+        <weixin-java-pay.version>4.5.0</weixin-java-pay.version>
     </properties>
 
     <dependencies>
@@ -78,16 +82,18 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-commons-dependencies -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-commons-dependencies</artifactId>
+                <version>${spring-commons.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>com.wind.script</groupId>
                 <artifactId>script-supported</artifactId>
                 <version>${revision}</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/com.alipay.sdk/alipay-sdk-java -->
-            <dependency>
-                <groupId>com.alipay.sdk</groupId>
-                <artifactId>alipay-sdk-java</artifactId>
-                <version>${alipay-sdk.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.payment</groupId>
@@ -216,6 +222,18 @@
                 <artifactId>j2v8_macosx_x86_64</artifactId>
                 <version>${j2v8.version}</version>
                 <optional>true</optional>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.alipay.sdk/alipay-sdk-java -->
+            <dependency>
+                <groupId>com.alipay.sdk</groupId>
+                <artifactId>alipay-sdk-java</artifactId>
+                <version>${alipay-sdk.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.github.binarywang/weixin-java-pay -->
+            <dependency>
+                <groupId>com.github.binarywang</groupId>
+                <artifactId>weixin-java-pay</artifactId>
+                <version>${weixin-java-pay.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

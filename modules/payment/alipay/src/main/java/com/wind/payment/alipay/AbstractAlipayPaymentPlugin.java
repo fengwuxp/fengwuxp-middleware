@@ -40,6 +40,8 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * 支付宝支付插件抽象类
+ *
  * @author wuxp
  * @date 2023-10-01 08:48
  **/
@@ -50,6 +52,11 @@ public abstract class AbstractAlipayPaymentPlugin implements PaymentTransactionP
      * 支付结果处理成功返回码
      */
     private static final String PAYMENT_RESULT_HANDLE_SUCCESS_RETURN_CODE = "success";
+
+    /**
+     * 支付结果处理失败返回码
+     */
+    private static final String PAYMENT_RESULT_HANDLE_FAILURE_RETURN_CODE = "failure";
 
     static final String ERROR_PATTERN = "errorCode：%s，errorMessage：%s";
 
@@ -89,15 +96,15 @@ public abstract class AbstractAlipayPaymentPlugin implements PaymentTransactionP
         try {
             AlipayTradeQueryResponse response = alipayClient.execute(req);
             if (log.isDebugEnabled()) {
-                log.debug("查询支付结果 :{}", response.getBody());
+                log.debug("查询支付宝支付结果 :{}", response.getBody());
             }
             if (response.isSuccess()) {
-                int buyerPayAmount = PaymentTransactionUtils.yuanToFen(response.getBuyerPayAmount());
+                int buyerPayAmount = PaymentTransactionUtils.yuanToFee(response.getBuyerPayAmount());
                 result.setOutTransactionNo(response.getTradeNo())
                         .setOutTransactionNo(response.getOutTradeNo())
-                        .setOrderAmount(PaymentTransactionUtils.yuanToFen(response.getTotalAmount()))
+                        .setOrderAmount(PaymentTransactionUtils.yuanToFee(response.getTotalAmount()))
                         .setBuyerPayAmount(buyerPayAmount)
-                        .setReceiptAmount(PaymentTransactionUtils.yuanToFen(response.getReceiptAmount()))
+                        .setReceiptAmount(PaymentTransactionUtils.yuanToFee(response.getReceiptAmount()))
                         .setUseSandboxEnv(this.isUseSandboxEnv())
                         .setTransactionState(this.transformTradeState(response.getTradeStatus(), buyerPayAmount))
                         .setRawResponse(response);
@@ -105,7 +112,6 @@ public abstract class AbstractAlipayPaymentPlugin implements PaymentTransactionP
                 throw new PaymentTransactionException(DefaultExceptionCode.COMMON_ERROR, String.format("查询支付宝交易单失败，transactionNo = %s。" +
                         ERROR_PATTERN, request.getTransactionNo(), response.getCode(), response.getMsg()));
             }
-            result.setRawResponse(response);
         } catch (AlipayApiException exception) {
             throw new PaymentTransactionException(DefaultExceptionCode.COMMON_ERROR, String.format("查询支付宝交易单异常，transactionNo = %s", request.getTransactionNo()), exception);
         }
@@ -119,10 +125,10 @@ public abstract class AbstractAlipayPaymentPlugin implements PaymentTransactionP
         model.setOutTradeNo(request.getOutTransactionNo());
         model.setTradeNo(request.getTransactionNo());
         model.setOutRequestNo(request.getTransactionRefundNo());
-        model.setRefundAmount(PaymentTransactionUtils.fen2Yun(request.getRefundAmount()).toString());
+        model.setRefundAmount(PaymentTransactionUtils.feeToYun(request.getRefundAmount()).toString());
         model.setRefundReason(request.getRefundReason());
         if (log.isDebugEnabled()) {
-            log.debug("退款请求参数 {}", model);
+            log.debug("支付宝退款请求参数 {}", model);
         }
         req.setBizModel(model);
         AssertUtils.hasLength(request.getRefundNotifyUrl(), "refund notify url mist not empty");
@@ -141,7 +147,7 @@ public abstract class AbstractAlipayPaymentPlugin implements PaymentTransactionP
                 result.setTransactionNo(request.getTransactionRefundNo())
                         .setTransactionRefundNo(response.getOutTradeNo())
                         .setOutTransactionRefundNo(response.getTradeNo())
-                        .setOrderAmount(PaymentTransactionUtils.yuanToFen(response.getRefundFee()))
+                        .setOrderAmount(PaymentTransactionUtils.yuanToFee(response.getRefundFee()))
                         .setOrderAmount(request.getOrderAmount())
                         .setTransactionState(PaymentTransactionState.WAIT_REFUND)
                         .setRawResponse(response);
@@ -172,24 +178,22 @@ public abstract class AbstractAlipayPaymentPlugin implements PaymentTransactionP
                 log.debug("查询支付宝退款响应, {}", response);
             }
             if (response.isSuccess()) {
-                int refundAmount = PaymentTransactionUtils.yuanToFen(response.getRefundAmount());
-                int orderAmount = PaymentTransactionUtils.yuanToFen(response.getTotalAmount());
+                int refundAmount = PaymentTransactionUtils.yuanToFee(response.getRefundAmount());
+                int orderAmount = PaymentTransactionUtils.yuanToFee(response.getTotalAmount());
                 result.setTransactionNo(request.getTransactionNo())
                         .setTransactionRefundNo(response.getOutTradeNo())
                         .setOutTransactionRefundNo(response.getOutRequestNo())
                         .setRefundAmount(refundAmount)
                         .setOrderAmount(orderAmount)
-                        .setTransactionState(refundAmount == orderAmount ? PaymentTransactionState.REFUNDED : PaymentTransactionState.PARTIAL_REFUND)
+                        .setTransactionState(Objects.equals(refundAmount, orderAmount) ? PaymentTransactionState.REFUNDED : PaymentTransactionState.PARTIAL_REFUND)
                         .setRawResponse(response);
             } else {
                 throw new PaymentTransactionException(DefaultExceptionCode.COMMON_ERROR,
                         String.format("查询支付宝交易退款失败，transactionNo = %s。" + ERROR_PATTERN, request.getTransactionNo(), response.getCode(), response.getMsg()));
             }
-            result.setRawResponse(response);
         } catch (AlipayApiException exception) {
             throw new PaymentTransactionException(DefaultExceptionCode.COMMON_ERROR, String.format("查询支付宝交易退款异常，transactionNo = %s", request.getTransactionNo()), exception);
         }
-
         return result;
     }
 
@@ -200,7 +204,7 @@ public abstract class AbstractAlipayPaymentPlugin implements PaymentTransactionP
         AlipayAsyncNoticeRequest noticeRequest = request.getRawRequest();
         result.setOutTransactionNo(noticeRequest.getTrade_no())
                 .setTransactionNo(noticeRequest.getOut_trade_no())
-                .setOrderAmount(PaymentTransactionUtils.yuanToFen(noticeRequest.getTotal_amount()));
+                .setOrderAmount(PaymentTransactionUtils.yuanToFee(noticeRequest.getTotal_amount()));
         AliPayTransactionState tradeState = noticeRequest.getTrade_status();
         Integer buyerPayAmount;
         BigDecimal payAmount = noticeRequest.getBuyer_pay_amount();
@@ -230,14 +234,14 @@ public abstract class AbstractAlipayPaymentPlugin implements PaymentTransactionP
         AlipayAsyncNoticeRequest noticeRequest = request.getRawRequest();
         result.setTransactionRefundNo(request.getTransactionRefundNo());
         result.setOutTransactionRefundNo(noticeRequest.getOut_biz_no());
-        result.setOrderAmount(PaymentTransactionUtils.yuanToFen(noticeRequest.getTotal_amount()));
-        result.setRefundAmount(PaymentTransactionUtils.yuanToFen(noticeRequest.getRefund_fee()));
+        result.setOrderAmount(PaymentTransactionUtils.yuanToFee(noticeRequest.getTotal_amount()));
+        result.setRefundAmount(PaymentTransactionUtils.yuanToFee(noticeRequest.getRefund_fee()));
         return result;
     }
 
     @Override
-    public Object getHandleSuccessResponse() {
-        return PAYMENT_RESULT_HANDLE_SUCCESS_RETURN_CODE;
+    public Object getHandleResponse(boolean isSuccess) {
+        return isSuccess ? PAYMENT_RESULT_HANDLE_SUCCESS_RETURN_CODE : PAYMENT_RESULT_HANDLE_FAILURE_RETURN_CODE;
     }
 
     /**
@@ -284,7 +288,7 @@ public abstract class AbstractAlipayPaymentPlugin implements PaymentTransactionP
         // 参数验证
         String tradeNo = request.getTransactionNo();
         AlipayAsyncNoticeRequest rawRequest = request.getRawRequest();
-        BigDecimal orderAmount = PaymentTransactionUtils.fen2Yun(request.getOrderAmount());
+        BigDecimal orderAmount = PaymentTransactionUtils.feeToYun(request.getOrderAmount());
         boolean paramVerify = Objects.equals(tradeNo, rawRequest.getOut_trade_no())
                 && Objects.equals(orderAmount, rawRequest.getTotal_amount());
         AssertUtils.isTrue(paramVerify, () -> String.format("支付宝支付通知，【%s】参数验证失:%s", tradeNo, rawRequest));
@@ -299,13 +303,12 @@ public abstract class AbstractAlipayPaymentPlugin implements PaymentTransactionP
         // 参数验证
         Map<String, String> params = request.getRawRequest();
         String transactionRefundNo = request.getTransactionRefundNo();
-        BigDecimal refundAmount = PaymentTransactionUtils.fen2Yun(request.getRefundAmount());
+        BigDecimal refundAmount = PaymentTransactionUtils.feeToYun(request.getRefundAmount());
 
         boolean paramVerify = Objects.equals(transactionRefundNo, params.get("out_trade_no"))
                 && Objects.equals(refundAmount.toString(), params.get("refund_fee"));
         AssertUtils.isTrue(paramVerify, String.format("支付宝退款通知，【%s】参数验证失败，%s", transactionRefundNo, params));
         verifySign(request.getRawRequest());
-
     }
 
 
@@ -336,7 +339,7 @@ public abstract class AbstractAlipayPaymentPlugin implements PaymentTransactionP
     }
 
     static String normalizationBody(String description) {
-        return StringUtils.abbreviate(description.replaceAll("[^0-9a-zA-Z\\u4e00-\\u9fa5 ]", ""), 600);
+        return StringUtils.abbreviate(description, 128);
     }
 
     static String getExpireTimeOrUseDefault(String expireTime) {

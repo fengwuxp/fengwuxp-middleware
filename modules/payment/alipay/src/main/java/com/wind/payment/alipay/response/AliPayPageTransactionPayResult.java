@@ -14,7 +14,7 @@ import javax.validation.constraints.NotBlank;
  **/
 @Data
 @Accessors(chain = true)
-public class AliPayPageTradePayResult {
+public class AliPayPageTransactionPayResult {
 
     /**
      * 用于唤起 支付宝 App 支付的字符串

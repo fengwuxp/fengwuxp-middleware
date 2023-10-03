@@ -31,9 +31,11 @@ public interface PaymentTransactionWebHooker {
     TransactionOrderRefundResponse refundNotice(PaymentTransactionRefundNoticeRequest request);
 
     /**
-     * 获取通知处理成功返回对象
+     * 获取通知处理返回对象
+     *
+     * @param isSuccess 是否处理成功
      * @return 处理成功响应
      */
-    Object getHandleSuccessResponse();
+    Object getHandleResponse(boolean isSuccess);
 
 }

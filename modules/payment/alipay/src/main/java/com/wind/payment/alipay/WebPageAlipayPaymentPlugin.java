@@ -6,7 +6,7 @@ import com.alipay.api.domain.AlipayTradePagePayModel;
 import com.alipay.api.request.AlipayTradePagePayRequest;
 import com.alipay.api.response.AlipayTradePagePayResponse;
 import com.wind.common.exception.DefaultExceptionCode;
-import com.wind.payment.alipay.response.AliPayPageTradePayResult;
+import com.wind.payment.alipay.response.AliPayPageTransactionPayResult;
 import com.wind.payment.core.PaymentTransactionException;
 import com.wind.payment.core.request.PrePaymentOrderRequest;
 import com.wind.payment.core.response.PrePaymentOrderResponse;
@@ -28,7 +28,6 @@ public class WebPageAlipayPaymentPlugin extends AbstractAlipayPaymentPlugin {
      */
     private static final String ALI_WEB_PAGE_PAY_PRODUCT_CODE = "FAST_INSTANT_TRADE_PAY";
 
-
     public WebPageAlipayPaymentPlugin(String config) {
         this(JSON.parseObject(config, AliPayPartnerConfig.class));
     }
@@ -46,7 +45,7 @@ public class WebPageAlipayPaymentPlugin extends AbstractAlipayPaymentPlugin {
         model.setBody(normalizationBody(request.getDescription()));
         model.setTimeoutExpress(getExpireTimeOrUseDefault( request.getExpireTime()));
         model.setSubject(request.getSubject());
-        model.setTotalAmount(PaymentTransactionUtils.fen2Yun(request.getOrderAmount()).toString());
+        model.setTotalAmount(PaymentTransactionUtils.feeToYun(request.getOrderAmount()).toString());
         req.setBizModel(model);
         req.setNotifyUrl(request.getNotifyUrl());
         req.setReturnUrl(request.getReturnUrl());
@@ -60,7 +59,7 @@ public class WebPageAlipayPaymentPlugin extends AbstractAlipayPaymentPlugin {
                 log.debug("支付响应 :{}", response);
             }
             if (response.isSuccess()) {
-                AliPayPageTradePayResult tradePayResult = new AliPayPageTradePayResult();
+                AliPayPageTransactionPayResult tradePayResult = new AliPayPageTransactionPayResult();
                 tradePayResult.setOrderInfo(response.getBody())
                         .setTransactionNo(response.getOutTradeNo())
                         .setOutTransactionNo(response.getTradeNo())
@@ -70,7 +69,7 @@ public class WebPageAlipayPaymentPlugin extends AbstractAlipayPaymentPlugin {
                 result.setTransactionNo(response.getOutTradeNo())
                         .setOutTransactionNo(response.getTradeNo())
                         .setUseSandboxEnv(this.isUseSandboxEnv())
-                        .setOrderAmount(PaymentTransactionUtils.yuanToFen(response.getTotalAmount()))
+                        .setOrderAmount(PaymentTransactionUtils.yuanToFee(response.getTotalAmount()))
                         .setResult(tradePayResult)
                         .setRawResponse(response);
             } else {
