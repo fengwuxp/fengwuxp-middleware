@@ -4,6 +4,7 @@ import com.wind.common.WindConstants;
 import com.wind.common.exception.AssertUtils;
 import com.wind.security.captcha.Captcha;
 import com.wind.security.captcha.CaptchaStorage;
+import com.wind.security.captcha.CaptchaConstants;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -16,10 +17,6 @@ import org.springframework.lang.NonNull;
 @AllArgsConstructor
 public class CacheCaptchaStorage implements CaptchaStorage {
 
-    /**
-     * 图片验证码缓存缓存 key
-     */
-    private static final String CACHE_CAPTCHA_STORE_KEY = "CAPTCHA_CACHES";
 
     private final CacheManager cacheManager;
 
@@ -49,7 +46,7 @@ public class CacheCaptchaStorage implements CaptchaStorage {
 
     @NonNull
     private Cache requiredCache(Captcha.CaptchaType captchaTyp, Captcha.CaptchaUseScene useScene) {
-        String name = String.format("%s_%s_%s_%s", group, captchaTyp.name(), useScene.name(), CACHE_CAPTCHA_STORE_KEY);
+        String name = CaptchaConstants.getCaptchaCacheName(group, captchaTyp, useScene);
         Cache result = cacheManager.getCache(name);
         AssertUtils.notNull(result, String.format("获取验证码 Cache 失败，CacheName = %s", name));
         return result;

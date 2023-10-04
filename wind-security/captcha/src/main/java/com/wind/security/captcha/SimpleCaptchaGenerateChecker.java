@@ -20,11 +20,6 @@ import static org.apache.commons.lang3.time.DateFormatUtils.ISO_8601_EXTENDED_DA
 public class SimpleCaptchaGenerateChecker implements CaptchaGenerateChecker {
 
     /**
-     * 验证码生成次数缓存缓存 key
-     */
-    private static final String CACHE_CAPTCHA_GENERATE_COUNT_STORE_KEY = "CAPTCHA_COUNT_CACHES";
-
-    /**
      * 缓存管理器
      */
     private final CacheManager cacheManager;
@@ -37,10 +32,10 @@ public class SimpleCaptchaGenerateChecker implements CaptchaGenerateChecker {
     /**
      * 每个用户每天允许发生验证码的最大次数
      */
-    private final Function<Captcha.CaptchaType,Integer> mxAllowGenerateTimesOfUserWithDaySupplier;
+    private final Function<Captcha.CaptchaType, Integer> mxAllowGenerateTimesOfUserWithDaySupplier;
 
     public SimpleCaptchaGenerateChecker(CacheManager cacheManager) {
-        this(cacheManager, WindConstants.DEFAULT_TEXT.toUpperCase(), (type)->15);
+        this(cacheManager, WindConstants.DEFAULT_TEXT.toUpperCase(), (type) -> 15);
     }
 
     @Override
@@ -55,12 +50,11 @@ public class SimpleCaptchaGenerateChecker implements CaptchaGenerateChecker {
         }
         AssertUtils.isTrue(total < mxAllowGenerateTimesOfUserWithDaySupplier.apply(type), "已超过每天允许发送的最大次数");
         cache.put(key, total);
-
     }
 
     @NonNull
     private Cache requiredCache(Captcha.CaptchaType captchaTyp) {
-        String name = String.format("%s_%s_%s", group, captchaTyp.name(), CACHE_CAPTCHA_GENERATE_COUNT_STORE_KEY);
+        String name = CaptchaConstants.getCaptchaValidCountCacheName(group, captchaTyp);
         Cache result = cacheManager.getCache(name);
         AssertUtils.notNull(result, String.format("获取验证码生成次数 Cache 失败，CacheName = %s", name));
         return result;

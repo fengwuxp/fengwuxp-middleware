@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.time.Duration;
@@ -90,10 +89,7 @@ public class WebRbacResourceManager implements ApplicationListener<RbacResourceC
      * @return 有 {@param permissionIds} 权限的角色
      */
     public Set<String> getRolesByPermissionIds(String... permissionIds) {
-        Set<String> result = Arrays.stream(permissionIds)
-                .map(this::findRole)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+        Set<String> result = Arrays.stream(permissionIds).map(this::findRole).filter(Objects::nonNull).collect(Collectors.toSet());
         return Collections.unmodifiableSet(result);
     }
 
@@ -177,15 +173,13 @@ public class WebRbacResourceManager implements ApplicationListener<RbacResourceC
 
 
     private <V> Cache<String, V> buildRolesCaches(Duration cacheEffectiveTime) {
-        return Caffeine.newBuilder()
-                .executor(scheduledExecutor)
+        return Caffeine.newBuilder().executor(scheduledExecutor)
                 // 设置最后一次写入或访问后经过固定时间过期
                 .expireAfterWrite(cacheEffectiveTime.getSeconds() + 10, TimeUnit.SECONDS)
                 // 初始的缓存空间大小
                 .initialCapacity(100)
                 // 缓存的最大条数
-                .maximumSize(1000)
-                .build();
+                .maximumSize(1000).build();
     }
 
 }

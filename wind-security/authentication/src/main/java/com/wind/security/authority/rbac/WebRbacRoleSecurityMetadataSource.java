@@ -39,6 +39,10 @@ public class WebRbacRoleSecurityMetadataSource implements FilterInvocationSecuri
      */
     private final String rolePrefix;
 
+    /**
+     * 请求权限匹配是否匹配所有权限
+     */
+    private final boolean matchesRequestAllPermission;
 
     @Override
     public Collection<ConfigAttribute> getAttributes(Object object) throws IllegalArgumentException {
@@ -78,9 +82,12 @@ public class WebRbacRoleSecurityMetadataSource implements FilterInvocationSecuri
         Set<String> permissionIds = new HashSet<>();
         for (Map.Entry<String, Set<RequestMatcher>> entry : rbacResourceManager.getRequestPermissionMatchers().entrySet()) {
             if (RequestMatcherUtils.matches(entry.getValue(), request)) {
-                // 权限匹配  TODO 减少匹配次数
+                // 权限匹配
                 permissionIds.add(entry.getKey());
-                break;
+                if (matchesRequestAllPermission) {
+                    //非匹配所有权限模式， 匹配到了则返回
+                    break;
+                }
             }
         }
         return permissionIds.toArray(new String[0]);

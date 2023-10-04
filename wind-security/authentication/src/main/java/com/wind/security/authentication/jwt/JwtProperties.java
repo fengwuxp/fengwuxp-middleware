@@ -2,6 +2,7 @@ package com.wind.security.authentication.jwt;
 
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
+import com.wind.security.configuration.WindSecurityProperties;
 import lombok.Data;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Base64Utils;
@@ -22,11 +23,6 @@ import java.time.Duration;
  */
 @Data
 public class JwtProperties {
-
-    /**
-     * 是否可用
-     */
-    private boolean enabled = true;
 
     /**
      * jwt issuer
