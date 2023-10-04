@@ -16,6 +16,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static com.wind.security.WebSecurityConstants.REQUEST_REQUIRED_ROLES_ATTRIBUTE_NAME;
+
 /**
  * 1：通过请求 method、requestUri 获取需要的权限
  * 1.1：如果为配置权限则表示不需要控制权限
@@ -53,7 +55,9 @@ public class WebRbacRoleSecurityMetadataSource implements FilterInvocationSecuri
             // 请求路径没有配置权限，表明该请求接口可以任意访问
             return Collections.emptyList();
         }
-        String[] authorities = rbacResourceManager.getRolesByPermissionIds(permissions)
+        Set<String> roleIds = rbacResourceManager.getRolesByPermissionIds(permissions);
+        filterInvocation.getRequest().setAttribute(REQUEST_REQUIRED_ROLES_ATTRIBUTE_NAME, roleIds);
+        String[] authorities = roleIds
                 .stream()
                 .map(role -> rolePrefix + role)
                 .distinct()

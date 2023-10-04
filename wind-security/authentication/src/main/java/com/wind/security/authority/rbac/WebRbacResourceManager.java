@@ -18,18 +18,24 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
+ * 基于 web 请求 rbac 管理器
+ *
  * @author wuxp
  * @date 2023-09-26 08:31
  **/
 @Slf4j
 public class WebRbacResourceManager implements ApplicationListener<RbacResourceChangeEvent> {
 
-    private final RbacResourceService rbacResourceService;
+    /**
+     * rbac resource 服务
+     */
+    private final RbacResourceService<?> rbacResourceService;
 
     /**
      * 缓存刷新间隔
@@ -60,14 +66,15 @@ public class WebRbacResourceManager implements ApplicationListener<RbacResourceC
      */
     private final Cache<String, Set<String>> userRoleCaches;
 
-    private final ScheduledThreadPoolExecutor scheduledExecutor = new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("web-rbac-resource-manager"));
+    private final ScheduledExecutorService schedule = new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("web-rbac-resource-manager"));
 
-    public WebRbacResourceManager(RbacResourceService rbacResourceService, Duration cacheRefreshInterval) {
+    public WebRbacResourceManager(RbacResourceService<?> rbacResourceService, Duration cacheRefreshInterval) {
         this.rbacResourceService = rbacResourceService;
         this.cacheRefreshInterval = cacheRefreshInterval;
         this.permissionCaches = buildRolesCaches(cacheRefreshInterval);
         this.rolePermissionCaches = buildRolesCaches(cacheRefreshInterval);
         this.userRoleCaches = buildRolesCaches(cacheRefreshInterval);
+        refreshRefresh();
     }
 
     /**
@@ -100,7 +107,7 @@ public class WebRbacResourceManager implements ApplicationListener<RbacResourceC
      * @return 角色列表
      */
     public Set<String> getUserRoles(String userId) {
-        Set<String> result = userRoleCaches.get(userId, rbacResourceService::findRolesByUserId);
+        Set<String> result = userRoleCaches.get(userId, key -> rbacResourceService.findRolesByUserId(key).stream().map(String::valueOf).collect(Collectors.toSet()));
         return result == null ? Collections.emptySet() : Collections.unmodifiableSet(result);
     }
 
@@ -120,7 +127,7 @@ public class WebRbacResourceManager implements ApplicationListener<RbacResourceC
         if (event.getResourceType() == RbacResource.Permission.class) {
             // 权限内容变更
             event.getResourceIds().forEach(id -> {
-                RbacResource.Permission permission = rbacResourceService.findPermissionById(id);
+                RbacResource.Permission<?> permission = rbacResourceService.findPermissionById(id);
                 if (permission == null) {
                     permissionCaches.invalidate(id);
                 } else {
@@ -128,10 +135,11 @@ public class WebRbacResourceManager implements ApplicationListener<RbacResourceC
                 }
             });
         }
+
         if (event.getResourceType() == RbacResource.Role.class) {
             // 角色关联的权限变更
             event.getResourceIds().forEach(id -> {
-                RbacResource.Role role = rbacResourceService.findRoleById(id);
+                RbacResource.Role<?> role = rbacResourceService.findRoleById(id);
                 if (role == null) {
                     rolePermissionCaches.invalidate(id);
                 } else {
@@ -147,7 +155,7 @@ public class WebRbacResourceManager implements ApplicationListener<RbacResourceC
     }
 
     private void scheduleRefresh(long delay) {
-        scheduledExecutor.schedule(this::refreshRefresh, delay, TimeUnit.SECONDS);
+        schedule.schedule(this::refreshRefresh, delay, TimeUnit.SECONDS);
     }
 
     private void refreshRefresh() {
@@ -155,7 +163,7 @@ public class WebRbacResourceManager implements ApplicationListener<RbacResourceC
         try {
             rbacResourceService.getAllPermissions().forEach(this::putPermissionCaches);
             rbacResourceService.getAllRoles().forEach(this::putRoleCaches);
-            log.debug("begin refresh rbac resource end");
+            log.debug("refresh rbac resource end");
         } catch (Exception exception) {
             log.error("refresh rbac resource error, message = {}", exception.getMessage(), exception);
         } finally {
@@ -163,23 +171,24 @@ public class WebRbacResourceManager implements ApplicationListener<RbacResourceC
         }
     }
 
-    private void putPermissionCaches(RbacResource.Permission permission) {
-        permissionCaches.put(permission.getId(), RequestMatcherUtils.convertMatchers(permission.getAttributes()));
+    private void putPermissionCaches(RbacResource.Permission<?> permission) {
+        permissionCaches.put(String.valueOf(permission.getId()), RequestMatcherUtils.convertMatchers(permission.getAttributes()));
     }
 
-    private void putRoleCaches(RbacResource.Role role) {
-        rolePermissionCaches.put(role.getId(), role.getPermissions());
+    private void putRoleCaches(RbacResource.Role<?> role) {
+        rolePermissionCaches.put(String.valueOf(role.getId()), role.getPermissions());
     }
-
 
     private <V> Cache<String, V> buildRolesCaches(Duration cacheEffectiveTime) {
-        return Caffeine.newBuilder().executor(scheduledExecutor)
+        return Caffeine.newBuilder()
+                .executor(schedule)
                 // 设置最后一次写入或访问后经过固定时间过期
                 .expireAfterWrite(cacheEffectiveTime.getSeconds() + 10, TimeUnit.SECONDS)
                 // 初始的缓存空间大小
-                .initialCapacity(100)
+                .initialCapacity(200)
                 // 缓存的最大条数
-                .maximumSize(1000).build();
+                .maximumSize(2000)
+                .build();
     }
 
 }

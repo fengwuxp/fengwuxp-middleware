@@ -28,6 +28,8 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
+ * jwt token 编码解码
+ *
  * @author wuxp
  * @date 2023-09-24 16:59
  **/
@@ -52,15 +54,22 @@ public final class JwtTokenCodec {
         this.jwtDecoder = buildJwtDecoder(rsaKey);
     }
 
+    /**
+     * jwt parse token
+     *
+     * @param jwtToken jwt token
+     * @param userType 用户类类型
+     * @return jwt token payload
+     */
     @Nullable
-    public <T> JwtTokenPayload<T> parse(String jwtToken, Class<T> classType) {
+    public JwtTokenPayload parse(String jwtToken, Class<?> userType) {
         if (StringUtils.hasLength(jwtToken)) {
             Jwt jwt = jwtDecoder.decode(jwtToken);
             Map<String, Object> claims = jwt.getClaims();
-            T user = JSON.to(classType, claims.get(AUTHENTICATION_VARIABLE_NAME));
+            Object user = JSON.to(userType, claims.get(AUTHENTICATION_VARIABLE_NAME));
             Instant expiresAt = jwt.getExpiresAt();
             AssertUtils.notNull(expiresAt, "jwt token expire must not null");
-            return new JwtTokenPayload<>(jwt.getSubject(), user, expiresAt.getEpochSecond());
+            return new JwtTokenPayload(jwt.getSubject(), user, expiresAt.toEpochMilli());
         }
         return null;
     }
@@ -76,11 +85,7 @@ public final class JwtTokenCodec {
         Jwt jwt = jwtEncoder.encode(
                 JwtEncoderParameters.from(
                         jwsHeader,
-                        JwtClaimsSet.builder()
-                                .expiresAt(Instant.now().plusSeconds(properties.getEffectiveTime().getSeconds()))
-                                .audience(Collections.singletonList(properties.getAudience()))
-                                .issuer(properties.getIssuer())
-                                .subject(id)
+                        newJwtBuilder(id)
                                 .claim(AUTHENTICATION_VARIABLE_NAME, user)
                                 .build()
                 )
@@ -95,16 +100,7 @@ public final class JwtTokenCodec {
      * @return refresh token
      */
     public String encodingRefreshToken(String id) {
-        Jwt jwt = jwtEncoder.encode(
-                JwtEncoderParameters.from(
-                        jwsHeader,
-                        JwtClaimsSet.builder()
-                                .expiresAt(Instant.now().plusSeconds(properties.getRefreshEffectiveTime().getSeconds()))
-                                .audience(Collections.singletonList(properties.getAudience()))
-                                .subject(id)
-                                .build()
-                )
-        );
+        Jwt jwt = jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, newJwtBuilder(id).build()));
         return jwt.getTokenValue();
     }
 
@@ -115,14 +111,22 @@ public final class JwtTokenCodec {
      * @return 用户 id
      */
     @Nullable
-    public <T> JwtTokenPayload<T> parseRefreshToken(String refreshToken) {
+    public JwtTokenPayload parseRefreshToken(String refreshToken) {
         if (StringUtils.hasLength(refreshToken)) {
             Jwt jwt = jwtDecoder.decode(refreshToken);
             Instant expiresAt = jwt.getExpiresAt();
             AssertUtils.notNull(expiresAt, "jwt token expire must not null");
-            return new JwtTokenPayload<>(jwt.getSubject(), null, expiresAt.getEpochSecond());
+            return new JwtTokenPayload(jwt.getSubject(), null, expiresAt.toEpochMilli());
         }
         return null;
+    }
+
+    private JwtClaimsSet.Builder newJwtBuilder(String userId) {
+        return JwtClaimsSet.builder()
+                .expiresAt(Instant.now().plusSeconds(properties.getEffectiveTime().getSeconds()))
+                .audience(Collections.singletonList(properties.getAudience()))
+                .issuer(properties.getIssuer())
+                .subject(userId);
     }
 
     private JwtDecoder buildJwtDecoder(RSAKey rsaKey) {
@@ -142,4 +146,5 @@ public final class JwtTokenCodec {
                 .keyID(JWT_AUTH_KEY_ID)
                 .build();
     }
+
 }

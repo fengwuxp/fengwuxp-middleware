@@ -5,6 +5,7 @@ import com.wind.security.authentication.jwt.JwtTokenPayload;
 import lombok.AllArgsConstructor;
 import org.apache.catalina.core.ApplicationFilterChain;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -51,15 +52,14 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
-
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain chain) throws ServletException, IOException {
         if (chain instanceof ApplicationFilterChain || SecurityContextHolder.getContext() != null) {
             // 如果是在tomcat的过滤器链中，不处理
             chain.doFilter(request, response);
             return;
         }
         String jwtToken = request.getHeader(headerName);
-        JwtTokenPayload<?> payload = jwtTokenCodec.parse(jwtToken, userType);
+        JwtTokenPayload payload = jwtTokenCodec.parse(jwtToken, userType);
         if (payload == null) {
             chain.doFilter(request, response);
             return;

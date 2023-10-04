@@ -1,5 +1,6 @@
 package com.wind.security.configuration;
 
+import com.wind.security.authentication.JwtTokenAuthenticationFilter;
 import com.wind.security.authentication.jwt.JwtProperties;
 import com.wind.security.authentication.jwt.JwtTokenCodec;
 import com.wind.security.authority.rbac.WebRbacResourceManager;
@@ -32,7 +33,6 @@ public class WindSecurityAutoConfiguration {
      */
     public static final String RBAC_PREFIX = WindSecurityProperties.PREFIX + ".rbac";
 
-
     @Bean
     @ConfigurationProperties(prefix = JWT_PREFIX)
     public JwtProperties jwtProperties() {
@@ -53,7 +53,7 @@ public class WindSecurityAutoConfiguration {
 
     @Bean
     @ConditionalOnBean({WindSecurityRbacProperties.class, RbacResourceService.class})
-    public WebRbacResourceManager webRbacResourceManager(RbacResourceService rbacResourceService, WindSecurityRbacProperties properties) {
+    public WebRbacResourceManager webRbacResourceManager(RbacResourceService<?> rbacResourceService, WindSecurityRbacProperties properties) {
         return new WebRbacResourceManager(rbacResourceService, properties.getResourceCacheEffectiveTime());
     }
 

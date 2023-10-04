@@ -14,7 +14,7 @@ import java.time.Duration;
 public class WindSecurityRbacProperties {
 
     /**
-     * rbac resource 缓存失效时间
+     * rbac resource 缓存有效期
      */
     private Duration resourceCacheEffectiveTime = Duration.ofMinutes(3);
 

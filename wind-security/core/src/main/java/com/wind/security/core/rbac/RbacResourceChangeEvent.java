@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 /**
  * rbac 资源发生变更
@@ -22,7 +23,7 @@ public class RbacResourceChangeEvent extends ApplicationEvent {
     private final Class<?> resourceType;
 
     private RbacResourceChangeEvent(Collection<String> ids, Class<?> resourceType) {
-        super(ids == null ? Collections.emptyList() : ids);
+        super(ids == null ? Collections.emptyList() : Collections.unmodifiableCollection(ids));
         this.resourceType = resourceType;
     }
 
@@ -34,19 +35,35 @@ public class RbacResourceChangeEvent extends ApplicationEvent {
         return (Collection<String>) getSource();
     }
 
-    public static void refreshPermission(Collection<String> ids) {
+    public static void refreshPermission(Collection<Long> ids) {
+        refreshPermissionTextIds(idAsText(ids));
+    }
+
+    public static void refreshRole(Collection<Long> ids) {
+        refreshRoleTextIds(idAsText(ids));
+    }
+
+    public static void refreshUser(Collection<Long> ids) {
+        refreshUserTextIds(idAsText(ids));
+    }
+
+    public static void refreshPermissionTextIds(Collection<String> ids) {
         publish(new RbacResourceChangeEvent(ids, RbacResource.Permission.class));
     }
 
-    public static void refreshRole(Collection<String> ids) {
+    public static void refreshRoleTextIds(Collection<String> ids) {
         publish(new RbacResourceChangeEvent(ids, RbacResource.Role.class));
     }
 
-    public static void refreshUser(Collection<String> ids) {
+    public static void refreshUserTextIds(Collection<String> ids) {
         publish(new RbacResourceChangeEvent(ids, RbacResource.User.class));
     }
 
     private static void publish(RbacResourceChangeEvent event) {
         ApplicationContextUtils.getBean(ApplicationEventPublisher.class).publishEvent(event);
+    }
+
+    private static Collection<String> idAsText(Collection<Long> ids) {
+        return ids.stream().map(String::valueOf).collect(Collectors.toSet());
     }
 }

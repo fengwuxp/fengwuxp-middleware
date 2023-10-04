@@ -16,7 +16,6 @@ class JwtTokenCodecTest {
 
     private final JwtTokenCodec jwtTokenCodec = new JwtTokenCodec(jwtProperties(null));
 
-
     @Test
     void testCodecUserToken() {
         User user = new User("张三", "****", Collections.emptyList());
@@ -28,7 +27,7 @@ class JwtTokenCodecTest {
     @Test
     void testCodecRefreshToken() {
         String token = jwtTokenCodec.encodingRefreshToken("1");
-        JwtTokenPayload<Object> payload = jwtTokenCodec.parseRefreshToken(token);
+        JwtTokenPayload payload = jwtTokenCodec.parseRefreshToken(token);
         Assertions.assertEquals("1", payload.getUserId());
     }
 
