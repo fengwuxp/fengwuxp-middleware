@@ -30,7 +30,7 @@ public class SimpleCaptchaGenerateChecker implements CaptchaGenerateChecker {
     private final String group;
 
     /**
-     * 每个用户每天允许发生验证码的最大次数
+     * 每个用户每天允许发送验证码的最大次数
      */
     private final Function<Captcha.CaptchaType, Integer> mxAllowGenerateTimesOfUserWithDaySupplier;
 
@@ -54,7 +54,7 @@ public class SimpleCaptchaGenerateChecker implements CaptchaGenerateChecker {
 
     @NonNull
     private Cache requiredCache(Captcha.CaptchaType captchaTyp) {
-        String name = CaptchaConstants.getCaptchaValidCountCacheName(group, captchaTyp);
+        String name = CaptchaConstants.getCaptchaAllowGenTimesCacheName(group, captchaTyp);
         Cache result = cacheManager.getCache(name);
         AssertUtils.notNull(result, String.format("获取验证码生成次数 Cache 失败，CacheName = %s", name));
         return result;

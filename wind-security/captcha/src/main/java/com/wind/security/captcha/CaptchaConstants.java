@@ -26,8 +26,6 @@ public final class CaptchaConstants {
     }
 
     /**
-     * 获取图片验证码缓存名称
-     *
      * @param group      业务分组
      * @param captchaTyp 验证码类型
      * @param useScene   验证码使用场景
@@ -39,14 +37,12 @@ public final class CaptchaConstants {
     }
 
     /**
-     * 获取图片验证码可验证次数缓存名称
-     *
      * @param group      业务分组
      * @param captchaTyp 验证码类型
-     * @return 验证码缓存名称
+     * @return 对于同一个用户验证码可发送生成次数缓存名称
      */
     @NonNull
-    public static String getCaptchaValidCountCacheName(String group, Captcha.CaptchaType captchaTyp) {
+    public static String getCaptchaAllowGenTimesCacheName(String group, Captcha.CaptchaType captchaTyp) {
         return String.format("%s_%s_%s", group, captchaTyp.name(), CACHE_CAPTCHA_GENERATE_COUNT_STORE_KEY);
     }
 }
