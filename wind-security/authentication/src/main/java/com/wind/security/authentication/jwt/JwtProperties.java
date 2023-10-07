@@ -2,11 +2,11 @@ package com.wind.security.authentication.jwt;
 
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
-import com.wind.security.configuration.WindSecurityProperties;
 import lombok.Data;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Base64Utils;
 
+import java.beans.Transient;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -61,11 +61,12 @@ public class JwtProperties {
      */
     private String rsaPrivateKey;
 
+    @Transient
     KeyPair getKeyPair() {
         try {
             return new KeyPair(getPublicKey(), getPrivateKey());
         } catch (Exception exception) {
-            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, "生成 rsa 秘钥对失败", exception);
+            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, "生成 Rsa 秘钥对失败", exception);
         }
     }
 
