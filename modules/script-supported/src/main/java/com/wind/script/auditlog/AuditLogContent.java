@@ -24,11 +24,15 @@ public class AuditLogContent {
      */
     private final String type;
 
-
     /**
      * 操作类型，比如：CREATE
      */
     private final String operation;
+
+    /**
+     * 操作备注
+     */
+    private final String remark;
 
     /**
      * 请求参数

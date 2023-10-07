@@ -71,7 +71,7 @@ class ScriptAuditLogBuilderTest {
 
     public static class ExampleService {
 
-        @AuditLog(value = "获取用户 {#name}，p1 = {#p1} , p2 = {#p2}", group = "用户", operation = "Query", resourceType = "USER", resourceId = "#result.id")
+        @AuditLog(value = "获取用户 {#name}，p1 = {#p1} , p2 = {#p2}", group = "用户", operation = "Query", resourceType = "USER", resourceId = "#result.id",remark = "#p1")
         public User getUser(String name, String p1, Integer p2) {
             User result = new User();
             result.setId(1L);

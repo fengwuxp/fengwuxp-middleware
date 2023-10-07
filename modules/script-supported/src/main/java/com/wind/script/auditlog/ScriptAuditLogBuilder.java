@@ -30,6 +30,7 @@ import java.util.function.Supplier;
 @Slf4j
 public class ScriptAuditLogBuilder {
 
+    public static final String AUDIT_LOG_REMARK_ATTRIBUTE_NAME = "AUDIT_LOG_REMARK";
 
     /**
      * 方法参数列表变量
@@ -49,7 +50,6 @@ public class ScriptAuditLogBuilder {
     private static final ParameterNameDiscoverer PARAMETER_NAME_DISCOVERER = new DefaultParameterNameDiscoverer();
 
     private final AuditLogRecorder auditLogRecorder;
-
 
     private final Supplier<Map<String, Object>> contextVariablesSupplier;
 
@@ -90,10 +90,12 @@ public class ScriptAuditLogBuilder {
         Map<String, Object> variables = buildEvaluationVariables(arguments, methodReturnValue, method.getParameters());
         EvaluationContext evaluationContext = new StandardEvaluationContext();
         variables.forEach(evaluationContext::setVariable);
+        String remark = auditLog.remark();
         return AuditLogContent.builder()
                 .args(arguments)
                 .resultValue(methodReturnValue)
                 .log(evalLog(auditLog.value(), evaluationContext, throwable))
+                .remark(StringUtils.hasLength(remark) ? evalLog(remark, evaluationContext, throwable) :(String) variables.get(AUDIT_LOG_REMARK_ATTRIBUTE_NAME))
                 .group(auditLog.group())
                 .type(auditLog.resourceType())
                 .operation(auditLog.operation())

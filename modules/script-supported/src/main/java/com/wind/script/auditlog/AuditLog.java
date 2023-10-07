@@ -47,5 +47,11 @@ public @interface AuditLog {
      */
     String resourceId() default "";
 
+    /**
+     * 支持从表达式中获取
+     *
+     * @return 审计操作备注
+     */
+    String remark() default "";
 
 }
