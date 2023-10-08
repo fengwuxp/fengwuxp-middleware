@@ -3,6 +3,7 @@ package com.wind.server.configuration;
 import com.wind.common.exception.AssertUtils;
 import com.wind.script.auditlog.AuditLogRecorder;
 import com.wind.script.auditlog.ScriptAuditLogBuilder;
+import com.wind.server.actuate.health.GracefulShutdownHealthIndicator;
 import com.wind.server.logging.ControllerLogAspect;
 import com.wind.server.logging.WebAuditLogBuilder;
 import com.wind.server.web.exception.RespfulErrorAttributes;
@@ -58,6 +59,12 @@ public class WindServerAutoConfiguration {
         advisor.setPointcut(pointcut);
         advisor.setAdvice(apiInterceptor);
         return advisor;
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = WIND_SERVER_PROPERTIES_PREFIX + ".health.graceful-shutdown", name = "enabled", havingValue = "true", matchIfMissing = true)
+    public GracefulShutdownHealthIndicator gracefulShutdownHealthIndicator() {
+        return new GracefulShutdownHealthIndicator();
     }
 
 
