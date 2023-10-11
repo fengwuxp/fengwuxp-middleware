@@ -14,6 +14,7 @@ import java.util.function.Supplier;
  * 断言工具
  * 断言优先于 if 判断
  * copy form {@link org.springframework.util.Assert}
+ * @author wuxp
  */
 public final class AssertUtils {
 

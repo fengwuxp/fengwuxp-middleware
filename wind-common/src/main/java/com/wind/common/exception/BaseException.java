@@ -3,8 +3,12 @@ package com.wind.common.exception;
 
 import lombok.Getter;
 
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.UnaryOperator;
+
 /**
  * 通用基础业务异常，不同的业务场景可以继承该类做扩展
+ * 支出对消息做 i18n 处理 {@link #MESSAGE_I18N}
  *
  * @author wuxp
  */
@@ -12,6 +16,11 @@ import lombok.Getter;
 public class BaseException extends RuntimeException {
 
     private static final long serialVersionUID = 319556802147084526L;
+
+    /**
+     * 异常消息 i18n 支持
+     */
+    private static final AtomicReference<UnaryOperator<String>> MESSAGE_I18N = new AtomicReference<>(t -> t);
 
     private final ExceptionCode code;
 
@@ -24,7 +33,7 @@ public class BaseException extends RuntimeException {
     }
 
     public BaseException(ExceptionCode code, String message, Throwable cause) {
-        super(message, cause);
+        super(MESSAGE_I18N.get().apply(message), cause);
         this.code = code;
     }
 
@@ -52,5 +61,9 @@ public class BaseException extends RuntimeException {
         return new BaseException(message);
     }
 
+
+    public static void setMessageI18n(UnaryOperator<String> converter) {
+        MESSAGE_I18N.set(converter);
+    }
 
 }

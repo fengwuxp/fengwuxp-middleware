@@ -10,9 +10,9 @@ public interface DescriptiveEnum {
 
 
     /**
-     * 枚举的名称
+     * 枚举名称
      *
-     * @return
+     * @return 名称
      */
     default String name() {
         return "";
@@ -21,14 +21,14 @@ public interface DescriptiveEnum {
     /**
      * 枚举描述中文说明
      *
-     * @return
+     * @return 中文说明
      */
     String getDesc();
 
     /**
      * 获取英文的枚举描述说明
      *
-     * @return
+     * @return 英文说明
      */
     default String getEnDesc() {
         return "";

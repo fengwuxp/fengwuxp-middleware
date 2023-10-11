@@ -66,11 +66,11 @@ public class DefaultCaptchaManager {
      */
     public void verify(String expected, Captcha.CaptchaType type, Captcha.CaptchaUseScene useScene, String owner) {
         Captcha captcha = captchaStorage.get(type, useScene, owner);
-        AssertUtils.notNull(captcha, "验证码不存在");
+        AssertUtils.notNull(captcha, CaptchaI18nMessageKeys.CAPTCHA_NOT_EXIST);
         if (!captcha.isEffective()) {
             // 验证码已失效，移除
             captchaStorage.remove(type, useScene, owner);
-            throw BaseException.common("验证码已失效");
+            throw BaseException.common(CaptchaI18nMessageKeys.CAPTCHA_EXPIRED);
         }
         boolean isPass = verificationIgnoreCase ? captcha.getValue().equalsIgnoreCase(expected) : captcha.getValue().equals(expected);
         if (isPass) {
@@ -85,7 +85,7 @@ public class DefaultCaptchaManager {
                 // 验证码已失效，移除
                 captchaStorage.remove(type, useScene, owner);
             }
-            throw BaseException.common("验证码验证失败");
+            throw BaseException.common(CaptchaI18nMessageKeys.CAPTCHA_VERITY_FAILURE);
         }
     }
 
@@ -95,7 +95,7 @@ public class DefaultCaptchaManager {
                 return delegate;
             }
         }
-        throw BaseException.notFound(String.format("未找到：type = %s，scene = %s 的验证码提供者", type.getDesc(), scene.getDesc()));
+        throw BaseException.notFound(String.format("un found：type = %s，scene = %s CaptchaContentProvider", type.getDesc(), scene.getDesc()));
     }
 
 }

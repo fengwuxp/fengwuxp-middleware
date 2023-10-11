@@ -3,6 +3,8 @@ package com.wind.common.exception;
 import com.wind.common.WindConstants;
 import com.wind.common.enums.DescriptiveEnum;
 
+import java.io.Serializable;
+
 import static com.wind.common.WindConstants.SUCCESSFUL_CODE;
 
 /**
@@ -12,12 +14,14 @@ import static com.wind.common.WindConstants.SUCCESSFUL_CODE;
  * @author wuxp
  * @see DefaultExceptionCode
  */
-public interface ExceptionCode extends DescriptiveEnum {
+public interface ExceptionCode extends DescriptiveEnum, Serializable {
 
     /**
      * 表示成功的 code
      */
     ExceptionCode SUCCESSFUL = new ExceptionCode() {
+        private static final long serialVersionUID = 5034455936657195532L;
+
         @Override
         public String getCode() {
             return SUCCESSFUL_CODE;

@@ -89,7 +89,7 @@ class DefaultCaptchaManagerTest {
             Assertions.assertNotNull(captcha);
             String expected = RandomStringUtils.randomAlphanumeric(4);
             BaseException exception = Assertions.assertThrows(BaseException.class, () -> captchaManager.verify(expected, type, scene, owner));
-            Assertions.assertEquals("验证码验证失败", exception.getMessage());
+            Assertions.assertEquals("$.captcha.verify.failure", exception.getMessage());
             Captcha next = captchaManager.getCaptchaStorage().get(captcha.getType(), captcha.getUseScene(), owner);
             if (maxAllowVerificationTimes <= 1) {
                 Assertions.assertNull(next);

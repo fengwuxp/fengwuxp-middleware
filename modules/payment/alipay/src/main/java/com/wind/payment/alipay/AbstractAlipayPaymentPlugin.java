@@ -332,7 +332,7 @@ public abstract class AbstractAlipayPaymentPlugin implements PaymentTransactionP
         try {
             // 切记 rsaPublicKey 是支付宝的公钥，请去open.alipay.com对应应用下查看。
             boolean result = AlipaySignature.rsaCheckV1(signParams, config.getRsaPublicKey(), config.getCharset(), signType.name());
-            AssertUtils.isTrue(result, "签名验证失败");
+            AssertUtils.isTrue(result, "支付宝通知签名验证失败");
         } catch (AlipayApiException e) {
             throw new PaymentTransactionException(DefaultExceptionCode.COMMON_ERROR, "支付宝支付通知签名验证异常", e);
         }
