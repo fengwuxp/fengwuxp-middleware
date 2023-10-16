@@ -63,6 +63,10 @@
            <groupId>org.springframework.cloud</groupId>
            <artifactId>spring-cloud-starter-bootstrap</artifactId>
        </dependency>
+       <dependency>
+           <groupId>com.wind.configcenter</groupId>
+           <artifactId>wind-config-center-core</artifactId>
+       </dependency>
    </dependencies>
 
 </project>

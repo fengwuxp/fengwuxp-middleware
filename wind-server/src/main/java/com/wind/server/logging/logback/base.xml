@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Base logback configuration provided for compatibility with Spring Boot 1.1
+-->
+
+<included>
+	<include resource="defaults.xml" />
+	<include resource="console-appender.xml" />
+	<include resource="file-appender.xml" />
+	<!--为了防止进程退出时，内存中的数据丢失，请加上此选项-->
+	<shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
+</included>

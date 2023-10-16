@@ -90,8 +90,9 @@ public class Spring18nMessageUtils implements ApplicationListener<ApplicationSta
             LOCALE_RESOLVER.set(event.getApplicationContext().getBean(LocaleResolver.class));
             MESSAGE_SOURCE.set(event.getApplicationContext().getBean(MessageSource.class));
             BaseException.setMessageI18n(Spring18nMessageUtils::getMessage);
-        } catch (Exception e) {
-            log.error("un enabled i18n supported");
+            log.info("enabled i18n supported");
+        } catch (Exception ignore) {
+            log.debug("un enabled i18n supported");
         }
     }
 

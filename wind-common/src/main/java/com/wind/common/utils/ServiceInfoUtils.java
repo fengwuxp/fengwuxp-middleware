@@ -27,7 +27,15 @@ public final class ServiceInfoUtils {
         return ONLINE_ENVS.contains(getSpringProfilesActive());
     }
 
-    private static String getSpringProfilesActive() {
+    /**
+     * @return 获取应用名称
+     */
+    public static String getApplicationName() {
+       return ApplicationContextUtils.getProperty(WindConstants.SPRING_APPLICATION_NAME);
+    }
+
+    public static String getSpringProfilesActive() {
         return ApplicationContextUtils.getProperty(WindConstants.SPRING_PROFILES_ACTIVE);
     }
+
 }

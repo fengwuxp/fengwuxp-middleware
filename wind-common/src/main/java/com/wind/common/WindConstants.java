@@ -84,10 +84,27 @@ public final class WindConstants {
      */
     public static final String SPRING_PROFILES_ACTIVE = "spring.profiles.active";
 
+    public static final String SPRING_APPLICATION_NAME = "spring.application.name";
+
+    public static final String WIND_SERVER_USED_MIDDLEWARE= "wind.server.use.middleware";
+
+    public static final String WIND_MYSQL_NAME = "wind.mysql.name";
+
+    public static final String WIND_REDIS_NAME = "wind.redis.name";
+
+    public static final String WIND_ROCKETMQ_NAME = "wind.rocketmq.name";
+
+    public static final String WIND_OSS_NAME = "wind.oss.name";
+
     /**
      * 配置前缀
      */
     public static final String WIND_SERVER_PROPERTIES_PREFIX = "wind.server";
+
+    /**
+     * 配置中心支持
+     */
+    public static final String WIND_SERVER_CONFIG_CENTER_PROPERTIES_PREFIX = "wind.server.config-center";
 
 
     /**
@@ -95,5 +112,19 @@ public final class WindConstants {
      */
     public static final String CONTROLLER_ASPECT_LOG_EXPRESSION = "wind.server.controller-aspect-log.expression";
 
+    /**
+     * 应用配置名称
+     */
+    public static final String GLOBAL_CONFIG_NAME = "wind-global";
+
+    /**
+     * 全局配置分组
+     */
+    public static final String GLOBAL_CONFIG_GROUP = "GLOBAL";
+
+    /**
+     * 应用配置分组
+     */
+    public static final String APP_CONFIG_GROUP = "APP";
 
 }

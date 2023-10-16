@@ -25,6 +25,7 @@
         <module>modules/script-supported</module>
         <module>wind-security</module>
         <module>modules/payment</module>
+        <module>wind-config-center</module>
     </modules>
 
     <properties>
@@ -48,7 +49,7 @@
         <spring-commons.version>3.1.6</spring-commons.version>
         <spring-cloud-albaba.version>2021.0.5.0</spring-cloud-albaba.version>
         <mysql.version>8.0.33</mysql.version>
-        <mybatis-flex.version>1.6.8</mybatis-flex.version>
+        <mybatis-flex.version>1.7.0</mybatis-flex.version>
         <commons-io.version>2.13.0</commons-io.version>
         <commons-lang3.version>3.10</commons-lang3.version>
         <mybatis.version>3.5.13</mybatis.version>
@@ -122,6 +123,16 @@
             <dependency>
                 <groupId>com.wind.tools</groupId>
                 <artifactId>wind-mybatis-flex-processor</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.configcenter</groupId>
+                <artifactId>wind-config-center-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.configcenter</groupId>
+                <artifactId>wind-nacos-spring-cloud-config-starter</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

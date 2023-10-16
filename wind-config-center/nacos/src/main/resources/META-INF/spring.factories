@@ -1,0 +1,18 @@
+org.springframework.cloud.bootstrap.BootstrapConfiguration=\
+com.wind.nacos.configuration.NacosConfigBootstrapConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.wind.nacos.configuration.NacosConfigAutoConfiguration,\
+com.wind.nacos.endpoint.NacosConfigEndpointAutoConfiguration
+org.springframework.boot.diagnostics.FailureAnalyzer=\
+com.wind.nacos.diagnostics.analyzer.NacosConnectionFailureAnalyzer 
+org.springframework.boot.env.PropertySourceLoader=\
+com.wind.nacos.parser.NacosJsonPropertySourceLoader,\
+com.wind.nacos.parser.NacosXmlPropertySourceLoader
+org.springframework.boot.SpringApplicationRunListener=\
+com.wind.nacos.logging.NacosLoggingAppRunListener
+# ConfigData Location Resolvers
+org.springframework.boot.context.config.ConfigDataLocationResolver=\
+com.wind.nacos.configdata.NacosConfigDataLocationResolver
+# ConfigData Loaders
+org.springframework.boot.context.config.ConfigDataLoader=\
+com.wind.nacos.configdata.NacosConfigDataLoader
