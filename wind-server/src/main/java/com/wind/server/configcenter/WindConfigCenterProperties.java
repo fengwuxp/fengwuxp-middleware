@@ -15,6 +15,11 @@ import java.util.List;
 @Data
 public class WindConfigCenterProperties {
 
+    /**
+     * APP 分组的共享配置名称
+     * {@link com.wind.common.WindConstants#APP_SHARED_CONFIG_GROUP}
+     */
+    private List<String> appSharedConfigs = Collections.emptyList();
 
     /**
      * 额外加载的扩展配置

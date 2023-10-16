@@ -2,6 +2,7 @@ package com.wind.server.configcenter;
 
 import com.wind.configcenter.core.ConfigRepository;
 import org.springframework.beans.BeansException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -32,12 +33,13 @@ public class ConfigCenterBootstrapAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnClass(name = "com.wind.nacos.configuration.NacosConfigBootstrapConfiguration")
     @ConditionalOnMissingBean(name = "windPropertySourceLocator")
     public PropertySourceLocator windPropertySourceLocator(ApplicationContext context, WindConfigCenterProperties properties) {
         try {
             // 由于在 bootstrap 阶段 ConditionalOnBean 未生效，改为手动处理
             ConfigRepository repository = context.getBean(ConfigRepository.class);
-            return new WindPropertySourceLocator(repository, properties.getExtensionConfigs(), properties.getConfigFileType());
+            return new WindPropertySourceLocator(repository, properties);
         } catch (BeansException e) {
             return environment -> new MapPropertySource("empty", Collections.emptyMap());
         }

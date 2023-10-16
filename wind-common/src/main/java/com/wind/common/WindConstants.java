@@ -84,16 +84,49 @@ public final class WindConstants {
      */
     public static final String SPRING_PROFILES_ACTIVE = "spring.profiles.active";
 
+    /**
+     * 应用名称
+     */
     public static final String SPRING_APPLICATION_NAME = "spring.application.name";
 
-    public static final String WIND_SERVER_USED_MIDDLEWARE= "wind.server.use.middleware";
+    /**
+     * 使用的中间件类型
+     */
+    public static final String WIND_SERVER_USED_MIDDLEWARE = "wind.server.use.middleware";
 
+    /**
+     * Mysql 配置名称
+     */
     public static final String WIND_MYSQL_NAME = "wind.mysql.name";
 
+    /**
+     * redis 配置名称
+     */
     public static final String WIND_REDIS_NAME = "wind.redis.name";
 
+    /**
+     * redisson 配置名称
+     */
+    public static final String WIND_REDISSON_NAME = "wind.redisson.name";
+
+    /**
+     * redisson 配置 PropertySource 名称
+     */
+    public static final String WIND_REDISSON_PROPERTY_SOURCE_NAME = "redissonProperties";
+
+    /**
+     * redisson 配置名称
+     */
+    public static final String SPRING_REDISSON_CONFIG_NAME = "spring.redis.redisson.config";
+
+    /**
+     * rocketmq 配置名称
+     */
     public static final String WIND_ROCKETMQ_NAME = "wind.rocketmq.name";
 
+    /**
+     * oss 配置名称
+     */
     public static final String WIND_OSS_NAME = "wind.oss.name";
 
     /**
@@ -126,5 +159,10 @@ public final class WindConstants {
      * 应用配置分组
      */
     public static final String APP_CONFIG_GROUP = "APP";
+
+    /**
+     * 应用共享配置分组
+     */
+    public static final String APP_SHARED_CONFIG_GROUP = "APP_SHARED";
 
 }

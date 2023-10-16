@@ -111,10 +111,10 @@ public interface ConfigRepository {
          * @return ConfigDescriptor 实例
          */
         static ConfigDescriptor immutable(String name, String group) {
-            return immutable(name, group);
+            return immutable(name, group, ConfigFileType.PROPERTIES);
         }
 
-        static ConfigDescriptor immutable(String name, String group, @Nullable String label) {
+        static ConfigDescriptor immutable(String name, String group, ConfigFileType fileType) {
             return new ConfigDescriptor() {
                 @Override
                 public String getName() {
@@ -126,10 +126,9 @@ public interface ConfigRepository {
                     return group;
                 }
 
-                @Nullable
                 @Override
-                public String getLabel() {
-                    return label;
+                public ConfigFileType getFileType() {
+                    return fileType;
                 }
             };
         }
