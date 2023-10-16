@@ -1,4 +1,4 @@
-package com.wind.security.web.utils;
+package com.wind.web.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.wind.common.exception.BaseException;
@@ -8,8 +8,11 @@ import org.springframework.http.MediaType;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 
 /**
+ * 用于写回 http 响应
+ *
  * @author wuxp
  * @date 2023-09-28 09:15
  **/
@@ -38,6 +41,8 @@ public final class HttpResponseMessageUtils {
      */
     public static void writeJsonText(HttpServletResponse response, String data) {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        // 中文乱码处理
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         try (PrintWriter writer = response.getWriter()) {
             writer.write(data);
             writer.flush();

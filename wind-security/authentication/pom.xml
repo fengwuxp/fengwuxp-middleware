@@ -33,12 +33,12 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.wind.web</groupId>
+            <artifactId>wind-web</artifactId>
         </dependency>
         <dependency>
             <groupId>com.wind.security.core</groupId>

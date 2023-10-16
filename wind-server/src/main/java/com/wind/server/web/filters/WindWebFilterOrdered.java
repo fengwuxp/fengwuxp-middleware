@@ -14,7 +14,9 @@ import org.springframework.core.Ordered;
 public enum WindWebFilterOrdered implements Ordered, DescriptiveEnum {
 
 
-    REQUEST_SOURCE_FILTER(Ordered.HIGHEST_PRECEDENCE + 1000, "RequestSourceIpFilter");
+    RESTFUL_ERROR_FILTER(Ordered.HIGHEST_PRECEDENCE + 30, "RestfulErrorHandleFilter"),
+
+    REQUEST_SOURCE_FILTER(Ordered.HIGHEST_PRECEDENCE +1000, "RequestSourceIpFilter");
 
 
     private final int order;

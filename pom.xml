@@ -26,6 +26,7 @@
         <module>wind-security</module>
         <module>modules/payment</module>
         <module>wind-config-center</module>
+        <module>wind-web</module>
     </modules>
 
     <properties>
@@ -158,6 +159,11 @@
             <dependency>
                 <groupId>com.wind.server</groupId>
                 <artifactId>wind-server</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.web</groupId>
+                <artifactId>wind-web</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
