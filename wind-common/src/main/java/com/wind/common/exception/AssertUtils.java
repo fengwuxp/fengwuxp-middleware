@@ -8,12 +8,14 @@ import org.springframework.util.StringUtils;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
  * 断言工具
  * 断言优先于 if 判断
  * copy form {@link org.springframework.util.Assert}
+ *
  * @author wuxp
  */
 public final class AssertUtils {
@@ -22,6 +24,7 @@ public final class AssertUtils {
         throw new AssertionError();
     }
 
+
     /**
      * Assert a boolean expression, throwing an {@code BaseException}
      * if the expression evaluates to {@code false}.
@@ -29,47 +32,14 @@ public final class AssertUtils {
      * on an assertion failure.
      * <pre class="code">Assert.state(id == null, "The id property must not already be initialized");</pre>
      *
-     * @param expression a boolean expression
-     * @param message    the exception message to use if the assertion fails
+     * @param expression        a boolean expression
+     * @param exceptionSupplier the exception message to use if the assertion fails
      * @throws BaseException if {@code expression} is {@code false}
      */
-    public static void state(boolean expression, String message) {
+    public static void state(boolean expression, Supplier<BaseException> exceptionSupplier) {
         if (!expression) {
-            throw BaseException.common(message);
+            throw Objects.requireNonNull(nullSafeGet(exceptionSupplier), "exception must not null");
         }
-    }
-
-    /**
-     * Assert a boolean expression, throwing an {@code BaseException}
-     * if the expression evaluates to {@code false}.
-     * <p>Call {@link #isTrue} if you wish to throw an {@code BaseException}
-     * on an assertion failure.
-     * <pre class="code">
-     * Assert.state(entity.getId() == null,
-     *     () -&gt; "ID for entity " + entity.getName() + " must not already be initialized");
-     * </pre>
-     *
-     * @param expression      a boolean expression
-     * @param messageSupplier a supplier for the exception message to use if the
-     *                        assertion fails
-     * @throws BaseException if {@code expression} is {@code false}
-     * @since 5.0
-     */
-    public static void state(boolean expression, Supplier<String> messageSupplier) {
-        if (!expression) {
-            throw BaseException.common(nullSafeGet(messageSupplier));
-        }
-    }
-
-    /**
-     * Assert a boolean expression, throwing an {@code BaseException}
-     * if the expression evaluates to {@code false}.
-     *
-     * @deprecated as of 4.3.7, in favor of {@link #state(boolean, String)}
-     */
-    @Deprecated
-    public static void state(boolean expression) {
-        state(expression, "[Assertion failed] - this state invariant must be true");
     }
 
     /**
@@ -82,9 +52,7 @@ public final class AssertUtils {
      * @throws BaseException if {@code expression} is {@code false}
      */
     public static void isTrue(boolean expression, String message) {
-        if (!expression) {
-            throw BaseException.common(message);
-        }
+        state(expression, () -> BaseException.common(message));
     }
 
     /**
@@ -101,20 +69,15 @@ public final class AssertUtils {
      * @since 5.0
      */
     public static void isTrue(boolean expression, Supplier<String> messageSupplier) {
-        if (!expression) {
-            throw BaseException.common(nullSafeGet(messageSupplier));
-        }
+        state(expression, () -> BaseException.common(nullSafeGet(messageSupplier)));
     }
 
-    /**
-     * Assert a boolean expression, throwing an {@code BaseException}
-     * if the expression evaluates to {@code false}.
-     *
-     * @deprecated as of 4.3.7, in favor of {@link #isTrue(boolean, String)}
-     */
-    @Deprecated
-    public static void isTrue(boolean expression) {
-        isTrue(expression, "[Assertion failed] - this expression must be true");
+    public static void isFalse(boolean expression, String message) {
+        isTrue(!expression, message);
+    }
+
+    public static void isFalse(boolean expression, Supplier<String> messageSupplier) {
+        isTrue(!expression, messageSupplier);
     }
 
     /**
@@ -126,9 +89,7 @@ public final class AssertUtils {
      * @throws BaseException if the object is not {@code null}
      */
     public static void isNull(@Nullable Object object, String message) {
-        if (object != null) {
-            throw BaseException.common(message);
-        }
+        isTrue(object == null, message);
     }
 
     /**
@@ -144,19 +105,7 @@ public final class AssertUtils {
      * @since 5.0
      */
     public static void isNull(@Nullable Object object, Supplier<String> messageSupplier) {
-        if (object != null) {
-            throw BaseException.common(nullSafeGet(messageSupplier));
-        }
-    }
-
-    /**
-     * Assert that an object is {@code null}.
-     *
-     * @deprecated as of 4.3.7, in favor of {@link #isNull(Object, String)}
-     */
-    @Deprecated
-    public static void isNull(@Nullable Object object) {
-        isNull(object, "[Assertion failed] - the object argument must be null");
+        isTrue(object == null, messageSupplier);
     }
 
     /**
@@ -168,9 +117,7 @@ public final class AssertUtils {
      * @throws BaseException if the object is {@code null}
      */
     public static void notNull(@Nullable Object object, String message) {
-        if (object == null) {
-            throw BaseException.common(message);
-        }
+        isTrue(object != null, message);
     }
 
     /**
@@ -187,19 +134,7 @@ public final class AssertUtils {
      * @since 5.0
      */
     public static void notNull(@Nullable Object object, Supplier<String> messageSupplier) {
-        if (object == null) {
-            throw BaseException.common(nullSafeGet(messageSupplier));
-        }
-    }
-
-    /**
-     * Assert that an object is not {@code null}.
-     *
-     * @deprecated as of 4.3.7, in favor of {@link #notNull(Object, String)}
-     */
-    @Deprecated
-    public static void notNull(@Nullable Object object) {
-        notNull(object, "[Assertion failed] - this argument is required; it must not be null");
+        isTrue(object != null, messageSupplier);
     }
 
     /**
@@ -213,9 +148,7 @@ public final class AssertUtils {
      * @see StringUtils#hasLength
      */
     public static void hasLength(@Nullable String text, String message) {
-        if (!StringUtils.hasLength(text)) {
-            throw BaseException.common(message);
-        }
+        isTrue(StringUtils.hasLength(text), message);
     }
 
     /**
@@ -234,21 +167,7 @@ public final class AssertUtils {
      * @since 5.0
      */
     public static void hasLength(@Nullable String text, Supplier<String> messageSupplier) {
-        if (!StringUtils.hasLength(text)) {
-            throw BaseException.common(nullSafeGet(messageSupplier));
-        }
-    }
-
-    /**
-     * Assert that the given String is not empty; that is,
-     * it must not be {@code null} and not the empty String.
-     *
-     * @deprecated as of 4.3.7, in favor of {@link #hasLength(String, String)}
-     */
-    @Deprecated
-    public static void hasLength(@Nullable String text) {
-        hasLength(text,
-                "[Assertion failed] - this String argument must have length; it must not be null or empty");
+        isTrue(StringUtils.hasLength(text), messageSupplier);
     }
 
     /**
@@ -262,9 +181,7 @@ public final class AssertUtils {
      * @see StringUtils#hasText
      */
     public static void hasText(@Nullable String text, String message) {
-        if (!StringUtils.hasText(text)) {
-            throw BaseException.common(message);
-        }
+        isTrue(StringUtils.hasText(text), message);
     }
 
     /**
@@ -283,22 +200,9 @@ public final class AssertUtils {
      * @since 5.0
      */
     public static void hasText(@Nullable String text, Supplier<String> messageSupplier) {
-        if (!StringUtils.hasText(text)) {
-            throw BaseException.common(nullSafeGet(messageSupplier));
-        }
+        isTrue(StringUtils.hasText(text), messageSupplier);
     }
 
-    /**
-     * Assert that the given String contains valid text content; that is, it must not
-     * be {@code null} and must contain at least one non-whitespace character.
-     *
-     * @deprecated as of 4.3.7, in favor of {@link #hasText(String, String)}
-     */
-    @Deprecated
-    public static void hasText(@Nullable String text) {
-        hasText(text,
-                "[Assertion failed] - this String argument must have text; it must not be null, empty, or blank");
-    }
 
     /**
      * Assert that the given text does not contain the given substring.
@@ -310,10 +214,8 @@ public final class AssertUtils {
      * @throws BaseException if the text contains the substring
      */
     public static void doesNotContain(@Nullable String textToSearch, String substring, String message) {
-        if (StringUtils.hasLength(textToSearch) && StringUtils.hasLength(substring) &&
-                textToSearch.contains(substring)) {
-            throw BaseException.common(message);
-        }
+        isFalse(StringUtils.hasLength(textToSearch) && StringUtils.hasLength(substring) &&
+                textToSearch.contains(substring), message);
     }
 
     /**
@@ -330,22 +232,10 @@ public final class AssertUtils {
      * @since 5.0
      */
     public static void doesNotContain(@Nullable String textToSearch, String substring, Supplier<String> messageSupplier) {
-        if (StringUtils.hasLength(textToSearch) && StringUtils.hasLength(substring) &&
-                textToSearch.contains(substring)) {
-            throw BaseException.common(nullSafeGet(messageSupplier));
-        }
+        isFalse(StringUtils.hasLength(textToSearch) && StringUtils.hasLength(substring) &&
+                textToSearch.contains(substring), messageSupplier);
     }
 
-    /**
-     * Assert that the given text does not contain the given substring.
-     *
-     * @deprecated as of 4.3.7, in favor of {@link #doesNotContain(String, String, String)}
-     */
-    @Deprecated
-    public static void doesNotContain(@Nullable String textToSearch, String substring) {
-        doesNotContain(textToSearch, substring,
-                () -> "[Assertion failed] - this String argument must not contain the substring [" + substring + "]");
-    }
 
     /**
      * Assert that an array contains elements; that is, it must not be
@@ -357,9 +247,7 @@ public final class AssertUtils {
      * @throws BaseException if the object array is {@code null} or contains no elements
      */
     public static void notEmpty(@Nullable Object[] array, String message) {
-        if (ObjectUtils.isEmpty(array)) {
-            throw BaseException.common(message);
-        }
+        isFalse(ObjectUtils.isEmpty(array), message);
     }
 
     /**
@@ -376,20 +264,7 @@ public final class AssertUtils {
      * @since 5.0
      */
     public static void notEmpty(@Nullable Object[] array, Supplier<String> messageSupplier) {
-        if (ObjectUtils.isEmpty(array)) {
-            throw BaseException.common(nullSafeGet(messageSupplier));
-        }
-    }
-
-    /**
-     * Assert that an array contains elements; that is, it must not be
-     * {@code null} and must contain at least one element.
-     *
-     * @deprecated as of 4.3.7, in favor of {@link #notEmpty(Object[], String)}
-     */
-    @Deprecated
-    public static void notEmpty(@Nullable Object[] array) {
-        notEmpty(array, "[Assertion failed] - this array must not be empty: it must contain at least 1 element");
+        isFalse(ObjectUtils.isEmpty(array), messageSupplier);
     }
 
     /**
@@ -434,15 +309,6 @@ public final class AssertUtils {
         }
     }
 
-    /**
-     * Assert that an array contains no {@code null} elements.
-     *
-     * @deprecated as of 4.3.7, in favor of {@link #noNullElements(Object[], String)}
-     */
-    @Deprecated
-    public static void noNullElements(@Nullable Object[] array) {
-        noNullElements(array, "[Assertion failed] - this array must not contain any null elements");
-    }
 
     /**
      * Assert that a collection contains elements; that is, it must not be
@@ -455,9 +321,7 @@ public final class AssertUtils {
      *                       contains no elements
      */
     public static void notEmpty(@Nullable Collection<?> collection, String message) {
-        if (CollectionUtils.isEmpty(collection)) {
-            throw BaseException.common(message);
-        }
+        isFalse(CollectionUtils.isEmpty(collection), message);
     }
 
     /**
@@ -475,21 +339,7 @@ public final class AssertUtils {
      * @since 5.0
      */
     public static void notEmpty(@Nullable Collection<?> collection, Supplier<String> messageSupplier) {
-        if (CollectionUtils.isEmpty(collection)) {
-            throw BaseException.common(nullSafeGet(messageSupplier));
-        }
-    }
-
-    /**
-     * Assert that a collection contains elements; that is, it must not be
-     * {@code null} and must contain at least one element.
-     *
-     * @deprecated as of 4.3.7, in favor of {@link #notEmpty(Collection, String)}
-     */
-    @Deprecated
-    public static void notEmpty(@Nullable Collection<?> collection) {
-        notEmpty(collection,
-                "[Assertion failed] - this collection must not be empty: it must contain at least 1 element");
+        isFalse(CollectionUtils.isEmpty(collection), messageSupplier);
     }
 
     /**
@@ -545,9 +395,7 @@ public final class AssertUtils {
      * @throws BaseException if the map is {@code null} or contains no entries
      */
     public static void notEmpty(@Nullable Map<?, ?> map, String message) {
-        if (CollectionUtils.isEmpty(map)) {
-            throw BaseException.common(message);
-        }
+        isFalse(CollectionUtils.isEmpty(map), message);
     }
 
     /**
@@ -564,20 +412,7 @@ public final class AssertUtils {
      * @since 5.0
      */
     public static void notEmpty(@Nullable Map<?, ?> map, Supplier<String> messageSupplier) {
-        if (CollectionUtils.isEmpty(map)) {
-            throw BaseException.common(nullSafeGet(messageSupplier));
-        }
-    }
-
-    /**
-     * Assert that a Map contains entries; that is, it must not be {@code null}
-     * and must contain at least one entry.
-     *
-     * @deprecated as of 4.3.7, in favor of {@link #notEmpty(Map, String)}
-     */
-    @Deprecated
-    public static void notEmpty(@Nullable Map<?, ?> map) {
-        notEmpty(map, "[Assertion failed] - this map must not be empty; it must contain at least one entry");
+        isFalse(CollectionUtils.isEmpty(map), messageSupplier);
     }
 
     /**
@@ -620,17 +455,6 @@ public final class AssertUtils {
         }
     }
 
-    /**
-     * Assert that the provided object is an instance of the provided class.
-     * <pre class="code">Assert.instanceOf(Foo.class, foo);</pre>
-     *
-     * @param type the type to check against
-     * @param obj  the object to check
-     * @throws BaseException if the object is not an instance of type
-     */
-    public static void isInstanceOf(Class<?> type, @Nullable Object obj) {
-        isInstanceOf(type, obj, "");
-    }
 
     /**
      * Assert that {@code superType.isAssignableFrom(subType)} is {@code true}.
@@ -729,7 +553,7 @@ public final class AssertUtils {
     }
 
     @Nullable
-    private static String nullSafeGet(@Nullable Supplier<String> messageSupplier) {
+    private static <T> T nullSafeGet(@Nullable Supplier<T> messageSupplier) {
         return (messageSupplier != null ? messageSupplier.get() : null);
     }
 }

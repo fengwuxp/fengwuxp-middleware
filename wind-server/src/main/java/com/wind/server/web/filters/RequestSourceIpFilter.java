@@ -1,6 +1,7 @@
 package com.wind.server.web.filters;
 
 import com.google.common.collect.ImmutableSet;
+import com.wind.common.WindConstants;
 import com.wind.common.utils.IpAddressUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -23,7 +24,10 @@ import static com.wind.server.web.WindWebConstants.HTTP_REQUEST_IP_ATTR_NAME;
  **/
 public class RequestSourceIpFilter extends OncePerRequestFilter {
 
-    private static final Set<String> IP_HEAD_NAME_LIST = ImmutableSet.copyOf(
+    /**
+     * ip 头名称
+     */
+    private static final Set<String> IP_HEAD_NAMES = ImmutableSet.copyOf(
             Arrays.asList(
                     "X-Real-IP",
                     "X-Forwarded-For",
@@ -36,7 +40,6 @@ public class RequestSourceIpFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
-
         request.setAttribute(HTTP_REQUEST_IP_ATTR_NAME, getRequestSourceIp(request));
         chain.doFilter(request, response);
     }
@@ -47,15 +50,15 @@ public class RequestSourceIpFilter extends OncePerRequestFilter {
      * @param request 请求对象
      * @return 真实 ip
      */
-    public String getRequestSourceIp(HttpServletRequest request) {
-        for (String headName : IP_HEAD_NAME_LIST) {
+    private String getRequestSourceIp(HttpServletRequest request) {
+        for (String headName : IP_HEAD_NAMES) {
             String ip = request.getHeader(headName);
             if (ip == null || ip.trim().isEmpty()) {
                 continue;
             }
             ip = ip.trim();
             // 对于通过多个代理的情况， 第一个 ip 为客户端真实IP,多个IP按照 ',' 分隔
-            String[] sections = ip.split(",");
+            String[] sections = ip.split(WindConstants.COMMA);
             for (String section : sections) {
                 if (IpAddressUtils.isValidIp(section)) {
                     return section;

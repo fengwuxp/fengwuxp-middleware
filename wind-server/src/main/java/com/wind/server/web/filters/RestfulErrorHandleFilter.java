@@ -4,7 +4,6 @@ import com.wind.server.web.restful.RestfulApiRespFactory;
 import com.wind.server.web.supports.ApiResp;
 import com.wind.web.utils.HttpResponseMessageUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.annotation.Nonnull;
@@ -28,8 +27,7 @@ public class RestfulErrorHandleFilter extends OncePerRequestFilter {
         } catch (Throwable throwable) {
             if (!response.isCommitted()) {
                 logger.error("request error", throwable);
-                String message = throwable.getMessage();
-                ApiResp<Void> resp = RestfulApiRespFactory.error(StringUtils.hasLength(message) ? message : "unknown error");
+                ApiResp<Void> resp = RestfulApiRespFactory.withThrowable(throwable);
                 HttpResponseMessageUtils.writeJson(response, resp);
             }
         }

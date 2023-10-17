@@ -96,7 +96,7 @@ public class DefaultGlobalExceptionHandler {
     @ResponseBody
     public ApiResp<Integer> handleBusinessServiceException(BaseException exception) {
         log.error("业务异常，code：{}，errorMessage：{}", exception.getTextCode(), exception.getMessage(), exception);
-        return RestfulApiRespFactory.error(null, exception.getCode(), exception.getMessage());
+        return RestfulApiRespFactory.withThrowable(exception);
     }
 
 

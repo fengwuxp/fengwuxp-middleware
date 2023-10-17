@@ -8,7 +8,6 @@ import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.LocaleResolver;
 
@@ -29,7 +28,6 @@ import java.util.function.Predicate;
  * @see org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration
  * @see org.springframework.web.servlet.LocaleResolver
  **/
-@Component
 @Slf4j
 public class Spring18nMessageUtils implements ApplicationListener<ApplicationStartedEvent> {
 
@@ -92,7 +90,7 @@ public class Spring18nMessageUtils implements ApplicationListener<ApplicationSta
             BaseException.setMessageI18n(Spring18nMessageUtils::getMessage);
             log.info("enabled i18n supported");
         } catch (Exception ignore) {
-            log.debug("un enabled i18n supported");
+            log.info("un enabled i18n supported");
         }
     }
 

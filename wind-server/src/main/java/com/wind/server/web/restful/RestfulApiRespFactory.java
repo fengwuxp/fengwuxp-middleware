@@ -1,12 +1,14 @@
 package com.wind.server.web.restful;
 
 import com.wind.common.exception.AssertUtils;
+import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.common.exception.ExceptionCode;
 import com.wind.common.query.supports.Pagination;
 import com.wind.server.web.supports.ApiResp;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 
 import java.beans.Transient;
 import java.io.Serializable;
@@ -91,7 +93,7 @@ public final class RestfulApiRespFactory {
     }
 
 
-    /*-------------------- business handle error -------------------*/
+    /*-------------------- business handle error 5xx -------------------*/
 
     public static <T> ApiResp<T> error() {
         return error("请求处理出现错误");
@@ -106,13 +108,25 @@ public final class RestfulApiRespFactory {
     }
 
     public static <T> ApiResp<T> error(T data, ExceptionCode code, String errorMessage) {
-        return of(HttpStatus.FORBIDDEN, data, code, errorMessage);
+        return of(HttpStatus.INTERNAL_SERVER_ERROR, data, code, errorMessage);
+    }
+
+    public static <T> ApiResp<T> withThrowable(Throwable throwable) {
+        String errorMessage = StringUtils.hasText(throwable.getMessage()) ? throwable.getMessage() : "unknown error";
+        if (throwable instanceof BaseException) {
+            ExceptionCode code = ((BaseException) throwable).getCode();
+            if (code instanceof DefaultExceptionCode) {
+                HttpStatus status = HttpStatus.resolve(Integer.parseInt(code.getCode()));
+                return of(status == null ? HttpStatus.INTERNAL_SERVER_ERROR : status, null, code, errorMessage);
+            }
+            return error(code, errorMessage);
+        }
+        return error(errorMessage);
     }
 
     private static <T> ApiResp<T> of(HttpStatus httpStatus, T data, ExceptionCode code, String errorMessage) {
         return new ImmutableApiResp<>(httpStatus, data, code, errorMessage);
     }
-
 
     static final class ImmutableApiResp<T> implements ApiResp<T>, Serializable {
 
