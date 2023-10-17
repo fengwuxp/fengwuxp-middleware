@@ -103,7 +103,7 @@ public class WindPropertySourceLocator implements PropertySourceLocator {
 
     private void loadRedissonConfig(String redissonName, CompositePropertySource result) {
         if (StringUtils.hasLength(redissonName)) {
-            String name = String.format("%s%s%s", redissonName, WindConstants.DASHED, SPRING_REDISSON_CONFIG_NAME);
+            String name = String.format("%s%s%s", redissonName, WindConstants.DASHED, "redisson");
             ConfigDescriptor descriptor = ConfigDescriptor.immutable(name, WindMiddlewareType.REDIS.name(), ConfigFileType.YAML);
             Map<String, Object> source = ImmutableMap.of(SPRING_REDISSON_CONFIG_NAME, repository.getTextConfig(descriptor));
             result.addFirstPropertySource(new MapPropertySource(WIND_REDISSON_PROPERTY_SOURCE_NAME, source));
