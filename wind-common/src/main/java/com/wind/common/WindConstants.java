@@ -134,6 +134,10 @@ public final class WindConstants {
      */
     public static final String WIND_SERVER_PROPERTIES_PREFIX = "wind.server";
 
+    public static final String ENABLED_NAME = "enabled";
+
+    public static final String TRUE = "true";
+
     /**
      * 配置中心支持
      */
@@ -141,9 +145,14 @@ public final class WindConstants {
 
 
     /**
-     * 控制器日志拦截开启表达式
+     * 统一异常捕获处理 Filter 开启表达式
      */
-    public static final String CONTROLLER_ASPECT_LOG_EXPRESSION = "wind.server.controller-aspect-log.expression";
+    public static final String RESTFUL_ERROR_FILTER_EXPRESSION = "wind.server.filter.restful-error-filter";
+
+    /**
+     * 控制器日志拦截配置
+     */
+    public static final String CONTROLLER_ASPECT_LOG_NAME = "wind.server.controller-log-aspect";
 
     /**
      * 应用配置名称

@@ -1,6 +1,5 @@
 package com.wind.security.configuration;
 
-import com.wind.security.authentication.JwtTokenAuthenticationFilter;
 import com.wind.security.authentication.jwt.JwtProperties;
 import com.wind.security.authentication.jwt.JwtTokenCodec;
 import com.wind.security.authority.rbac.WebRbacResourceManager;
@@ -14,13 +13,16 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static com.wind.common.WindConstants.ENABLED_NAME;
+import static com.wind.common.WindConstants.TRUE;
+
 /**
  * @author wuxp
  * @date 2023-09-26 13:00
  **/
 @Configuration
 @EnableConfigurationProperties(value = {WindSecurityProperties.class})
-@ConditionalOnProperty(prefix = WindSecurityProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = WindSecurityProperties.PREFIX, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
 public class WindSecurityAutoConfiguration {
 
     /**

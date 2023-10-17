@@ -28,13 +28,16 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Collection;
 
+import static com.wind.common.WindConstants.ENABLED_NAME;
+import static com.wind.common.WindConstants.TRUE;
+
 /**
  * @author wuxp
  * @date 2023-09-24 15:33
  **/
 @Configuration
 @EnableConfigurationProperties(value = {CaptchaProperties.class})
-@ConditionalOnProperty(prefix = CaptchaProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = CaptchaProperties.PREFIX, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
 public class CaptchaAutoConfiguration {
 
     @Bean

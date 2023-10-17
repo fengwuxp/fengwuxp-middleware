@@ -3,9 +3,14 @@ package com.wind.server.configuration;
 import com.wind.server.web.filters.RequestSourceIpFilter;
 import com.wind.server.web.filters.RestfulErrorHandleFilter;
 import com.wind.server.web.filters.WindWebFilterOrdered;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static com.wind.common.WindConstants.ENABLED_NAME;
+import static com.wind.common.WindConstants.RESTFUL_ERROR_FILTER_EXPRESSION;
+import static com.wind.common.WindConstants.TRUE;
 
 /**
  * web filter 相关配置
@@ -17,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
 public class WebFilterConfiguration {
 
     @Bean
+    @ConditionalOnProperty(prefix = RESTFUL_ERROR_FILTER_EXPRESSION, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
     public FilterRegistrationBean<RestfulErrorHandleFilter> restfulErrorHandleFilter() {
         FilterRegistrationBean<RestfulErrorHandleFilter> result = new FilterRegistrationBean<>();
         result.setFilter(new RestfulErrorHandleFilter());

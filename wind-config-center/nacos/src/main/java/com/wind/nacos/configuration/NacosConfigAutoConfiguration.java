@@ -18,19 +18,23 @@ import org.springframework.cloud.context.properties.ConfigurationPropertiesRebin
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
+
+import static com.wind.common.WindConstants.ENABLED_NAME;
+import static com.wind.common.WindConstants.TRUE;
 
 /**
  * @author juven.xuxb
  * @author freeman
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnProperty(prefix = NacosConfigProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = NacosConfigProperties.PREFIX, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
 public class NacosConfigAutoConfiguration {
 
 
     @Bean
     @ConditionalOnMissingBean(value = NacosConfigProperties.class, search = SearchStrategy.CURRENT)
-    public NacosConfigProperties nacosConfigProperties(ApplicationContext context) {
+    public NacosConfigProperties nacosConfigProperties(@NonNull ApplicationContext context) {
         if (context.getParent() != null && BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context.getParent(), NacosConfigProperties.class).length > 0) {
             return BeanFactoryUtils.beanOfTypeIncludingAncestors(context.getParent(), NacosConfigProperties.class);
         }

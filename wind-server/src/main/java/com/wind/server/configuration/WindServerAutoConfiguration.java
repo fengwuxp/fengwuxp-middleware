@@ -17,7 +17,9 @@ import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static com.wind.common.WindConstants.CONTROLLER_ASPECT_LOG_EXPRESSION;
+import static com.wind.common.WindConstants.CONTROLLER_ASPECT_LOG_NAME;
+import static com.wind.common.WindConstants.ENABLED_NAME;
+import static com.wind.common.WindConstants.TRUE;
 import static com.wind.common.WindConstants.WIND_SERVER_PROPERTIES_PREFIX;
 
 /**
@@ -26,7 +28,7 @@ import static com.wind.common.WindConstants.WIND_SERVER_PROPERTIES_PREFIX;
  **/
 @Configuration
 @EnableConfigurationProperties(value = {WindServerProperties.class})
-@ConditionalOnProperty(prefix = WIND_SERVER_PROPERTIES_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = WIND_SERVER_PROPERTIES_PREFIX, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
 public class WindServerAutoConfiguration {
 
     @Bean
@@ -49,10 +51,10 @@ public class WindServerAutoConfiguration {
 
     @Bean
     @ConditionalOnBean(value = {ControllerLogAspect.class})
-    @ConditionalOnProperty(prefix = WIND_SERVER_PROPERTIES_PREFIX + ".controller-log-aspect", name = "expression")
+    @ConditionalOnProperty(prefix = CONTROLLER_ASPECT_LOG_NAME, name = "expression")
     public DefaultBeanFactoryPointcutAdvisor controllerLogAspectPointcutAdvisor(ControllerLogAspect apiInterceptor, WindServerProperties properties) {
         String expression = properties.getControllerLogAspect().getExpression();
-        AssertUtils.hasLength(expression, String.format("%s 未配置", CONTROLLER_ASPECT_LOG_EXPRESSION));
+        AssertUtils.hasLength(expression, String.format("%s 未配置", CONTROLLER_ASPECT_LOG_NAME));
         AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
         pointcut.setExpression(expression);
         DefaultBeanFactoryPointcutAdvisor advisor = new DefaultBeanFactoryPointcutAdvisor();

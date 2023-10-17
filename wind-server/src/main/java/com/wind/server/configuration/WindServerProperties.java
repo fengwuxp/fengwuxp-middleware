@@ -19,7 +19,7 @@ public class WindServerProperties {
     private boolean enabled = true;
 
     /**
-     * 控制器日志 aop 拦截配置
+     * 控制器日志 Aop 拦截配置
      */
     private ControllerLogAspectProperties controllerLogAspect;
 

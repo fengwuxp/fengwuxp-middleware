@@ -7,7 +7,6 @@ import com.wind.nacos.NacosConfigProperties;
 import com.wind.nacos.NacosConfigRepository;
 import com.wind.nacos.refresh.SmartConfigurationPropertiesRebinder;
 import com.wind.nacos.refresh.condition.ConditionalOnNonDefaultBehavior;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.SearchStrategy;
@@ -15,14 +14,16 @@ import org.springframework.cloud.context.properties.ConfigurationPropertiesBeans
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
+
+import static com.wind.common.WindConstants.ENABLED_NAME;
+import static com.wind.common.WindConstants.TRUE;
 
 /**
  * @author wuxp
  * @date 2023-10-15 14:19
  **/
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnProperty(prefix = NacosConfigProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = NacosConfigProperties.PREFIX, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
 public class NacosConfigBootstrapConfiguration {
 
     @Bean
