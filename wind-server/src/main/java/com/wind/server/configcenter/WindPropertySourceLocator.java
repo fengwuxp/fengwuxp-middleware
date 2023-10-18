@@ -47,8 +47,8 @@ public class WindPropertySourceLocator implements PropertySourceLocator {
     @Override
     public PropertySource<?> locate(Environment environment) {
         CompositePropertySource result = new CompositePropertySource(repository.getConfigSourceName());
-        // 加载全局配置
-        loadConfigs(buildDescriptor(WindConstants.GLOBAL_CONFIG_NAME, WindConstants.GLOBAL_CONFIG_GROUP), result);
+//        // 加载全局配置
+//        loadConfigs(buildDescriptor(WindConstants.GLOBAL_CONFIG_NAME, WindConstants.GLOBAL_CONFIG_GROUP), result);
         String applicationName = environment.getProperty(SPRING_APPLICATION_NAME);
         AssertUtils.notNull(applicationName, SPRING_APPLICATION_NAME + " must not empty");
         // 加载中间件配置
@@ -90,6 +90,8 @@ public class WindPropertySourceLocator implements PropertySourceLocator {
         if (result.getFileType() == null) {
             result.setFileType(properties.getConfigFileType());
         }
+        // 开启 RefreshScope 支持
+        result.setRefreshable(true);
         return result;
     }
 

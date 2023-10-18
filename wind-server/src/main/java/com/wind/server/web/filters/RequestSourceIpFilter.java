@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 
-import static com.wind.server.web.WindWebConstants.HTTP_REQUEST_IP_ATTR_NAME;
+import static com.wind.common.WindHttpConstants.HTTP_REQUEST_IP_ATTRIBUTE_NAME;
 
 /**
  * 获取用户请求来源 ip 并设置到请求上下文中
@@ -40,7 +40,7 @@ public class RequestSourceIpFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
-        request.setAttribute(HTTP_REQUEST_IP_ATTR_NAME, getRequestSourceIp(request));
+        request.setAttribute(HTTP_REQUEST_IP_ATTRIBUTE_NAME, getRequestSourceIp(request));
         chain.doFilter(request, response);
     }
 

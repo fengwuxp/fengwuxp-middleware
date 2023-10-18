@@ -2,12 +2,12 @@ package com.wind.server.configcenter;
 
 import com.wind.configcenter.core.ConfigRepository;
 import org.springframework.beans.BeansException;
+import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.MapPropertySource;
@@ -25,6 +25,7 @@ import static com.wind.common.WindConstants.WIND_SERVER_CONFIG_CENTER_PROPERTIES
 @Configuration
 @ConditionalOnProperty(prefix = WIND_SERVER_CONFIG_CENTER_PROPERTIES_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class ConfigCenterBootstrapAutoConfiguration {
+
     @Bean
     @ConfigurationProperties(prefix = WIND_SERVER_CONFIG_CENTER_PROPERTIES_PREFIX)
     @ConditionalOnMissingBean(WindConfigCenterProperties.class)
@@ -33,15 +34,16 @@ public class ConfigCenterBootstrapAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnClass(name = "com.wind.nacos.configuration.NacosConfigBootstrapConfiguration")
+    @ConditionalOnClass(name = "com.wind.nacos.NacosBootstrapListener")
     @ConditionalOnMissingBean(name = "windPropertySourceLocator")
-    public PropertySourceLocator windPropertySourceLocator(ApplicationContext context, WindConfigCenterProperties properties) {
+    public PropertySourceLocator windPropertySourceLocator(ConfigurableBootstrapContext context, WindConfigCenterProperties properties) {
         try {
             // 由于在 bootstrap 阶段 ConditionalOnBean 未生效，改为手动处理
-            ConfigRepository repository = context.getBean(ConfigRepository.class);
+            ConfigRepository repository = context.get(ConfigRepository.class);
             return new WindPropertySourceLocator(repository, properties);
         } catch (BeansException e) {
-            return environment -> new MapPropertySource("empty", Collections.emptyMap());
+            // 未开启配置中心支持
+            return environment -> new MapPropertySource("wind-empty", Collections.emptyMap());
         }
     }
 

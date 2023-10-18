@@ -25,7 +25,7 @@ public class PictureCaptchaProperties implements Captcha.CaptchaConfiguration {
     private Duration effectiveTime = Duration.ofMinutes(3);
 
     /**
-     * 最大可以验证次数
+     * 最大可验证失败的次数
      */
     private int maxAllowVerificationTimes = 1;
 

@@ -143,11 +143,15 @@ public final class WindConstants {
      */
     public static final String WIND_SERVER_CONFIG_CENTER_PROPERTIES_PREFIX = "wind.server.config-center";
 
-
     /**
      * 统一异常捕获处理 Filter 开启表达式
      */
     public static final String RESTFUL_ERROR_FILTER_EXPRESSION = "wind.server.filter.restful-error-filter";
+
+    /**
+     * trace Filter 开启表达式
+     */
+    public static final String TRACE_FILTER_EXPRESSION = "wind.server.filter.trace-filter";
 
     /**
      * 控制器日志拦截配置
@@ -173,5 +177,16 @@ public final class WindConstants {
      * 应用共享配置分组
      */
     public static final String APP_SHARED_CONFIG_GROUP = "APP_SHARED";
+
+
+    /**
+     * traceId
+     */
+    public static final String TRACE_ID_NAME = "traceId";
+
+    /**
+     * http 请求 url 变量
+     */
+    public static final String HTTP_REQUEST_UR_TRACE_NAME = "requestUrl";
 
 }

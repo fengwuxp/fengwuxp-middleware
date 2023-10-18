@@ -1,5 +1,6 @@
 package com.wind.server.configuration;
 
+import com.wind.server.trace.TraceFilter;
 import com.wind.server.web.filters.RequestSourceIpFilter;
 import com.wind.server.web.filters.RestfulErrorHandleFilter;
 import com.wind.server.web.filters.WindWebFilterOrdered;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 import static com.wind.common.WindConstants.ENABLED_NAME;
 import static com.wind.common.WindConstants.RESTFUL_ERROR_FILTER_EXPRESSION;
+import static com.wind.common.WindConstants.TRACE_FILTER_EXPRESSION;
 import static com.wind.common.WindConstants.TRUE;
 
 /**
@@ -35,6 +37,15 @@ public class WebFilterConfiguration {
         FilterRegistrationBean<RequestSourceIpFilter> result = new FilterRegistrationBean<>();
         result.setFilter(new RequestSourceIpFilter());
         result.setOrder(WindWebFilterOrdered.REQUEST_SOURCE_FILTER.getOrder());
+        return result;
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = TRACE_FILTER_EXPRESSION, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
+    public FilterRegistrationBean<TraceFilter> traceFilter() {
+        FilterRegistrationBean<TraceFilter> result = new FilterRegistrationBean<>();
+        result.setFilter(new TraceFilter());
+        result.setOrder(WindWebFilterOrdered.TRACE_FILTER.getOrder());
         return result;
     }
 }

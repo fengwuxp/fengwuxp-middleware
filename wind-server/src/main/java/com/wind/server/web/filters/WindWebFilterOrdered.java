@@ -16,7 +16,9 @@ public enum WindWebFilterOrdered implements Ordered, DescriptiveEnum {
 
     RESTFUL_ERROR_FILTER(Ordered.HIGHEST_PRECEDENCE + 30, "RestfulErrorHandleFilter"),
 
-    REQUEST_SOURCE_FILTER(Ordered.HIGHEST_PRECEDENCE +1000, "RequestSourceIpFilter");
+    REQUEST_SOURCE_FILTER(Ordered.HIGHEST_PRECEDENCE + 1000, "RequestSourceIpFilter"),
+
+    TRACE_FILTER(Ordered.HIGHEST_PRECEDENCE + 1001, "TraceFilter");
 
 
     private final int order;

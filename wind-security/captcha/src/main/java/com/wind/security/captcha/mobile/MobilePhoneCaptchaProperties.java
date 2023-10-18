@@ -23,12 +23,12 @@ public class MobilePhoneCaptchaProperties implements Captcha.CaptchaConfiguratio
     private Duration effectiveTime = Duration.ofMinutes(10);
 
     /**
-     * 最大可以验证次数
+     * 最大可验证失败的次数
      */
     private int maxAllowVerificationTimes = 5;
 
     /**
-     * 每个用户每天允许发生验证码的最大次数
+     * 每个用户每天允许发送验证码的最大次数
      */
-    private int mxAllowGenerateTimesOfUserWithDay = 15;
+    private int mxAllowGenerateTimesOfUserWithDay = 5;
 }

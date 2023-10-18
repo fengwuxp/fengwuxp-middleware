@@ -6,6 +6,9 @@ import org.springframework.lang.Nullable;
 
 import java.util.Map;
 
+import static com.wind.common.WindHttpConstants.HTTP_REQUEST_IP_ATTRIBUTE_NAME;
+import static com.wind.common.WindHttpConstants.HTTP_USER_AGENT_HEADER_NAME;
+
 /**
  * @author wuxp
  * @date 2023-09-23 09:43
@@ -73,10 +76,32 @@ public class AuditLogContent {
     @Nullable
     private final Throwable throwable;
 
+    /**
+     * 获取上线文变量
+     *
+     * @param key 变量 key
+     * @return 变量值
+     */
     @Nullable
     @SuppressWarnings("unchecked")
-    public <T> T getVariable(String key) {
+    public <T> T getContextVariable(String key) {
         return (T) contextVariables.get(key);
+    }
+
+    /**
+     * @return 请求来源 ip
+     */
+    @Nullable
+    public String getRequestSourceIp() {
+        return getContextVariable(HTTP_REQUEST_IP_ATTRIBUTE_NAME);
+    }
+
+    /**
+     * @return 请求 UserAgent
+     */
+    @Nullable
+    public String getRequestUserAgent() {
+        return getContextVariable(HTTP_USER_AGENT_HEADER_NAME);
     }
 
 }
