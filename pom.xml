@@ -27,6 +27,7 @@
         <module>modules/payment</module>
         <module>wind-config-center</module>
         <module>wind-web</module>
+        <module>modules/sequence-generate</module>
     </modules>
 
     <properties>
