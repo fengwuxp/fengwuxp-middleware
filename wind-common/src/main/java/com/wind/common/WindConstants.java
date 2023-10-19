@@ -95,6 +95,11 @@ public final class WindConstants {
     public static final String WIND_SERVER_USED_MIDDLEWARE = "wind.server.use.middleware";
 
     /**
+     * 中间在多个应用下共享是，统一配置的配置名称
+     */
+    public static final String WIND_MIDDLEWARE_SHARE_NAME = "wind.server.middleware.share.name";
+
+    /**
      * Mysql 配置名称
      */
     public static final String WIND_MYSQL_NAME = "wind.mysql.name";
@@ -103,11 +108,6 @@ public final class WindConstants {
      * redis 配置名称
      */
     public static final String WIND_REDIS_NAME = "wind.redis.name";
-
-    /**
-     * redisson 配置名称
-     */
-    public static final String WIND_REDISSON_NAME = "wind.redisson.name";
 
     /**
      * redisson 配置 PropertySource 名称

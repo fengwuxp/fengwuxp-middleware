@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Default logback configuration provided for import
+-->
+<included>
+    <springProperty name="KAFKA_SERVERS" scope="context" source="spring.kafka.log.bootstrap-servers"/>
+    <springProperty name="KAFKA_TOPIC" scope="context" source="spring.kafka.log.topic"/>
+    <!--  kafka -->
+    <appender name="KAFKA" class="com.wind.logging.logback.kafaka.KafkaAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers class="net.logstash.logback.composite.loggingevent.LoggingEventJsonProviders">
+                <pattern>
+                    <pattern>
+                        {
+                        "appName": "${APP_NAME}",
+                        "env": "${SPRING_PROFILES_ACTIVE}",
+                        "traceId": "%X{traceId:-}]",
+                        "requestUrl": "%X{requestUrl:-}]",
+                        "requestSourceIp": "%X{requestSourceIp:-}]",
+                        "userAgent": "%X{userAgent:-}]",
+                        "thread": "%thread",
+                        "logger": "%logger{5}",
+                        "message": "%msg",
+                        "date": "%d{yyyy-MM-dd HH:mm:ss.SSS}",
+                        "level": "%level",
+                        "stack_trace": "%exception"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+        <topic>${KAFKA_TOPIC}</topic>
+        <producerConfig>bootstrap.servers=${KAFKA_SERVERS}</producerConfig>
+        <producerConfig>retries=1</producerConfig>
+        <producerConfig>batch-size=16384</producerConfig>
+        <producerConfig>buffer-memory=33554432</producerConfig>
+        <producerConfig>properties.max.request.size==2097152</producerConfig>
+    </appender>
+    <appender name="KAFKA_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- if neverBlock is set to true, the async appender discards messages when its internal queue is full -->
+        <neverBlock>true</neverBlock>
+        <appender-ref ref="KAFKA"/>
+    </appender>
+</included>
