@@ -33,7 +33,7 @@ import static com.wind.common.WindConstants.WIND_SERVER_PROPERTIES_PREFIX;
  * @author wxup
  */
 @Slf4j
-@ConditionalOnProperty(prefix = WIND_SERVER_PROPERTIES_PREFIX, name = "enable-global-exception", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = WIND_SERVER_PROPERTIES_PREFIX, name = "enabled-global-exception", havingValue = "true", matchIfMissing = true)
 @RestControllerAdvice()
 public class DefaultGlobalExceptionHandler {
 
@@ -74,7 +74,7 @@ public class DefaultGlobalExceptionHandler {
             return RestfulApiRespFactory.badRequest(exception.getMessage());
         }
         String message = fieldError.getDefaultMessage();
-        return RestfulApiRespFactory.badRequest(message);
+        return RestfulApiRespFactory.badRequest(String.format("%s#%s：%s", fieldError.getObjectName(), fieldError.getField(), message));
     }
 
 
