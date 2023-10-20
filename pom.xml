@@ -29,6 +29,7 @@
         <module>wind-web</module>
         <module>modules/sequence-generate</module>
         <module>logback-kafka-appender</module>
+        <module>wind-tracer</module>
     </modules>
 
     <properties>
@@ -188,6 +189,16 @@
             <dependency>
                 <groupId>com.wind.security</groupId>
                 <artifactId>wind-security-authentication</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.sequence</groupId>
+                <artifactId>wind-sequence-generate</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.trace</groupId>
+                <artifactId>wind-tracer</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

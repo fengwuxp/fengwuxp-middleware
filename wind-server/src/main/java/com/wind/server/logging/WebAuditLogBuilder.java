@@ -2,7 +2,7 @@ package com.wind.server.logging;
 
 import com.wind.script.auditlog.AuditLogRecorder;
 import com.wind.script.auditlog.ScriptAuditLogBuilder;
-import com.wind.server.utils.HttpServletRequestUtils;
+import com.wind.web.utils.HttpServletRequestUtils;
 import org.springframework.http.HttpHeaders;
 
 import javax.servlet.http.HttpServletRequest;

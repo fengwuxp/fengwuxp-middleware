@@ -1,4 +1,4 @@
-package com.wind.server.utils;
+package com.wind.web.utils;
 
 import com.wind.common.exception.AssertUtils;
 import org.springframework.lang.Nullable;

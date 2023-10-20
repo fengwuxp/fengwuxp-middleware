@@ -1,5 +1,6 @@
 package com.wind.server.trace;
 
+import com.wind.trace.http.HttpTraceUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.annotation.Nonnull;
@@ -19,11 +20,11 @@ public class TraceFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain chain) throws ServletException, IOException {
-        TraceUtils.trace(request);
+        HttpTraceUtils.trace(request);
         try {
             chain.doFilter(request, response);
         } finally {
-            TraceUtils.clearTrace();
+            HttpTraceUtils.clearTrace();
         }
     }
 

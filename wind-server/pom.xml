@@ -68,10 +68,8 @@
            <optional>true</optional>
        </dependency>
        <dependency>
-           <groupId>com.wind.sequence</groupId>
-           <artifactId>wind-sequence-generate</artifactId>
-           <version>1.0.0-SNAPSHOT</version>
-           <scope>compile</scope>
+           <groupId>com.wind.trace</groupId>
+           <artifactId>wind-tracer</artifactId>
        </dependency>
    </dependencies>
 

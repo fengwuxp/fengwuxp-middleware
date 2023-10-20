@@ -2,7 +2,7 @@ package com.wind.server.i18n;
 
 import com.wind.common.WindConstants;
 import com.wind.common.exception.BaseException;
-import com.wind.server.utils.HttpServletRequestUtils;
+import com.wind.web.utils.HttpServletRequestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
