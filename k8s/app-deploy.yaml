@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: ${K8S_NAMESPACE}
   name: ${SPRING_APPLICATION_NAME}
   labels:
     appName: ${SPRING_APPLICATION_NAME}
@@ -22,32 +23,38 @@ spec:
         appName: ${SPRING_APPLICATION_NAME}
         env: ${SPRING_PROFILE_ACTIVE}
     spec:
+      imagePullSecrets:
+        - name: docker-harbor
       containers:
         - name: ${SPRING_APPLICATION_NAME}
           image: ${IMAGE}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
-            - name: SPRING_APPLICATION_NAME      # 应用名称
-              value: ${SPRING_APPLICATION_NAME}
+            - name: SPRING_APPLICATION_NAME     # 应用名称
+              value: "${SPRING_APPLICATION_NAME}"
             - name: SPRING_PROFILES_ACTIVE       # 指定激活环境
-              value: ${SPRING_PROFILE_ACTIVE}
+              value: "${SPRING_PROFILE_ACTIVE}"
             - name: SERVER_PORT
               value: "8080"
             - name: MANAGEMENT_SERVER_PORT
               value: "8899"
+            - name: JAVA_OPTS
+              value: "${JAVA_OPTS}"
+            - name: SPRING_CLOUD_OPTS
+              value: "${SPRING_CLOUD_OPTS} -Dspring.profiles.active=${SPRING_PROFILE_ACTIVE}"
           resources: # 容器资源管理
             limits: # 资源限制（监控使用情况）
-              cpu: "1"
-              memory: "3072Mi"
+              cpu: "${LIMIT_CPU}"
+              memory: "${LIMIT_MEMORY}"
             requests: # 最小可用资源（灵活调度）
-              cpu: "15M"
-              memory: "300Mi"
+              cpu: "${REQUEST_CPU}"
+              memory: "${REQUEST_MEMORY}"
           ports:
             - containerPort: 8080
           readinessProbe: # 就绪探针
             httpGet:
               path: /actuator/health/readiness
-              port: ${MANAGEMENT_SERVER_PORT}
+              port: 8899
             initialDelaySeconds: 30      # 延迟加载时间
             periodSeconds: 3             # 重试时间间隔
             timeoutSeconds: 1            # 超时时间设置
@@ -56,7 +63,7 @@ spec:
           livenessProbe: # 存活探针
             httpGet:
               path: /actuator/health/liveness
-              port: ${MANAGEMENT_SERVER_PORT}
+              port: 8899
             initialDelaySeconds: 30      # 延迟加载时间
             periodSeconds: 5             # 重试时间间隔
             timeoutSeconds: 1            # 超时时间设置

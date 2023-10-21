@@ -14,17 +14,23 @@ import org.apache.kafka.common.serialization.ByteArraySerializer;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
+ * @author wuxp
  * @since 0.0.1
  */
 public class KafkaAppender<E> extends KafkaAppenderConfig<E> {
+
+    private static final String KAFKA_APPENDER_ENABLED_KEY = "spring.logging.logback.kafka-appender.enabled";
 
     /**
      * Kafka clients uses this prefix for its slf4j logging.
      * This appender defers appends of any Kafka logs since it could cause harmful infinite recursion/self feeding effects.
      */
     private static final String KAFKA_LOGGER_PREFIX = KafkaProducer.class.getPackage().getName().replaceFirst("\\.producer$", "");
+
+    private final boolean enabled = isEnabled();
 
     private LazyProducer lazyProducer = null;
     private final AppenderAttachableImpl<E> aai = new AppenderAttachableImpl<>();
@@ -39,8 +45,11 @@ public class KafkaAppender<E> extends KafkaAppenderConfig<E> {
 
     @Override
     public void doAppend(E e) {
+        if (!enabled) {
+            return;
+        }
         ensureDeferredAppends();
-        if (e instanceof ILoggingEvent && ((ILoggingEvent)e).getLoggerName().startsWith(KAFKA_LOGGER_PREFIX)) {
+        if (e instanceof ILoggingEvent && ((ILoggingEvent) e).getLoggerName().startsWith(KAFKA_LOGGER_PREFIX)) {
             deferAppend(e);
         } else {
             super.doAppend(e);
@@ -49,20 +58,27 @@ public class KafkaAppender<E> extends KafkaAppenderConfig<E> {
 
     @Override
     public void start() {
+        if (!enabled) {
+            return;
+        }
         // only error free appenders should be activated
-        if (!checkPrerequisites()) return;
+        if (!checkPrerequisites()) {
+            return;
+        }
 
         if (partition != null && partition < 0) {
             partition = null;
         }
 
         lazyProducer = new LazyProducer();
-
         super.start();
     }
 
     @Override
     public void stop() {
+        if (!enabled) {
+            return;
+        }
         super.stop();
         if (lazyProducer != null && lazyProducer.isInitialized()) {
             try {
@@ -76,6 +92,9 @@ public class KafkaAppender<E> extends KafkaAppenderConfig<E> {
 
     @Override
     public void addAppender(Appender<E> newAppender) {
+        if (!enabled) {
+            return;
+        }
         aai.addAppender(newAppender);
     }
 
@@ -111,6 +130,9 @@ public class KafkaAppender<E> extends KafkaAppenderConfig<E> {
 
     @Override
     protected void append(E e) {
+        if (!enabled) {
+            return;
+        }
         final byte[] payload = encoder.encode(e);
         final byte[] key = keyingStrategy.createKey(e);
 
@@ -158,33 +180,39 @@ public class KafkaAppender<E> extends KafkaAppenderConfig<E> {
      */
     private class LazyProducer {
 
-        private volatile Producer<byte[], byte[]> producer;
+        private final AtomicReference<Producer<byte[], byte[]>> producer = new AtomicReference<>();
 
         public Producer<byte[], byte[]> get() {
-            Producer<byte[], byte[]> result = this.producer;
+            Producer<byte[], byte[]> result = this.producer.get();
             if (result == null) {
-                synchronized(this) {
-                    result = this.producer;
-                    if(result == null) {
-                        this.producer = result = this.initialize();
+                synchronized (this) {
+                    result = this.producer.get();
+                    if (result == null) {
+                        result = this.initialize();
+                        this.producer.set(result);
                     }
                 }
             }
-
             return result;
         }
 
         protected Producer<byte[], byte[]> initialize() {
-            Producer<byte[], byte[]> producer = null;
             try {
-                producer = createProducer();
+                return createProducer();
             } catch (Exception e) {
                 addError("error creating producer", e);
             }
-            return producer;
+            return null;
         }
 
-        public boolean isInitialized() { return producer != null; }
+        public boolean isInitialized() {
+            return producer.get() != null;
+        }
     }
 
+    private static boolean isEnabled() {
+        String property = System.getProperty(KAFKA_APPENDER_ENABLED_KEY);
+        property = System.getProperty(KAFKA_APPENDER_ENABLED_KEY, property);
+        return property == null ? Boolean.TRUE : Boolean.TRUE.toString().equals(property);
+    }
 }
