@@ -178,11 +178,15 @@ public final class WindConstants {
      */
     public static final String APP_SHARED_CONFIG_GROUP = "APP_SHARED";
 
-
     /**
      * traceId
      */
     public static final String TRACE_ID_NAME = "traceId";
+
+    /**
+     * trace id http header name
+     */
+    public static final String WIND_TRANCE_ID_HEADER_NAME = "Wind-TraceId";
 
     /**
      * http 请求 url 变量

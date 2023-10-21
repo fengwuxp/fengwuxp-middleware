@@ -13,6 +13,7 @@ import java.util.Map;
 
 import static com.wind.common.WindConstants.HTTP_REQUEST_UR_TRACE_NAME;
 import static com.wind.common.WindConstants.TRACE_ID_NAME;
+import static com.wind.common.WindConstants.WIND_TRANCE_ID_HEADER_NAME;
 import static com.wind.common.WindHttpConstants.HTTP_REQUEST_IP_ATTRIBUTE_NAME;
 import static com.wind.common.WindHttpConstants.HTTP_USER_AGENT_HEADER_NAME;
 
@@ -30,7 +31,7 @@ public final class HttpTraceUtils {
     }
 
     public static void trace(HttpServletRequest request) {
-        String traceId = request.getHeader(TRACE_ID_NAME);
+        String traceId = request.getHeader(WIND_TRANCE_ID_HEADER_NAME);
         MDC.put(TRACE_ID_NAME, traceId == null ? TRACE_ID.next() : traceId);
         MDC.put(HTTP_REQUEST_IP_ATTRIBUTE_NAME, (String) request.getAttribute(HTTP_REQUEST_IP_ATTRIBUTE_NAME));
         MDC.put(HTTP_REQUEST_UR_TRACE_NAME, request.getRequestURI());

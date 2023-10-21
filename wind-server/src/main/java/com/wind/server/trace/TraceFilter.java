@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static com.wind.common.WindConstants.WIND_TRANCE_ID_HEADER_NAME;
+
 /**
  * trace filter
  *
@@ -24,6 +26,9 @@ public class TraceFilter extends OncePerRequestFilter {
         try {
             chain.doFilter(request, response);
         } finally {
+            if (!response.isCommitted()) {
+                response.setHeader(WIND_TRANCE_ID_HEADER_NAME, HttpTraceUtils.getTraceContext().getTraceId());
+            }
             HttpTraceUtils.clearTrace();
         }
     }
