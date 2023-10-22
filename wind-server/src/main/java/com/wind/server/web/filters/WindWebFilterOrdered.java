@@ -18,7 +18,11 @@ public enum WindWebFilterOrdered implements Ordered, DescriptiveEnum {
 
     REQUEST_SOURCE_FILTER(Ordered.HIGHEST_PRECEDENCE + 1000, "RequestSourceIpFilter"),
 
-    TRACE_FILTER(Ordered.HIGHEST_PRECEDENCE + 1001, "TraceFilter");
+    TRACE_FILTER(Ordered.HIGHEST_PRECEDENCE + 1010, "TraceFilter"),
+
+    REQUEST_SIGN_FILTER(Ordered.HIGHEST_PRECEDENCE + 1030, "RequestSignFilter"),
+
+    ;
 
 
     private final int order;

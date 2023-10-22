@@ -17,6 +17,7 @@ import java.util.function.Supplier;
  * copy form {@link org.springframework.util.Assert}
  *
  * @author wuxp
+ * @see BaseException
  */
 public final class AssertUtils {
 

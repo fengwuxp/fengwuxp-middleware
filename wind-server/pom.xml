@@ -71,6 +71,14 @@
            <groupId>com.wind.trace</groupId>
            <artifactId>wind-tracer</artifactId>
        </dependency>
+       <dependency>
+           <groupId>org.springframework.security</groupId>
+           <artifactId>spring-security-core</artifactId>
+       </dependency>
+       <dependency>
+           <groupId>org.springframework.security</groupId>
+           <artifactId>spring-security-web</artifactId>
+       </dependency>
    </dependencies>
 
 </project>

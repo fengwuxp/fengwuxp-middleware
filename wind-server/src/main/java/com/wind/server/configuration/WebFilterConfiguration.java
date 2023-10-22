@@ -48,4 +48,5 @@ public class WebFilterConfiguration {
         result.setOrder(WindWebFilterOrdered.TRACE_FILTER.getOrder());
         return result;
     }
+
 }

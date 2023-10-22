@@ -4,6 +4,8 @@ import com.wind.common.exception.AssertUtils;
 import com.wind.script.auditlog.AuditLogRecorder;
 import com.wind.script.auditlog.ScriptAuditLogBuilder;
 import com.wind.server.actuate.health.GracefulShutdownHealthIndicator;
+import com.wind.server.initialization.SystemInitializationListener;
+import com.wind.server.initialization.SystemInitializer;
 import com.wind.server.logging.ControllerLogAspect;
 import com.wind.server.logging.WebAuditLogBuilder;
 import com.wind.server.web.exception.RespfulErrorAttributes;
@@ -16,6 +18,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Collection;
 
 import static com.wind.common.WindConstants.CONTROLLER_ASPECT_LOG_NAME;
 import static com.wind.common.WindConstants.ENABLED_NAME;
@@ -67,6 +71,12 @@ public class WindServerAutoConfiguration {
     @ConditionalOnProperty(prefix = WIND_SERVER_PROPERTIES_PREFIX + ".health.graceful-shutdown", name = "enabled", havingValue = "true", matchIfMissing = true)
     public GracefulShutdownHealthIndicator gracefulShutdownHealthIndicator() {
         return new GracefulShutdownHealthIndicator();
+    }
+
+    @Bean
+    @ConditionalOnBean(SystemInitializer.class)
+    public SystemInitializationListener systemInitializationListener(Collection<SystemInitializer> initializers) {
+        return new SystemInitializationListener(initializers);
     }
 
 }
