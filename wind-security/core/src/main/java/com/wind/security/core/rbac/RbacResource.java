@@ -32,7 +32,7 @@ public interface RbacResource<I extends Serializable> extends Serializable {
     /**
      * rbac 权限资源
      */
-    interface Permission<I extends Serializable> extends RbacResource<I> {
+    interface Permission extends RbacResource<String> {
 
         /**
          * @return 权限类型，例如：菜单、接口、数据
@@ -53,20 +53,21 @@ public interface RbacResource<I extends Serializable> extends Serializable {
          * @param value 权限值，使用逗号分隔
          * @return 权限
          */
-        static <I extends Serializable> Permission<I> immutable(I id, String name, String type, String value) {
+        static Permission immutable(String id, String name, String type, String value) {
             Set<String> attributes = StringUtils.hasLength(value) ? Collections.emptySet() : ImmutableSet.copyOf(value.split(WindConstants.COMMA));
             return immutable(id, name, type, attributes);
         }
 
-        static <I extends Serializable> Permission<I> immutable(I id, String name, String type, Set<String> attributes) {
-            return new ImmutablePermission<>(id, name, type, attributes);
+        static Permission immutable(String id, String name, String type, Set<String> attributes) {
+            return new ImmutablePermission(id, name, type, attributes);
         }
     }
 
     /**
      * rbac 角色资源
      */
-    interface Role<I extends Serializable> extends RbacResource<I> {
+    interface Role extends RbacResource<String> {
+
 
         /**
          * 角色关联的权限
@@ -83,28 +84,28 @@ public interface RbacResource<I extends Serializable> extends Serializable {
          * @param permissions 权限值
          * @return 角色
          */
-        static <I extends Serializable> Role<I> immutable(I id, String name, Set<String> permissions) {
-            return new ImmutableRole<>(id, name, permissions);
+        static Role immutable(String id, String name, Set<String> permissions) {
+            return new ImmutableRole(id, name, permissions);
         }
     }
 
     /**
      * rbac 用户资源
      */
-    interface User<I extends Serializable> extends RbacResource<I> {
+    interface User extends RbacResource<String> {
 
     }
 
     @AllArgsConstructor
     @Getter
-    class ImmutablePermission<I extends Serializable> implements RbacResource.Permission<I> {
+    class ImmutablePermission implements RbacResource.Permission {
 
         private static final long serialVersionUID = 6255678473411919964L;
 
         /**
          * id
          */
-        private final I id;
+        private final String id;
 
         /**
          * 权限名称
@@ -125,14 +126,14 @@ public interface RbacResource<I extends Serializable> extends Serializable {
 
     @AllArgsConstructor
     @Getter
-    class ImmutableRole<I extends Serializable> implements RbacResource.Role<I> {
+    class ImmutableRole implements RbacResource.Role {
 
         private static final long serialVersionUID = -6791142921724321619L;
 
         /**
          * id
          */
-        private final I id;
+        private final String id;
 
         /**
          * 角色名称

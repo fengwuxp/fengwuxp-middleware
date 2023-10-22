@@ -31,13 +31,22 @@ public class DefaultCaptchaManager {
     private final boolean verificationIgnoreCase;
 
     public DefaultCaptchaManager(Collection<CaptchaContentProvider> delegates, CaptchaStorage captchaStorage, boolean verificationIgnoreCase) {
-        this(delegates, captchaStorage, (owner, type) -> {}, verificationIgnoreCase);
+        this(delegates, captchaStorage, (owner, type) -> {
+        }, verificationIgnoreCase);
     }
 
     public DefaultCaptchaManager(Collection<CaptchaContentProvider> delegates, CaptchaStorage captchaStorage, CaptchaGenerateChecker generateChecker) {
         this(delegates, captchaStorage, generateChecker, true);
     }
 
+    /**
+     * 生成验证码
+     *
+     * @param type     验证码类型
+     * @param useScene 验证码使用场景
+     * @param owner    验证码所有者
+     * @return 验证码
+     */
     public Captcha generate(Captcha.CaptchaType type, Captcha.CaptchaUseScene useScene, String owner) {
         // 检查是否允许生成验证码
         generateChecker.preCheck(owner, type);
@@ -61,6 +70,7 @@ public class DefaultCaptchaManager {
      * 验证验证码
      *
      * @param expected 预期的值
+     * @param type     验证码类型
      * @param useScene 验证码使用场景
      * @param owner    验证码所有者
      */

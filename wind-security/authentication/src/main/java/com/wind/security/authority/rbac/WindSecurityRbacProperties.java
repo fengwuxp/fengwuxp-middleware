@@ -16,7 +16,7 @@ public class WindSecurityRbacProperties {
     /**
      * rbac resource 缓存有效期
      */
-    private Duration resourceCacheEffectiveTime = Duration.ofMinutes(3);
+    private Duration cacheEffectiveTime = Duration.ofMinutes(3);
 
     /**
      * 默认的角色值前缀

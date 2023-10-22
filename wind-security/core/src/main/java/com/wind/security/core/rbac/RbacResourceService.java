@@ -13,7 +13,7 @@ import java.util.Set;
  * @author wuxp
  * @date 2023-09-25 15:41
  **/
-public interface RbacResourceService<I extends Serializable> {
+public interface RbacResourceService {
 
     /**
      * @return 获取所有的 rbac 权限
@@ -21,14 +21,7 @@ public interface RbacResourceService<I extends Serializable> {
      * @value 权限内容
      */
     @NotEmpty
-    List<RbacResource.Permission<I>> getAllPermissions();
-
-    /**
-     * @param permissionId 权限 id
-     * @return 权限
-     */
-    @Nullable
-    RbacResource.Permission<I> findPermissionById(String permissionId);
+    List<RbacResource.Permission> getAllPermissions();
 
     /**
      * @return 获取所有的 rbac 角色
@@ -36,23 +29,30 @@ public interface RbacResourceService<I extends Serializable> {
      * @value 权限内容
      */
     @NotEmpty
-    List<RbacResource.Role<I>> getAllRoles();
+    List<RbacResource.Role> getAllRoles();
+
+    /**
+     * @param permissionId 权限 id
+     * @return 权限
+     */
+    @Nullable
+    RbacResource.Permission findPermissionById(String permissionId);
 
     /**
      * @param roleId 角色 id
      * @return 角色
      */
     @Nullable
-    RbacResource.Role<I> findRoleById(String roleId);
+    RbacResource.Role findRoleById(String roleId);
 
     /**
      * 获取用户拥有的角色
      * 如果系统中有多种类型的用户 {@param userId}，可以使用 {type}_{id} 组合
      *
      * @param userId 用户唯一标识
-     * @return 角色 ID 列表
+     * @return 角色唯一标识
      */
     @NotEmpty()
-    Set<I> findRolesByUserId(String userId);
+    Set<String> findRolesByUserId(String userId);
 
 }

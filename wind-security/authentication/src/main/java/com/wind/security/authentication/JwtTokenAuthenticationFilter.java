@@ -34,7 +34,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenCodec jwtTokenCodec;
 
-    private final Function<String, Set<String>> authoritySupplier;
+    private final Function<Object, Set<String>> authoritySupplier;
 
     /**
      * 用户类型
@@ -44,10 +44,10 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
     private final String headerName;
 
     public JwtTokenAuthenticationFilter(JwtTokenCodec jwtTokenCodec, Class<?> userType) {
-        this(jwtTokenCodec, k -> Collections.emptySet(), userType);
+        this(jwtTokenCodec, u -> Collections.emptySet(), userType);
     }
 
-    public JwtTokenAuthenticationFilter(JwtTokenCodec jwtTokenCodec, Function<String, Set<String>> authoritySupplier, Class<?> userType) {
+    public JwtTokenAuthenticationFilter(JwtTokenCodec jwtTokenCodec, Function<Object, Set<String>> authoritySupplier, Class<?> userType) {
         this(jwtTokenCodec, authoritySupplier, userType, HttpHeaders.AUTHORIZATION);
     }
 
@@ -65,7 +65,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         // 加载用户权限
-        Set<SimpleGrantedAuthority> authorities = authoritySupplier.apply(payload.getUserId())
+        Set<SimpleGrantedAuthority> authorities = authoritySupplier.apply(payload.getUser())
                 .stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());

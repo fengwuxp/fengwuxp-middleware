@@ -1,5 +1,7 @@
 package com.wind.security.authority.rbac;
 
+import com.wind.security.core.rbac.RbacResource;
+import com.wind.security.core.rbac.RbacResourceService;
 import com.wind.security.web.utils.RequestMatcherUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.ConfigAttribute;
@@ -10,11 +12,16 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.ObjectUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.wind.security.WebSecurityConstants.REQUEST_REQUIRED_ROLES_ATTRIBUTE_NAME;
 
@@ -32,7 +39,7 @@ import static com.wind.security.WebSecurityConstants.REQUEST_REQUIRED_ROLES_ATTR
 @AllArgsConstructor
 public class WebRbacRoleSecurityMetadataSource implements FilterInvocationSecurityMetadataSource {
 
-    private final WebRbacResourceManager rbacResourceManager;
+    private final RbacResourceService rbacResourceService;
 
     /**
      * 默认的角色值前缀
@@ -55,7 +62,7 @@ public class WebRbacRoleSecurityMetadataSource implements FilterInvocationSecuri
             // 请求路径没有配置权限，表明该请求接口可以任意访问
             return Collections.emptyList();
         }
-        Set<String> roleIds = rbacResourceManager.getRolesByPermissionIds(permissions);
+        Set<String> roleIds = getRolesByPermissionIds(permissions);
         filterInvocation.getRequest().setAttribute(REQUEST_REQUIRED_ROLES_ATTRIBUTE_NAME, roleIds);
         String[] authorities = roleIds
                 .stream()
@@ -84,7 +91,7 @@ public class WebRbacRoleSecurityMetadataSource implements FilterInvocationSecuri
      */
     private String[] matchesRequestPermissions(HttpServletRequest request) {
         Set<String> permissionIds = new HashSet<>();
-        for (Map.Entry<String, Set<RequestMatcher>> entry : rbacResourceManager.getRequestPermissionMatchers().entrySet()) {
+        for (Map.Entry<String, Set<RequestMatcher>> entry : getRequestPermissionMatchers().entrySet()) {
             if (RequestMatcherUtils.matches(entry.getValue(), request)) {
                 // 权限匹配
                 permissionIds.add(entry.getKey());
@@ -97,5 +104,34 @@ public class WebRbacRoleSecurityMetadataSource implements FilterInvocationSecuri
         return permissionIds.toArray(new String[0]);
     }
 
+    /**
+     * 通过权限标识查找权限
+     *
+     * @param permissionIds 权限标识
+     * @return 有 {@param permissionIds} 权限的角色
+     */
+    private Set<String> getRolesByPermissionIds(String... permissionIds) {
+        List<RbacResource.Role> roles = rbacResourceService.getAllRoles();
+        Set<String> result = Arrays.stream(permissionIds)
+                .map(id -> findRoleByPermissionId(id, roles))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        return Collections.unmodifiableSet(result);
+    }
+
+    private String findRoleByPermissionId(String permissionId, List<RbacResource.Role> roles) {
+        for (RbacResource.Role role : roles) {
+            if (role.getPermissions().contains(permissionId)) {
+                return role.getId();
+            }
+        }
+        return null;
+    }
+
+    private Map<String, Set<RequestMatcher>> getRequestPermissionMatchers() {
+        Map<String, Set<RequestMatcher>> result = new HashMap<>();
+        rbacResourceService.getAllPermissions().forEach(permission -> result.put(permission.getId(), RequestMatcherUtils.convertMatchers(permission.getAttributes())));
+        return result;
+    }
 
 }
