@@ -5,6 +5,7 @@ import com.wind.server.web.filters.IndexHtmlFilter;
 import com.wind.server.web.filters.RequestSourceIpFilter;
 import com.wind.server.web.filters.RestfulErrorHandleFilter;
 import com.wind.server.web.filters.WindWebFilterOrdered;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -38,9 +39,9 @@ public class WebFilterConfiguration {
     @Bean
     @ConditionalOnProperty(prefix = INDEX_HTML_FILTER_EXPRESSION, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
     @ConditionalOnBean(name = INDEX_HTML_RESOURCE_LOADER_BEAN_NAME)
-    public FilterRegistrationBean<IndexHtmlFilter> webIndexHtmlFilter(ApplicationContext context) {
+    public FilterRegistrationBean<IndexHtmlFilter> webIndexHtmlFilter(ApplicationContext context, @Value("${index.html.resource.enable-cache-control:false}") boolean enableCacheControl) {
         FilterRegistrationBean<IndexHtmlFilter> result = new FilterRegistrationBean<>();
-        result.setFilter(new IndexHtmlFilter(context.getBean(INDEX_HTML_RESOURCE_LOADER_BEAN_NAME, UnaryOperator.class)));
+        result.setFilter(new IndexHtmlFilter(context.getBean(INDEX_HTML_RESOURCE_LOADER_BEAN_NAME, UnaryOperator.class), enableCacheControl));
         result.setOrder(WindWebFilterOrdered.INDEX_HTML_FILTER.getOrder());
         return result;
     }

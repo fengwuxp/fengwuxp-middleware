@@ -18,7 +18,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
@@ -53,11 +52,7 @@ public class IndexHtmlFilter extends OncePerRequestFilter {
     /**
      * 忽略 swagger、webjars 下的静态资源
      */
-    private static final Set<String> IGNORE_PATTERNS = ImmutableSet.of(
-            "/swagger-ui/**",
-            "/swagger-resources/**",
-            "/webjars/**"
-    );
+    private static final Set<String> IGNORE_PATTERNS = ImmutableSet.of("/swagger-ui/**", "/swagger-resources/**", "/webjars/**");
 
     static {
         STATIC_RESOURCES.put(".js", "application/javascript");
@@ -85,16 +80,15 @@ public class IndexHtmlFilter extends OncePerRequestFilter {
      */
     private final UnaryOperator<String> resourceLoader;
 
+    private final boolean enableCacheControl;
+
     /**
      * 资源缓存
      */
-    private final Cache<String, String> resourcesCaches = Caffeine.newBuilder()
-            .expireAfterWrite(Duration.ofDays(1))
-            .maximumSize(200)
-            .build();
+    private final Cache<String, String> resourcesCaches = Caffeine.newBuilder().expireAfterWrite(Duration.ofDays(1)).maximumSize(200).build();
 
-    public IndexHtmlFilter(UnaryOperator<String> resourceLoader) {
-        this("/web/", resourceLoader);
+    public IndexHtmlFilter(UnaryOperator<String> resourceLoader, boolean enableCacheControl) {
+        this("/web/", resourceLoader, enableCacheControl);
     }
 
     @Override
@@ -106,11 +100,9 @@ public class IndexHtmlFilter extends OncePerRequestFilter {
                 chain.doFilter(request, response);
                 return;
             }
-            boolean requestIndexHtml = matchesMediaType(request.getHeader(HttpHeaders.ACCEPT)) &&
-                    (INDEX_HTML_PATHS.contains(requestUri) || requestUri.startsWith(routePrefix));
+            boolean requestIndexHtml = matchesMediaType(request.getHeader(HttpHeaders.ACCEPT)) && (INDEX_HTML_PATHS.contains(requestUri) || requestUri.startsWith(routePrefix));
             if (requestIndexHtml) {
                 // 写回 index.html
-                response.setCharacterEncoding(StandardCharsets.UTF_8.name());
                 response.setContentType(MediaType.TEXT_HTML_VALUE);
                 response.getWriter().write(getResourceContent(INDEX_HTML_NAME));
                 return;
@@ -118,9 +110,10 @@ public class IndexHtmlFilter extends OncePerRequestFilter {
             Optional<String> optional = STATIC_RESOURCES.keySet().stream().filter(requestUri::endsWith).findFirst();
             if (optional.isPresent()) {
                 // js css 资源访问
-                response.setCharacterEncoding(StandardCharsets.UTF_8.name());
                 response.setContentType(STATIC_RESOURCES.get(optional.get()));
-                response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=63072000");
+                if (enableCacheControl) {
+                    response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=63072000");
+                }
                 response.getWriter().write(getResourceContent(request.getRequestURI()));
                 return;
             }
@@ -133,10 +126,7 @@ public class IndexHtmlFilter extends OncePerRequestFilter {
     }
 
     private boolean matchesMediaType(String mediaType) {
-        return StringJoinSpiltUtils.spilt(mediaType)
-                .stream()
-                .map(MediaType::parseMediaType)
-                .anyMatch(media -> media.includes(MediaType.TEXT_HTML));
+        return StringJoinSpiltUtils.spilt(mediaType).stream().map(MediaType::parseMediaType).anyMatch(media -> media.includes(MediaType.TEXT_HTML));
     }
 
 }
