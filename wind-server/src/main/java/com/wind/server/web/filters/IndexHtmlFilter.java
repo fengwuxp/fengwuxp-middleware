@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.annotation.Nonnull;
@@ -40,10 +42,22 @@ public class IndexHtmlFilter extends OncePerRequestFilter {
 
     /**
      * 静态资源文件
+     *
      * @key 路径
      * @value 内容
      */
     private static final Map<String, String> STATIC_RESOURCES = new ConcurrentHashMap<>();
+
+    private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
+
+    /**
+     * 忽略 swagger、webjars 下的静态资源
+     */
+    private static final Set<String> IGNORE_PATTERNS = ImmutableSet.of(
+            "/swagger-ui/**",
+            "/swagger-resources/**",
+            "/webjars/**"
+    );
 
     static {
         STATIC_RESOURCES.put(".js", "application/javascript");
@@ -87,6 +101,11 @@ public class IndexHtmlFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain chain) throws ServletException, IOException {
         if (Objects.equals(request.getMethod(), HttpMethod.GET.name())) {
             String requestUri = request.getRequestURI();
+            if (IGNORE_PATTERNS.stream().anyMatch(pattern -> PATH_MATCHER.match(pattern, requestUri))) {
+                // 忽略
+                chain.doFilter(request, response);
+                return;
+            }
             boolean requestIndexHtml = matchesMediaType(request.getHeader(HttpHeaders.ACCEPT)) &&
                     (INDEX_HTML_PATHS.contains(requestUri) || requestUri.startsWith(routePrefix));
             if (requestIndexHtml) {
