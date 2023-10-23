@@ -1,5 +1,6 @@
 package com.wind.security.web.context;
 
+import com.wind.common.exception.BaseException;
 import com.wind.security.authentication.jwt.JwtTokenCodec;
 import com.wind.security.authentication.jwt.JwtTokenPayload;
 import lombok.AllArgsConstructor;
@@ -30,6 +31,8 @@ import static org.springframework.security.web.context.HttpSessionSecurityContex
  **/
 @AllArgsConstructor
 public class JwtSecurityContextRepository implements SecurityContextRepository {
+
+    private static final String LOGIN_JWT_TOKEN_INVALID = "$.login.jwt.token.invalid";
 
     private final JwtTokenCodec jwtTokenCodec;
 
@@ -73,7 +76,12 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
     @Nonnull
     private SecurityContextImpl getSecurityContext(HttpServletRequest request) {
         String jwtToken = request.getHeader(headerName);
-        JwtTokenPayload payload = jwtTokenCodec.parse(jwtToken, userType);
+        JwtTokenPayload payload;
+        try {
+            payload = jwtTokenCodec.parse(jwtToken, userType);
+        } catch (Exception e) {
+            throw BaseException.unAuthorized(LOGIN_JWT_TOKEN_INVALID);
+        }
         if (payload == null) {
             return new SecurityContextImpl();
         }

@@ -28,7 +28,7 @@ public class RestfulErrorHandleFilter extends OncePerRequestFilter {
             if (!response.isCommitted()) {
                 logger.error("request error", throwable);
                 ApiResp<Void> resp = RestfulApiRespFactory.withThrowable(throwable);
-                HttpResponseMessageUtils.writeJson(response, resp);
+                HttpResponseMessageUtils.writeApiResp(response, resp);
             }
         }
     }

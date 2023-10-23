@@ -4,10 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.wind.common.exception.AssertUtils;
 import com.wind.security.core.rbac.RbacResource;
 import com.wind.security.core.rbac.RbacResourceCache;
+import com.wind.security.core.rbac.RbacResourceCacheSupplier;
 import com.wind.security.core.rbac.RbacResourceChangeEvent;
 import com.wind.security.core.rbac.RbacResourceService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -17,11 +19,9 @@ import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 
 /**
  * 基于缓存的 RbacResourceService
@@ -31,7 +31,7 @@ import java.util.function.BiFunction;
  **/
 @Slf4j
 @AllArgsConstructor
-public class WebRbacResourceService implements RbacResourceService, ApplicationListener<RbacResourceChangeEvent> {
+public class WebRbacResourceService implements RbacResourceService, ApplicationListener<RbacResourceChangeEvent>, InitializingBean {
 
     /**
      * rbac 权限缓存名称
@@ -41,14 +41,14 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     /**
      * rbac 角色缓存名称
      */
-    private static final String RBA_ROLE_CACHE_NAME = "RBAC_PERMISSION_CACHE";
+    private static final String RBA_ROLE_CACHE_NAME = "RBAC_ROLE_CACHE";
 
     /**
      * rbac 用户角色缓存名称
      */
     private static final String RBA_USER_ROLE_CACHE_NAME = "RBAC_USER_ROLE_CACHE";
 
-    private final BiFunction<String, Executor, RbacResourceCache<String, Object>> cacheProvider;
+    private final RbacResourceCacheSupplier cacheSupplier;
 
     private final RbacResourceService delegate;
 
@@ -59,8 +59,8 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
 
     private final ScheduledExecutorService schedule = new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("web-rbac-resource-refresher"));
 
-    public WebRbacResourceService(BiFunction<String, Executor, RbacResourceCache<String, Object>> cacheProvider, RbacResourceService delegate) {
-        this(cacheProvider, delegate, Duration.ofMinutes(3));
+    public WebRbacResourceService(RbacResourceCacheSupplier cacheSupplier, RbacResourceService delegate) {
+        this(cacheSupplier, delegate, Duration.ofMinutes(3));
     }
 
     @Override
@@ -133,6 +133,11 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
         }
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        refreshRefresh();
+    }
+
     private void scheduleRefresh(long delay) {
         schedule.schedule(this::refreshRefresh, delay, TimeUnit.SECONDS);
     }
@@ -153,7 +158,7 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     @NonNull
     @SuppressWarnings("unchecked")
     private <T> RbacResourceCache<String, T> requiredCache(String cacheName) {
-        RbacResourceCache<String, Object> result = cacheProvider.apply(cacheName, schedule);
+        RbacResourceCache<String, Object> result = cacheSupplier.apply(cacheName, schedule);
         AssertUtils.notNull(result, String.format("获取 Cache 失败，CacheName = %s", cacheName));
         return (RbacResourceCache<String, T>) result;
     }

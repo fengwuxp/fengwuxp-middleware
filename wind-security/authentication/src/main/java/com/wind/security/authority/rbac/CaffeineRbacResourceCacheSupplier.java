@@ -3,6 +3,7 @@ package com.wind.security.authority.rbac;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.wind.security.core.rbac.RbacResourceCache;
+import com.wind.security.core.rbac.RbacResourceCacheSupplier;
 import lombok.AllArgsConstructor;
 import org.springframework.lang.Nullable;
 
@@ -12,7 +13,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -22,7 +22,7 @@ import java.util.function.Function;
  * @date 2023-10-22 11:02
  **/
 @AllArgsConstructor
-public class CaffeineCacheProvider implements BiFunction<String, Executor, RbacResourceCache<String, Object>> {
+public class CaffeineRbacResourceCacheSupplier implements RbacResourceCacheSupplier {
 
     private final Map<String, RbacResourceCache<String, Object>> caches = new ConcurrentHashMap<>();
 

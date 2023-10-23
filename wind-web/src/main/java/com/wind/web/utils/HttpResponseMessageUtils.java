@@ -3,6 +3,7 @@ package com.wind.web.utils;
 import com.alibaba.fastjson.JSON;
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
+import com.wind.server.web.supports.ApiResp;
 import org.springframework.http.MediaType;
 
 import javax.servlet.http.HttpServletResponse;
@@ -20,6 +21,19 @@ public final class HttpResponseMessageUtils {
 
     private HttpResponseMessageUtils() {
         throw new AssertionError();
+    }
+
+    /**
+     * 响应返回 json 数据
+     *
+     * @param response http response
+     * @param resp     响应
+     */
+    public static void writeApiResp(HttpServletResponse response, ApiResp<?> resp) {
+        if (resp.getHttpStatus() != null) {
+            response.setStatus(resp.getHttpStatus().value());
+        }
+        writeJsonText(response, JSON.toJSONString(resp));
     }
 
     /**
