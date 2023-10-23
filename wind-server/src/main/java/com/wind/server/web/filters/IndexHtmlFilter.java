@@ -1,12 +1,13 @@
 package com.wind.server.web.filters;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.ImmutableSet;
-import com.wind.common.exception.AssertUtils;
+import com.wind.common.utils.StringJoinSpiltUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.annotation.Nonnull;
@@ -16,8 +17,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.UnaryOperator;
 
 /**
  * 前后端分离模式下用于返回前端的 index.html 页面
@@ -29,9 +35,31 @@ import java.util.Set;
 @AllArgsConstructor
 public class IndexHtmlFilter extends OncePerRequestFilter {
 
-    private static final RestTemplate REST_TEMPLATE = new RestTemplate();
+    public static final String INDEX_HTML_NAME = "/index.html";
+    private static final Set<String> INDEX_HTML_PATHS = ImmutableSet.of("/", INDEX_HTML_NAME, "/index.htm", "/web");
 
-    private static final Set<String> INDEX_HTML_PATHS = ImmutableSet.of("/", "/index.html", "/index.htm");
+    /**
+     * 静态资源文件
+     * @key 路径
+     * @value 内容
+     */
+    private static final Map<String, String> STATIC_RESOURCES = new ConcurrentHashMap<>();
+
+    static {
+        STATIC_RESOURCES.put(".js", "application/javascript");
+        STATIC_RESOURCES.put(".css", "text/css");
+        STATIC_RESOURCES.put(".svg", "image/svg");
+        STATIC_RESOURCES.put(".webp", "image/webp");
+        STATIC_RESOURCES.put(".gif", "image/webp");
+        STATIC_RESOURCES.put(".png", "image/png");
+        STATIC_RESOURCES.put(".jpg", "image/jpg");
+        STATIC_RESOURCES.put(".jpeg", "image/jpeg");
+        STATIC_RESOURCES.put(".ico", "image/ico");
+        STATIC_RESOURCES.put(".ttf", "font/ttf");
+        STATIC_RESOURCES.put(".otf", "font/otf");
+        STATIC_RESOURCES.put(".woff", "font/woff");
+        STATIC_RESOURCES.put(".ttc", "font/ttc");
+    }
 
     /**
      * 前端路由前缀，仅支持 browser 模式下的路由
@@ -39,44 +67,57 @@ public class IndexHtmlFilter extends OncePerRequestFilter {
     private final String routePrefix;
 
     /**
-     * html content
+     * 资源加载器
      */
-    private final byte[] bytes;
+    private final UnaryOperator<String> resourceLoader;
 
     /**
-     * @param routePrefix 路由前缀
-     * @param indexUrl    index.html 文件资源所在的远程地址
+     * 资源缓存
      */
-    public IndexHtmlFilter(String routePrefix, String indexUrl) {
-        this(routePrefix, getIndexHtmlContent(indexUrl));
-    }
+    private final Cache<String, String> resourcesCaches = Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofDays(1))
+            .maximumSize(200)
+            .build();
 
-    public IndexHtmlFilter(String indexUrl) {
-        this("/web/", indexUrl);
+    public IndexHtmlFilter(UnaryOperator<String> resourceLoader) {
+        this("/web/", resourceLoader);
     }
 
     @Override
     protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain chain) throws ServletException, IOException {
-        if (isAccessIndexView(request)) {
-            // 写回前端前端页面
-            response.setContentLength(bytes.length);
-            response.setContentType(MediaType.TEXT_HTML_VALUE);
-            response.getWriter().write(new String(bytes, StandardCharsets.UTF_8));
-            return;
+        if (Objects.equals(request.getMethod(), HttpMethod.GET.name())) {
+            String requestUri = request.getRequestURI();
+            boolean requestIndexHtml = matchesMediaType(request.getHeader(HttpHeaders.ACCEPT)) &&
+                    (INDEX_HTML_PATHS.contains(requestUri) || requestUri.startsWith(routePrefix));
+            if (requestIndexHtml) {
+                // 写回 index.html
+                response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+                response.setContentType(MediaType.TEXT_HTML_VALUE);
+                response.getWriter().write(getResourceContent(INDEX_HTML_NAME));
+                return;
+            }
+            Optional<String> optional = STATIC_RESOURCES.keySet().stream().filter(requestUri::endsWith).findFirst();
+            if (optional.isPresent()) {
+                // js css 资源访问
+                response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+                response.setContentType(STATIC_RESOURCES.get(optional.get()));
+                response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=63072000");
+                response.getWriter().write(getResourceContent(request.getRequestURI()));
+                return;
+            }
         }
         chain.doFilter(request, response);
     }
 
-    private boolean isAccessIndexView(HttpServletRequest request) {
-        String requestUri = request.getRequestURI();
-        return Objects.equals(request.getMethod(), HttpMethod.GET.name())
-                && MediaType.parseMediaType(request.getHeader(HttpHeaders.ACCEPT)).includes(MediaType.TEXT_HTML)
-                && INDEX_HTML_PATHS.contains(requestUri) || requestUri.startsWith(routePrefix);
+    private String getResourceContent(String resourcePath) {
+        return resourcesCaches.get(resourcePath, resourceLoader);
     }
 
-    private static byte[] getIndexHtmlContent(String url) {
-        String result = REST_TEMPLATE.getForObject(url, String.class);
-        AssertUtils.notNull(result, String.format("get index.html content error，url =%s", url));
-        return result.getBytes(StandardCharsets.UTF_8);
+    private boolean matchesMediaType(String mediaType) {
+        return StringJoinSpiltUtils.spilt(mediaType)
+                .stream()
+                .map(MediaType::parseMediaType)
+                .anyMatch(media -> media.includes(MediaType.TEXT_HTML));
     }
+
 }

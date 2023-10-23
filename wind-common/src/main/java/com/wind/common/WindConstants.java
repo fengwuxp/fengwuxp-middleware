@@ -150,6 +150,11 @@ public final class WindConstants {
     public static final String WIND_SERVER_CONFIG_CENTER_PROPERTIES_PREFIX = "wind.server.config-center";
 
     /**
+     *  index html Filter 开启表达式
+     */
+    public static final String INDEX_HTML_FILTER_EXPRESSION = "wind.server.filter.index-html-filter";
+
+    /**
      * 统一异常捕获处理 Filter 开启表达式
      */
     public static final String RESTFUL_ERROR_FILTER_EXPRESSION = "wind.server.filter.restful-error-filter";
