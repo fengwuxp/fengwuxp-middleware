@@ -1,12 +1,14 @@
 package com.wind.server.initialization;
 
+import org.springframework.core.Ordered;
+
 /**
  * 系统初始化器，用于在系统启动时初始数据
  *
  * @author wuxp
  * @date 2023-10-22 07:48
  **/
-public interface SystemInitializer {
+public interface SystemInitializer extends Ordered {
 
     /**
      * 初始化
@@ -20,5 +22,10 @@ public interface SystemInitializer {
      */
     default boolean requiredInitialize() {
         return true;
+    }
+
+    @Override
+    default int getOrder() {
+        return 0;
     }
 }
