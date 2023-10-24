@@ -3,9 +3,11 @@ package com.wind.security.configuration;
 import com.wind.security.authentication.jwt.JwtProperties;
 import com.wind.security.authentication.jwt.JwtTokenCodec;
 import com.wind.security.authority.rbac.CaffeineRbacResourceCacheSupplier;
+import com.wind.security.authority.rbac.SimpleSecurityAccessOperations;
 import com.wind.security.authority.rbac.WebRbacResourceService;
 import com.wind.security.authority.rbac.WebRequestAuthorizationManager;
 import com.wind.security.authority.rbac.WindSecurityRbacProperties;
+import com.wind.security.core.SecurityAccessOperations;
 import com.wind.security.core.rbac.RbacResourceCacheSupplier;
 import com.wind.security.core.rbac.RbacResourceService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -71,9 +73,15 @@ public class WindSecurityAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean({SecurityAccessOperations.class})
+    public SecurityAccessOperations securityAccessOperations(WindSecurityRbacProperties properties) {
+        return new SimpleSecurityAccessOperations(properties.getRolePrefix());
+    }
+
+    @Bean
     @ConditionalOnBean({WindSecurityRbacProperties.class, RbacResourceService.class})
-    public WebRequestAuthorizationManager webRequestAuthorizationManager(RbacResourceService rbacResourceService, WindSecurityRbacProperties properties) {
-        return new WebRequestAuthorizationManager(rbacResourceService, properties.getRolePrefix(), properties.isMatchesRequestAllPermission());
+    public WebRequestAuthorizationManager webRequestAuthorizationManager(RbacResourceService rbacResourceService, SecurityAccessOperations securityAccessOperations, WindSecurityRbacProperties properties) {
+        return new WebRequestAuthorizationManager(rbacResourceService, securityAccessOperations, properties.isMatchesRequestAllPermission());
     }
 
 }

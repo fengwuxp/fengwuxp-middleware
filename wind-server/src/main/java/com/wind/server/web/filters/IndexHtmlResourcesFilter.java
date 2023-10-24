@@ -34,9 +34,13 @@ import java.util.function.UnaryOperator;
  * @date 2023-10-21 20:18
  **/
 @AllArgsConstructor
-public class IndexHtmlFilter extends OncePerRequestFilter {
+public class IndexHtmlResourcesFilter extends OncePerRequestFilter {
 
     public static final String INDEX_HTML_NAME = "/index.html";
+
+    /**
+     * 请求 index.html 页面的请求路径
+     */
     private static final Set<String> INDEX_HTML_PATHS = ImmutableSet.of("/", INDEX_HTML_NAME, "/index.htm", "/web");
 
     /**
@@ -87,7 +91,7 @@ public class IndexHtmlFilter extends OncePerRequestFilter {
      */
     private final Cache<String, String> resourcesCaches = Caffeine.newBuilder().expireAfterWrite(Duration.ofDays(1)).maximumSize(200).build();
 
-    public IndexHtmlFilter(UnaryOperator<String> resourceLoader, boolean enableCacheControl) {
+    public IndexHtmlResourcesFilter(UnaryOperator<String> resourceLoader, boolean enableCacheControl) {
         this("/web/", resourceLoader, enableCacheControl);
     }
 

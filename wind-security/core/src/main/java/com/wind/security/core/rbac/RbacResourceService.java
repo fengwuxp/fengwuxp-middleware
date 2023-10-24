@@ -3,9 +3,11 @@ package com.wind.security.core.rbac;
 import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * rbac 资源操作
@@ -39,6 +41,17 @@ public interface RbacResourceService {
     RbacResource.Permission findPermissionById(String permissionId);
 
     /**
+     * @param permissionIds 权限 id 集合
+     * @return 权限集合
+     */
+    default Set<RbacResource.Permission> findPermissionByIds(Collection<String> permissionIds) {
+        if (permissionIds == null) {
+            return Collections.emptySet();
+        }
+        return Collections.unmodifiableSet(permissionIds.stream().map(this::findPermissionById).collect(Collectors.toSet()));
+    }
+
+    /**
      * @param roleId 角色 id
      * @return 角色
      */
@@ -53,6 +66,6 @@ public interface RbacResourceService {
      * @return 角色唯一标识
      */
     @NotEmpty()
-    Set<String> findRolesByUserId(String userId);
+    Set<RbacResource.Role> findRolesByUserId(String userId);
 
 }

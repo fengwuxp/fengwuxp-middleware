@@ -90,7 +90,7 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     }
 
     @Override
-    public Set<String> findRolesByUserId(String userId) {
+    public Set<RbacResource.Role> findRolesByUserId(String userId) {
         return getUserRoleCache().computeIfAbsent(userId, delegate::findRolesByUserId);
     }
 
@@ -123,7 +123,7 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
         if (event.getResourceType() == RbacResource.User.class) {
             // 用户角色内容变更
             event.getResourceIds().forEach(id -> {
-                Set<String> roles = delegate.findRolesByUserId(id);
+                Set<RbacResource.Role> roles = delegate.findRolesByUserId(id);
                 if (roles == null) {
                     getUserRoleCache().remove(id);
                 } else {
@@ -174,7 +174,7 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     }
 
     @Nonnull
-    private RbacResourceCache<String, Set<String>> getUserRoleCache() {
+    private RbacResourceCache<String, Set<RbacResource.Role>> getUserRoleCache() {
         return requiredCache(RBA_USER_ROLE_CACHE_NAME);
     }
 

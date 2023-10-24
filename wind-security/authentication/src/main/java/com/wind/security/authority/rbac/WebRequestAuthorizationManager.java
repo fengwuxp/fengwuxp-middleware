@@ -1,12 +1,12 @@
 package com.wind.security.authority.rbac;
 
+import com.wind.security.core.SecurityAccessOperations;
 import com.wind.security.core.rbac.RbacResource;
 import com.wind.security.core.rbac.RbacResourceService;
 import com.wind.security.web.utils.RequestMatcherUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
-import org.springframework.security.authorization.AuthorityAuthorizationManager;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
@@ -39,16 +39,11 @@ public class WebRequestAuthorizationManager implements AuthorizationManager<Requ
 
     private static final AuthorizationDecision ACCESS_PASSED = new AuthorizationDecision(true);
 
-    private static final AuthorizationManager<RequestAuthorizationContext> SUPPER_ADMIN = AuthorityAuthorizationManager.hasRole("SUPPER_ADMIN");
+    private static final AuthorizationDecision ACCESS_DENIED = new AuthorizationDecision(false);
 
     private final RbacResourceService rbacResourceService;
 
-    /**
-     * 默认的角色值前缀
-     *
-     * @see org.springframework.security.access.vote.RoleVoter#getRolePrefix
-     */
-    private final String rolePrefix;
+    private final SecurityAccessOperations securityAccessOperations;
 
     /**
      * 请求权限匹配时是否匹配所有权限
@@ -59,9 +54,9 @@ public class WebRequestAuthorizationManager implements AuthorizationManager<Requ
     @Nullable
     @Override
     public AuthorizationDecision check(Supplier<Authentication> supplier, RequestAuthorizationContext context) {
-        if (Objects.requireNonNull(SUPPER_ADMIN.check(supplier, context)).isGranted()) {
-            log.debug("supper admin, allow access");
+        if (securityAccessOperations.isSupperAdmin()) {
             // 超级管理员
+            log.debug("supper admin, allow access");
             return ACCESS_PASSED;
         }
         Set<String> permissions = matchesRequestPermissions(context.getRequest());
@@ -78,7 +73,7 @@ public class WebRequestAuthorizationManager implements AuthorizationManager<Requ
             log.debug("request resource ={} {}, required  has any role = {}", context.getRequest().getMethod(), context.getRequest().getRequestURI(), roles);
         }
         context.getRequest().setAttribute(REQUEST_REQUIRED_ROLES_ATTRIBUTE_NAME, roles);
-        return AuthorityAuthorizationManager.hasAnyRole(rolePrefix, roles.toArray(new String[0])).check(supplier, context);
+        return securityAccessOperations.hasAnyRole(roles.toArray(new String[0])) ? ACCESS_PASSED : ACCESS_DENIED;
     }
 
 

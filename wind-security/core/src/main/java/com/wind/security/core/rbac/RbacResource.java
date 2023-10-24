@@ -122,6 +122,11 @@ public interface RbacResource<I extends Serializable> extends Serializable {
          */
         private final Set<String> attributes;
 
+        public ImmutablePermission() {
+            // 为了给序列化框架使用
+            this("", "","", Collections.emptySet());
+        }
+
     }
 
     @AllArgsConstructor
@@ -145,6 +150,10 @@ public interface RbacResource<I extends Serializable> extends Serializable {
          */
         private final Set<String> permissions;
 
+        public ImmutableRole() {
+            // 为了给序列化框架使用
+            this("", "", Collections.emptySet());
+        }
     }
 
 }
