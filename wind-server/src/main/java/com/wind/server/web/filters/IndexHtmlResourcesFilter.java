@@ -86,10 +86,6 @@ public class IndexHtmlResourcesFilter extends OncePerRequestFilter {
 
     private final boolean enableCacheControl;
 
-    /**
-     * 资源缓存
-     */
-    private final Cache<String, String> resourcesCaches = Caffeine.newBuilder().expireAfterWrite(Duration.ofDays(1)).maximumSize(200).build();
 
     public IndexHtmlResourcesFilter(UnaryOperator<String> resourceLoader, boolean enableCacheControl) {
         this("/web/", resourceLoader, enableCacheControl);
@@ -126,11 +122,37 @@ public class IndexHtmlResourcesFilter extends OncePerRequestFilter {
     }
 
     private String getResourceContent(String resourcePath) {
-        return resourcesCaches.get(resourcePath, resourceLoader);
+        return resourceLoader.apply(resourcePath);
     }
 
     private boolean matchesMediaType(String mediaType) {
         return StringJoinSpiltUtils.spilt(mediaType).stream().map(MediaType::parseMediaType).anyMatch(media -> media.includes(MediaType.TEXT_HTML));
     }
 
+
+    /**
+     * 返回一个支持缓存的资源加载器
+     *
+     * @param delegate 委托的资源加载器
+     * @return 资源加载器
+     */
+    public static UnaryOperator<String> cacheWrapper(UnaryOperator<String> delegate) {
+        return new CacheResourcesLoader(delegate);
+    }
+
+    @AllArgsConstructor
+    private static class CacheResourcesLoader implements UnaryOperator<String> {
+
+        private final UnaryOperator<String> delegate;
+
+        /**
+         * 资源缓存
+         */
+        private final Cache<String, String> resourcesCaches = Caffeine.newBuilder().expireAfterWrite(Duration.ofDays(1)).maximumSize(200).build();
+
+        @Override
+        public String apply(String resourcePath) {
+            return resourcesCaches.get(resourcePath, delegate);
+        }
+    }
 }
