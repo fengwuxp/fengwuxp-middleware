@@ -42,7 +42,7 @@ public final class Signer {
      * @param request 用于验证签名的请求
      * @return 签名验证是否成功
      */
-    public boolean verifySign(String sign, SignatureRequest request) {
+    public boolean verify(String sign, SignatureRequest request) {
         return Objects.equals(sign(request), sign);
     }
 

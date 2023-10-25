@@ -75,15 +75,15 @@ public class RequestSignFilter implements Filter, Ordered {
             return;
         }
         HttpServletResponse response = (HttpServletResponse) servletResponse;
-        String accessKey = request.getHeader(headerNames.sign);
+        String accessKey = request.getHeader(headerNames.accessKey);
         if (!StringUtils.hasLength(accessKey)) {
             badRequest(response, "request ak must not empty");
             return;
         }
         RequestSignMatcher signMatcher = new RequestSignMatcher(request);
         SignatureRequest signatureRequest = buildSignatureRequest(accessKey, signMatcher);
-        String requestSign = request.getHeader(SignatureConstants.SIGN_HEADER_NAME);
-        if (Signer.SHA256.verifySign(requestSign, signatureRequest)) {
+        String requestSign = request.getHeader(headerNames.sign);
+        if (Signer.SHA256.verify(requestSign, signatureRequest)) {
             chain.doFilter(signMatcher.request, servletResponse);
         } else {
             if (!ServiceInfoUtils.isOnline()) {

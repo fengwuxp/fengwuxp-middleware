@@ -13,7 +13,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.function.UnaryOperator;
+import java.util.function.Function;
 
 import static com.wind.common.WindConstants.ENABLED_NAME;
 import static com.wind.common.WindConstants.INDEX_HTML_FILTER_EXPRESSION;
@@ -39,9 +39,9 @@ public class WebFilterConfiguration {
     @Bean
     @ConditionalOnProperty(prefix = INDEX_HTML_FILTER_EXPRESSION, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
     @ConditionalOnBean(name = INDEX_HTML_RESOURCE_LOADER_BEAN_NAME)
-    public FilterRegistrationBean<IndexHtmlResourcesFilter> webIndexHtmlResourcesFilter(ApplicationContext context, @Value("${index.html.resource.enable-cache-control:false}") boolean enableCacheControl) {
+    public FilterRegistrationBean<IndexHtmlResourcesFilter> webIndexHtmlResourcesFilter(ApplicationContext context) {
         FilterRegistrationBean<IndexHtmlResourcesFilter> result = new FilterRegistrationBean<>();
-        result.setFilter(new IndexHtmlResourcesFilter(context.getBean(INDEX_HTML_RESOURCE_LOADER_BEAN_NAME, UnaryOperator.class), enableCacheControl));
+        result.setFilter(new IndexHtmlResourcesFilter(context.getBean(INDEX_HTML_RESOURCE_LOADER_BEAN_NAME, Function.class)));
         result.setOrder(WindWebFilterOrdered.INDEX_HTML_FILTER.getOrder());
         return result;
     }

@@ -3,12 +3,17 @@ package com.wind.server.web.filters;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.ImmutableSet;
+import com.wind.common.exception.AssertUtils;
 import com.wind.common.utils.StringJoinSpiltUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -24,7 +29,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.UnaryOperator;
+import java.util.function.Function;
 
 /**
  * 前后端分离模式下用于返回前端的 index.html 页面
@@ -61,7 +66,7 @@ public class IndexHtmlResourcesFilter extends OncePerRequestFilter {
     static {
         STATIC_RESOURCES.put(".js", "application/javascript");
         STATIC_RESOURCES.put(".css", "text/css");
-        STATIC_RESOURCES.put(".svg", "image/svg");
+        STATIC_RESOURCES.put(".svg", "image/svg+xml");
         STATIC_RESOURCES.put(".webp", "image/webp");
         STATIC_RESOURCES.put(".gif", "image/webp");
         STATIC_RESOURCES.put(".png", "image/png");
@@ -74,6 +79,8 @@ public class IndexHtmlResourcesFilter extends OncePerRequestFilter {
         STATIC_RESOURCES.put(".ttc", "font/ttc");
     }
 
+    private static final Cache<String, HttpHeaders> HEADER_CACHES = Caffeine.newBuilder().expireAfterWrite(Duration.ofDays(1)).maximumSize(200).build();
+
     /**
      * 前端路由前缀，仅支持 browser 模式下的路由
      */
@@ -82,13 +89,11 @@ public class IndexHtmlResourcesFilter extends OncePerRequestFilter {
     /**
      * 资源加载器
      */
-    private final UnaryOperator<String> resourceLoader;
-
-    private final boolean enableCacheControl;
+    private final Function<String, byte[]> resourceLoader;
 
 
-    public IndexHtmlResourcesFilter(UnaryOperator<String> resourceLoader, boolean enableCacheControl) {
-        this("/web/", resourceLoader, enableCacheControl);
+    public IndexHtmlResourcesFilter(Function<String, byte[]> resourceLoader) {
+        this("/web/", resourceLoader);
     }
 
     @Override
@@ -103,26 +108,31 @@ public class IndexHtmlResourcesFilter extends OncePerRequestFilter {
             boolean requestIndexHtml = matchesMediaType(request.getHeader(HttpHeaders.ACCEPT)) && (INDEX_HTML_PATHS.contains(requestUri) || requestUri.startsWith(routePrefix));
             if (requestIndexHtml) {
                 // 写回 index.html
-                response.setContentType(MediaType.TEXT_HTML_VALUE);
-                response.getWriter().write(getResourceContent(INDEX_HTML_NAME));
+                response.getOutputStream().write(resourceLoader.apply(INDEX_HTML_NAME));
+                writeHeaders(response, INDEX_HTML_NAME);
                 return;
             }
             Optional<String> optional = STATIC_RESOURCES.keySet().stream().filter(requestUri::endsWith).findFirst();
             if (optional.isPresent()) {
                 // js css 资源访问
-                response.setContentType(STATIC_RESOURCES.get(optional.get()));
-                if (enableCacheControl) {
-                    response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=63072000");
-                }
-                response.getWriter().write(getResourceContent(request.getRequestURI()));
+                response.getOutputStream().write(resourceLoader.apply(requestUri));
+                writeHeaders(response, requestUri);
                 return;
             }
         }
         chain.doFilter(request, response);
     }
 
-    private String getResourceContent(String resourcePath) {
-        return resourceLoader.apply(resourcePath);
+    private void writeHeaders(@Nonnull HttpServletResponse response, String requestUri) {
+        HttpHeaders headers = HEADER_CACHES.getIfPresent(requestUri);
+        if (headers == null) {
+           return;
+        }
+        headers.forEach((name, values) -> {
+            if (!ObjectUtils.isEmpty(values)) {
+                response.setHeader(name, CollectionUtils.firstElement(values));
+            }
+        });
     }
 
     private boolean matchesMediaType(String mediaType) {
@@ -136,23 +146,29 @@ public class IndexHtmlResourcesFilter extends OncePerRequestFilter {
      * @param delegate 委托的资源加载器
      * @return 资源加载器
      */
-    public static UnaryOperator<String> cacheWrapper(UnaryOperator<String> delegate) {
+    public static Function<String, byte[]> cacheWrapper(Function<String, ResponseEntity<ByteArrayResource>> delegate) {
         return new CacheResourcesLoader(delegate);
     }
 
     @AllArgsConstructor
-    private static class CacheResourcesLoader implements UnaryOperator<String> {
+    private static class CacheResourcesLoader implements Function<String, byte[]> {
 
-        private final UnaryOperator<String> delegate;
+        private final Function<String, ResponseEntity<ByteArrayResource>> delegate;
 
         /**
          * 资源缓存
          */
-        private final Cache<String, String> resourcesCaches = Caffeine.newBuilder().expireAfterWrite(Duration.ofDays(1)).maximumSize(200).build();
+        private final Cache<String, byte[]> resourcesCaches = Caffeine.newBuilder().expireAfterWrite(Duration.ofDays(1)).maximumSize(200).build();
 
         @Override
-        public String apply(String resourcePath) {
-            return resourcesCaches.get(resourcePath, delegate);
+        public byte[] apply(String resourcePath) {
+            return resourcesCaches.get(resourcePath, key -> {
+                ResponseEntity<ByteArrayResource> resp = delegate.apply(resourcePath);
+                HEADER_CACHES.put(key, resp.getHeaders());
+                AssertUtils.isTrue(resp.hasBody(), () -> String.format("load resource： %s failure", key));
+                ByteArrayResource result = resp.getBody();
+                return result.getByteArray();
+            });
         }
     }
 }
