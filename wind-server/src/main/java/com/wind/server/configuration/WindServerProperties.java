@@ -19,12 +19,12 @@ public class WindServerProperties {
     private boolean enabled = true;
 
     /**
-     * 控制器日志 Aop 拦截配置
+     * 控制器 Aop 拦截增强配置
      */
-    private ControllerLogAspectProperties controllerLogAspect;
+    private ControllerAspectProperties controllerAspect;
 
     @Data
-    public static class ControllerLogAspectProperties {
+    public static class ControllerAspectProperties {
 
         /**
          * spring aop aspect pointcut 表达式
@@ -32,5 +32,6 @@ public class WindServerProperties {
          * <a href="https://docs.spring.io/spring-framework/reference/core/aop/ataspectj/pointcuts.html">Expression Supported Pointcut</a>
          */
         private String expression;
+
     }
 }

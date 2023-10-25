@@ -28,7 +28,7 @@ import java.util.function.Supplier;
  * @date 2023-09-23 06:26
  **/
 @Slf4j
-public class ScriptAuditLogBuilder {
+public class ScriptAuditLogRecorder {
 
     public static final String AUDIT_LOG_REMARK_ATTRIBUTE_NAME = "AUDIT_LOG_REMARK";
 
@@ -53,11 +53,11 @@ public class ScriptAuditLogBuilder {
 
     private final Supplier<Map<String, Object>> contextVariablesSupplier;
 
-    protected ScriptAuditLogBuilder(AuditLogRecorder auditLogRecorder) {
+    protected ScriptAuditLogRecorder(AuditLogRecorder auditLogRecorder) {
         this(auditLogRecorder, Collections::emptyMap);
     }
 
-    protected ScriptAuditLogBuilder(AuditLogRecorder auditLogRecorder, Supplier<Map<String, Object>> contextVariablesSupplier) {
+    protected ScriptAuditLogRecorder(AuditLogRecorder auditLogRecorder, Supplier<Map<String, Object>> contextVariablesSupplier) {
         this.auditLogRecorder = auditLogRecorder;
         this.contextVariablesSupplier = contextVariablesSupplier;
     }

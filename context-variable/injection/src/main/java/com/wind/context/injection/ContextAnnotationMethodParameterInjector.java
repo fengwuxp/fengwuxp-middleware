@@ -185,7 +185,6 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
             this.setterMethod = field == null ? null : findSetterMethod(field);
             this.getterMethod = field == null ? null : findGetterMethod(field);
             this.parameterIndex = parameterIndex;
-
         }
 
         boolean isInjectParameter() {
@@ -204,8 +203,8 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
                     () -> ReflectionUtils.invokeMethod(getterMethod, owner));
         }
 
-        @SuppressWarnings({"unchecked","rawtypes"})
-       private void injectWithOverride(Consumer<Object> setter, Object value, Supplier<Object> getter) {
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        private void injectWithOverride(Consumer<Object> setter, Object value, Supplier<Object> getter) {
             // TODO 做类型转换？
             if (override) {
                 setter.accept(value);

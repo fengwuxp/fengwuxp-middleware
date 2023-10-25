@@ -1,27 +1,32 @@
 package com.wind.server.configuration;
 
 import com.wind.common.exception.AssertUtils;
+import com.wind.context.injection.MethodParameterInjector;
 import com.wind.script.auditlog.AuditLogRecorder;
-import com.wind.script.auditlog.ScriptAuditLogBuilder;
+import com.wind.script.auditlog.ScriptAuditLogRecorder;
 import com.wind.server.actuate.health.GracefulShutdownHealthIndicator;
+import com.wind.server.aop.WindControllerMethodAspect;
 import com.wind.server.initialization.SystemInitializationListener;
 import com.wind.server.initialization.SystemInitializer;
-import com.wind.server.logging.ControllerLogAspect;
-import com.wind.server.logging.WebAuditLogBuilder;
+import com.wind.server.logging.WebAuditLogRecorder;
 import com.wind.server.web.exception.RespfulErrorAttributes;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.support.DefaultBeanFactoryPointcutAdvisor;
+import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Collection;
+import java.util.Map;
 
-import static com.wind.common.WindConstants.CONTROLLER_ASPECT_LOG_NAME;
+import static com.wind.common.WindConstants.CONTROLLER_METHOD_LOG_NAME;
 import static com.wind.common.WindConstants.ENABLED_NAME;
 import static com.wind.common.WindConstants.TRUE;
 import static com.wind.common.WindConstants.WIND_SERVER_PROPERTIES_PREFIX;
@@ -33,6 +38,7 @@ import static com.wind.common.WindConstants.WIND_SERVER_PROPERTIES_PREFIX;
 @Configuration
 @EnableConfigurationProperties(value = {WindServerProperties.class})
 @ConditionalOnProperty(prefix = WIND_SERVER_PROPERTIES_PREFIX, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
+@Slf4j
 public class WindServerAutoConfiguration {
 
     @Bean
@@ -42,28 +48,34 @@ public class WindServerAutoConfiguration {
 
     @Bean
     @ConditionalOnBean(AuditLogRecorder.class)
-    @ConditionalOnMissingBean(ScriptAuditLogBuilder.class)
-    public WebAuditLogBuilder webAuditLogBuilder(AuditLogRecorder recorder) {
-        return new WebAuditLogBuilder(recorder);
+    @ConditionalOnMissingBean(ScriptAuditLogRecorder.class)
+    public WebAuditLogRecorder webAuditLogRecorder(AuditLogRecorder recorder) {
+        return new WebAuditLogRecorder(recorder);
     }
 
     @Bean
-    @ConditionalOnBean(ScriptAuditLogBuilder.class)
-    public ControllerLogAspect controllerLogAspect(ScriptAuditLogBuilder auditLogBuilder) {
-        return new ControllerLogAspect(auditLogBuilder);
+    @ConditionalOnProperty(prefix = CONTROLLER_METHOD_LOG_NAME, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
+    public WindControllerMethodAspect windControllerMethodAspect(ApplicationContext context) {
+        ScriptAuditLogRecorder recorder = null;
+        try {
+            recorder = context.getBean(ScriptAuditLogRecorder.class);
+        } catch (BeansException exception) {
+            log.debug("un enable audit log");
+        }
+        Map<String, MethodParameterInjector> injectors = context.getBeansOfType(MethodParameterInjector.class);
+        return new WindControllerMethodAspect(recorder, MethodParameterInjector.composite(injectors.values()));
     }
 
     @Bean
-    @ConditionalOnBean(value = {ControllerLogAspect.class})
-    @ConditionalOnProperty(prefix = CONTROLLER_ASPECT_LOG_NAME, name = "expression")
-    public DefaultBeanFactoryPointcutAdvisor controllerLogAspectPointcutAdvisor(ControllerLogAspect apiInterceptor, WindServerProperties properties) {
-        String expression = properties.getControllerLogAspect().getExpression();
-        AssertUtils.hasLength(expression, String.format("%s 未配置", CONTROLLER_ASPECT_LOG_NAME));
+    @ConditionalOnProperty(prefix = CONTROLLER_METHOD_LOG_NAME, name = "expression")
+    public DefaultBeanFactoryPointcutAdvisor windControllerMethodAspectPointcutAdvisor(WindControllerMethodAspect advice, WindServerProperties properties) {
+        String expression = properties.getControllerAspect().getExpression();
+        AssertUtils.hasLength(expression, String.format("%s 未配置", CONTROLLER_METHOD_LOG_NAME));
         AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
         pointcut.setExpression(expression);
         DefaultBeanFactoryPointcutAdvisor advisor = new DefaultBeanFactoryPointcutAdvisor();
         advisor.setPointcut(pointcut);
-        advisor.setAdvice(apiInterceptor);
+        advisor.setAdvice(advice);
         return advisor;
     }
 

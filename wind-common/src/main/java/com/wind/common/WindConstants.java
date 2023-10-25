@@ -150,7 +150,7 @@ public final class WindConstants {
     public static final String WIND_SERVER_CONFIG_CENTER_PROPERTIES_PREFIX = "wind.server.config-center";
 
     /**
-     *  index html Filter 开启表达式
+     * index html Filter 开启表达式
      */
     public static final String INDEX_HTML_FILTER_EXPRESSION = "wind.server.filter.index-html-filter";
 
@@ -165,9 +165,9 @@ public final class WindConstants {
     public static final String TRACE_FILTER_EXPRESSION = "wind.server.filter.trace-filter";
 
     /**
-     * 控制器日志拦截配置
+     * 控制器方法拦截配置
      */
-    public static final String CONTROLLER_ASPECT_LOG_NAME = "wind.server.controller-log-aspect";
+    public static final String CONTROLLER_METHOD_LOG_NAME = "wind.server.controller-method-aspect";
 
     /**
      * 应用配置名称

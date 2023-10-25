@@ -2,6 +2,7 @@ package com.wind.context.injection;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.wind.context.variable.annotations.ContextRequestIp;
 import com.wind.context.variable.annotations.ContextTenantId;
 import com.wind.context.variable.annotations.ContextUserId;
 import com.wind.context.variable.annotations.ContextUserNme;
@@ -21,6 +22,7 @@ class ContextAnnotationMethodParameterInjectorTest {
             ContextVariableNames.USER_ID, 1L,
             ContextVariableNames.USER_NAME, "张三",
             ContextVariableNames.TENANT_ID, 101L,
+            ContextVariableNames.REQUEST_IP, "10.0.0.1",
             "example", "test",
             "age", 23
     ), ImmutableSet.of("com.wind.context"));
@@ -28,15 +30,16 @@ class ContextAnnotationMethodParameterInjectorTest {
     @Test
     void testInjectObject() {
         Method method = ReflectionUtils.findMethod(Example.class, "exampleObject", ExampleRequest.class);
-        ExampleRequest exampleRequest = new ExampleRequest();
-        injector.inject(method, new Object[]{exampleRequest});
-        Assertions.assertEquals(1L, exampleRequest.id);
-        Assertions.assertEquals(2L, exampleRequest.tenantId);
-        Assertions.assertEquals(101L, exampleRequest.tenantId2);
-        Assertions.assertEquals("张三", exampleRequest.userName);
-        Assertions.assertEquals("test", exampleRequest.example);
-        Assertions.assertEquals(23, exampleRequest.age);
-        Assertions.assertEquals(true, exampleRequest.falg);
+        ExampleRequest request = new ExampleRequest();
+        injector.inject(method, new Object[]{request});
+        Assertions.assertEquals(1L, request.id);
+        Assertions.assertEquals(2L, request.tenantId);
+        Assertions.assertEquals(101L, request.tenantId2);
+        Assertions.assertEquals("10.0.0.1", request.ip);
+        Assertions.assertEquals("张三", request.userName);
+        Assertions.assertEquals("test", request.example);
+        Assertions.assertEquals(23, request.age);
+        Assertions.assertEquals(true, request.falg);
     }
 
     @Test
@@ -71,8 +74,11 @@ class ContextAnnotationMethodParameterInjectorTest {
         @ContextTenantId(override = true)
         private Long tenantId2;
 
+        @ContextRequestIp
+        private String ip;
+
         @ContextUserNme
-        private String userName="李四";
+        private String userName = "李四";
 
         @ContextVariable(name = "example")
         private String example;

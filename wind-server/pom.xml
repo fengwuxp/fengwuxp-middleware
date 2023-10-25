@@ -79,6 +79,10 @@
            <groupId>org.springframework.security</groupId>
            <artifactId>spring-security-web</artifactId>
        </dependency>
+       <dependency>
+           <groupId>com.wind.context.variable</groupId>
+           <artifactId>wind-context-injection</artifactId>
+       </dependency>
    </dependencies>
 
 </project>

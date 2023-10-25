@@ -1,7 +1,7 @@
 package com.wind.server.logging;
 
 import com.wind.script.auditlog.AuditLogRecorder;
-import com.wind.script.auditlog.ScriptAuditLogBuilder;
+import com.wind.script.auditlog.ScriptAuditLogRecorder;
 import com.wind.web.utils.HttpServletRequestUtils;
 import org.springframework.http.HttpHeaders;
 
@@ -17,10 +17,10 @@ import java.util.Map;
  * @author wuxp
  * @date 2023-09-23 10:40
  **/
-public class WebAuditLogBuilder extends ScriptAuditLogBuilder {
+public class WebAuditLogRecorder extends ScriptAuditLogRecorder {
 
-    public WebAuditLogBuilder(AuditLogRecorder recorder) {
-        super(recorder, WebAuditLogBuilder::getRequestVariables);
+    public WebAuditLogRecorder(AuditLogRecorder recorder) {
+        super(recorder, WebAuditLogRecorder::getRequestVariables);
     }
 
     private static Map<String, Object> getRequestVariables() {

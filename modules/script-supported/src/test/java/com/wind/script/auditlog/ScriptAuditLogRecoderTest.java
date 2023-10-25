@@ -12,8 +12,8 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
-class ScriptAuditLogBuilderTest {
-    private final SimpleScriptAuditLogBuilder logAspectRecorder = new SimpleScriptAuditLogBuilder();
+class ScriptAuditLogRecoderTest {
+    private final SimpleScriptAuditLogRecorder logAspectRecorder = new SimpleScriptAuditLogRecorder();
 
     private final ExampleService exampleService = new ExampleService();
 
@@ -50,17 +50,17 @@ class ScriptAuditLogBuilderTest {
     void testEvalLogContentWithThrowable() {
         String errorMessage = "test";
         logAspectRecorder.recordLog(new Object[]{"", "", 2}, null, getUserMethod, BaseException.common(errorMessage));
-        Throwable throwable = SimpleScriptAuditLogBuilder.THROWABLE.get();
+        Throwable throwable = SimpleScriptAuditLogRecorder.THROWABLE.get();
         Assertions.assertEquals(errorMessage, throwable.getMessage());
     }
 
-    static class SimpleScriptAuditLogBuilder extends ScriptAuditLogBuilder {
+    static class SimpleScriptAuditLogRecorder extends ScriptAuditLogRecorder {
 
         private static final AtomicReference<AuditLogContent> AUDIT_LOG_CONTENT = new AtomicReference<>();
         private static final AtomicReference<Throwable> THROWABLE = new AtomicReference<>();
 
-        public SimpleScriptAuditLogBuilder() {
-            super(SimpleScriptAuditLogBuilder::mockRecord);
+        public SimpleScriptAuditLogRecorder() {
+            super(SimpleScriptAuditLogRecorder::mockRecord);
         }
 
         private static void mockRecord(AuditLogContent content, @Nullable Throwable throwable) {

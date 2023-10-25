@@ -1,6 +1,7 @@
 package com.wind.context.injection;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 
 /**
  * 方法参数注入器
@@ -10,7 +11,6 @@ import java.lang.reflect.Method;
  **/
 public interface MethodParameterInjector {
 
-
     /**
      * 注入方法参数中被注解标记的的字段或参数
      *
@@ -18,4 +18,15 @@ public interface MethodParameterInjector {
      * @param arguments 方法参数
      */
     void inject(Method method, Object[] arguments);
+
+
+    /**
+     * 合并一组方法参数注入器
+     *
+     * @param delegates 委托注入器集合
+     * @return 合并后的参数注入器
+     */
+    static MethodParameterInjector composite(Collection<MethodParameterInjector> delegates) {
+        return (method, arguments) -> delegates.forEach(deldgate -> deldgate.inject(method, arguments));
+    }
 }

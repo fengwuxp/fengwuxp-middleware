@@ -18,6 +18,7 @@ import static com.wind.common.WindConstants.WIND_ROCKETMQ_NAME;
 @Getter
 public enum WindMiddlewareType implements DescriptiveEnum {
 
+
     /**
      * 一般是 Mysql
      */

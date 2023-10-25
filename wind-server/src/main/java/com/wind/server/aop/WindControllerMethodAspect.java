@@ -1,7 +1,8 @@
-package com.wind.server.logging;
+package com.wind.server.aop;
 
 import com.wind.common.WindConstants;
-import com.wind.script.auditlog.ScriptAuditLogBuilder;
+import com.wind.context.injection.MethodParameterInjector;
+import com.wind.script.auditlog.ScriptAuditLogRecorder;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -11,18 +12,23 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 
 /**
- * 打印控制器日志
+ * 控制器方法拦截处理支持
  *
  * @author wuxp
- */
+ * @date 2023-10-25 10:00
+ **/
 @Slf4j
 @AllArgsConstructor
-public final class ControllerLogAspect implements MethodInterceptor {
+public class WindControllerMethodAspect implements MethodInterceptor {
 
-    private final ScriptAuditLogBuilder auditLogBuilder;
+    private final ScriptAuditLogRecorder auditLogBuilder;
+
+    private final MethodParameterInjector methodParameterInjector;
 
     @Override
     public Object invoke(@Nonnull MethodInvocation invocation) throws Throwable {
+        // 参数注入
+        methodParameterInjector.inject(invocation.getMethod(), invocation.getArguments());
         if (log.isDebugEnabled()) {
             log.debug("请求方法：{}，参数：{}", getRequestMethodDesc(invocation.getMethod()), invocation.getArguments());
         }
@@ -50,5 +56,4 @@ public final class ControllerLogAspect implements MethodInterceptor {
         }
         auditLogBuilder.recordLog(invocation.getArguments(), result, invocation.getMethod(), throwable);
     }
-
 }

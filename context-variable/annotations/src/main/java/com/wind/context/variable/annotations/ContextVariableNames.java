@@ -17,4 +17,6 @@ public final class ContextVariableNames {
     public static final String USER_NAME = "@@__current_user_name__@@";
 
     public static final String TENANT_ID = "@@__current_tenant_id__@@";
+
+    public static final String REQUEST_IP = "@@__current_request_ip__@@";
 }
