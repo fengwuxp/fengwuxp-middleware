@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Collection;
 import java.util.Map;
 
-import static com.wind.common.WindConstants.CONTROLLER_METHOD_LOG_NAME;
+import static com.wind.common.WindConstants.CONTROLLER_METHOD_ASPECT_NAME;
 import static com.wind.common.WindConstants.ENABLED_NAME;
 import static com.wind.common.WindConstants.TRUE;
 import static com.wind.common.WindConstants.WIND_SERVER_PROPERTIES_PREFIX;
@@ -54,7 +54,7 @@ public class WindServerAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = CONTROLLER_METHOD_LOG_NAME, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
+    @ConditionalOnProperty(prefix = CONTROLLER_METHOD_ASPECT_NAME, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
     public WindControllerMethodAspect windControllerMethodAspect(ApplicationContext context) {
         ScriptAuditLogRecorder recorder = null;
         try {
@@ -67,10 +67,10 @@ public class WindServerAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = CONTROLLER_METHOD_LOG_NAME, name = "expression")
+    @ConditionalOnBean(WindControllerMethodAspect.class)
     public DefaultBeanFactoryPointcutAdvisor windControllerMethodAspectPointcutAdvisor(WindControllerMethodAspect advice, WindServerProperties properties) {
-        String expression = properties.getControllerAspect().getExpression();
-        AssertUtils.hasLength(expression, String.format("%s 未配置", CONTROLLER_METHOD_LOG_NAME));
+        String expression = properties.getControllerMethodAspect().getExpression();
+        AssertUtils.hasLength(expression, String.format("%s 未配置", CONTROLLER_METHOD_ASPECT_NAME));
         AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
         pointcut.setExpression(expression);
         DefaultBeanFactoryPointcutAdvisor advisor = new DefaultBeanFactoryPointcutAdvisor();

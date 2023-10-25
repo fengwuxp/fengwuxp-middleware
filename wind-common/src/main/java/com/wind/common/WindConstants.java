@@ -167,7 +167,7 @@ public final class WindConstants {
     /**
      * 控制器方法拦截配置
      */
-    public static final String CONTROLLER_METHOD_LOG_NAME = "wind.server.controller-method-aspect";
+    public static final String CONTROLLER_METHOD_ASPECT_NAME = "wind.server.controller-method-aspect";
 
     /**
      * 应用配置名称

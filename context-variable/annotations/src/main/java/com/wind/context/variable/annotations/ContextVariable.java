@@ -24,7 +24,7 @@ public @interface ContextVariable {
     String name() default "";
 
     /**
-     * 默认支持 spring expression
+     * 默认支持 spring expression，例如：#name
      * 优先使用 {@link #name()}
      *
      * @return 取值表达

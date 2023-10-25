@@ -21,10 +21,10 @@ public class WindServerProperties {
     /**
      * 控制器 Aop 拦截增强配置
      */
-    private ControllerAspectProperties controllerAspect;
+    private ControllerMethodAspectProperties controllerMethodAspect = new ControllerMethodAspectProperties();
 
     @Data
-    public static class ControllerAspectProperties {
+    public static class ControllerMethodAspectProperties {
 
         /**
          * spring aop aspect pointcut 表达式
