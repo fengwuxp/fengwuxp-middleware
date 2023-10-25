@@ -54,6 +54,10 @@ public class WebRequestAuthorizationManager implements AuthorizationManager<Requ
     @Nullable
     @Override
     public AuthorizationDecision check(Supplier<Authentication> supplier, RequestAuthorizationContext context) {
+        if (!supplier.get().isAuthenticated()) {
+            // 未登录
+            return ACCESS_PASSED;
+        }
         if (securityAccessOperations.isSupperAdmin()) {
             // 超级管理员
             log.debug("supper admin, allow access");

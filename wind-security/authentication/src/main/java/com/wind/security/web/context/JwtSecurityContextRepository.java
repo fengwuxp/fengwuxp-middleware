@@ -1,6 +1,5 @@
 package com.wind.security.web.context;
 
-import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.BaseException;
 import com.wind.security.authentication.jwt.JwtTokenCodec;
 import com.wind.security.authentication.jwt.JwtTokenPayload;
@@ -12,7 +11,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +33,8 @@ import static org.springframework.security.web.context.HttpSessionSecurityContex
 public class JwtSecurityContextRepository implements SecurityContextRepository {
 
     private static final String LOGIN_JWT_TOKEN_INVALID = "$.login.jwt.token.invalid";
+
+    private static final SecurityContext EMPTY = new SecurityContextImpl();
 
     private final JwtTokenCodec jwtTokenCodec;
 
@@ -76,14 +76,16 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
     }
 
     @Nonnull
-    private SecurityContextImpl getSecurityContext(HttpServletRequest request) {
+    private SecurityContext getSecurityContext(HttpServletRequest request) {
         String jwtToken = request.getHeader(headerName);
-        AssertUtils.state(StringUtils.hasLength(jwtToken), () -> BaseException.unAuthorized(LOGIN_JWT_TOKEN_INVALID));
         JwtTokenPayload payload;
         try {
             payload = jwtTokenCodec.parse(jwtToken, userType);
         } catch (Exception e) {
             throw BaseException.unAuthorized(LOGIN_JWT_TOKEN_INVALID);
+        }
+        if (payload == null) {
+            return EMPTY;
         }
         // 加载用户权限
         Set<SimpleGrantedAuthority> authorities = authoritySupplier.apply(payload.getUser()).stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
