@@ -20,16 +20,17 @@
     <modules>
         <module>wind-server</module>
         <module>wind-common</module>
-        <module>tools/mybatis-plus-annotation-processor</module>
-        <module>tools/mybatis-flex-processor</module>
-        <module>modules/script-supported</module>
         <module>wind-security</module>
-        <module>modules/payment</module>
         <module>wind-config-center</module>
         <module>wind-web</module>
-        <module>modules/sequence-generate</module>
-        <module>logback-kafka-appender</module>
         <module>wind-tracer</module>
+        <module>context-variable</module>
+        <module>logback-kafka-appender</module>
+        <module>modules/payment</module>
+        <module>modules/script-supported</module>
+        <module>modules/sequence-generate</module>
+        <module>tools/mybatis-plus-annotation-processor</module>
+        <module>tools/mybatis-flex-processor</module>
     </modules>
 
     <properties>
@@ -199,6 +200,16 @@
             <dependency>
                 <groupId>com.wind.trace</groupId>
                 <artifactId>wind-tracer</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.context.variable</groupId>
+                <artifactId>wind-context-annotations</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.context.variable</groupId>
+                <artifactId>wind-context-injection</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
