@@ -78,7 +78,7 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
     @Nonnull
     private SecurityContextImpl getSecurityContext(HttpServletRequest request) {
         String jwtToken = request.getHeader(headerName);
-        AssertUtils.state(StringUtils.hasLength(jwtToken), () -> BaseException.common(LOGIN_JWT_TOKEN_INVALID));
+        AssertUtils.state(StringUtils.hasLength(jwtToken), () -> BaseException.unAuthorized(LOGIN_JWT_TOKEN_INVALID));
         JwtTokenPayload payload;
         try {
             payload = jwtTokenCodec.parse(jwtToken, userType);
