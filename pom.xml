@@ -31,6 +31,7 @@
         <module>modules/sequence-generate</module>
         <module>tools/mybatis-plus-annotation-processor</module>
         <module>tools/mybatis-flex-processor</module>
+        <module>modules/office</module>
     </modules>
 
     <properties>
@@ -69,6 +70,7 @@
         <weixin-java-pay.version>4.5.0</weixin-java-pay.version>
         <freemarker.version>2.3.32</freemarker.version>
         <logback-encoder.version>7.4</logback-encoder.version>
+        <easyexcel.version>3.3.2</easyexcel.version>
     </properties>
 
     <dependencies>
@@ -213,6 +215,11 @@
                 <version>${revision}</version>
             </dependency>
             <dependency>
+                <groupId>com.wind.office</groupId>
+                <artifactId>wind-office-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.version}</version>
@@ -312,6 +319,11 @@
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
                 <version>${logback-encoder.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>easyexcel</artifactId>
+                <version>${easyexcel.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

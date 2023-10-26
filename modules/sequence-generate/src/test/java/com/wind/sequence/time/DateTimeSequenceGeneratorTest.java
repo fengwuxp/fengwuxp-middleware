@@ -19,13 +19,13 @@ class DateTimeSequenceGeneratorTest {
 
     @Test
     void testDayRandomNumeric() {
-        SequenceGenerator day = DateTimeSequenceGenerator.day(SequenceGenerator.randomNumeric(8));
+        SequenceGenerator day = DateTimeSequenceGenerator.day(() -> SequenceGenerator.randomNumeric(8));
         Assertions.assertEquals(16, day.next().length());
     }
 
     @Test
     void testDay3RandomAlphanumeric() {
-        SequenceGenerator day = DateTimeSequenceGenerator.day(SequenceGenerator.randomAlphanumeric(8));
+        SequenceGenerator day = DateTimeSequenceGenerator.day(() -> SequenceGenerator.randomAlphanumeric(8));
         String next = day.next();
         Assertions.assertEquals(16, next.length());
     }

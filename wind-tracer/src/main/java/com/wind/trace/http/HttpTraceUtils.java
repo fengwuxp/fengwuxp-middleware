@@ -45,7 +45,7 @@ public final class HttpTraceUtils {
                     "HTTP_X_FORWARDED_FOR")
     );
 
-    private static final SequenceGenerator TRACE_ID = SequenceGenerator.randomAlphanumeric(32);
+    private static final SequenceGenerator TRACE_ID = () -> SequenceGenerator.randomAlphanumeric(32);
 
     private HttpTraceUtils() {
         throw new AssertionError();

@@ -23,7 +23,7 @@ import static com.wind.common.WindConstants.WIND_SERVER_PROPERTIES_PREFIX;
  * @author wuxp
  */
 @Slf4j
-@ConditionalOnProperty(prefix = WIND_SERVER_PROPERTIES_PREFIX, value = "enable-restful", havingValue = "true")
+@ConditionalOnProperty(prefix = WIND_SERVER_PROPERTIES_PREFIX, value = "enable-restful", havingValue = "true", matchIfMissing = true)
 @RestControllerAdvice()
 public class RestfulResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
