@@ -1,5 +1,6 @@
 package com.wind.security.captcha;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,6 +13,7 @@ import java.util.Date;
  **/
 @Getter
 @Builder
+@AllArgsConstructor
 public class ImmutableCaptcha implements Captcha {
 
     /**
@@ -54,6 +56,19 @@ public class ImmutableCaptcha implements Captcha {
      */
     private final Date expireTime;
 
+    /**
+     * 为了给序列化框架使用，提供一个空构造
+     */
+    ImmutableCaptcha() {
+        this.owner = null;
+        this.type = null;
+        this.useScene = null;
+        this.value = null;
+        this.content = null;
+        this.verificationCount = 0;
+        this.allowVerificationTimes = 0;
+        this.expireTime = null;
+    }
 
     /**
      * 统计已验证次数

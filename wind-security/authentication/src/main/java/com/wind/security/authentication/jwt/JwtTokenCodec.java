@@ -58,15 +58,14 @@ public final class JwtTokenCodec {
      * jwt parse token
      *
      * @param jwtToken jwt token
-     * @param userType 用户类类型
      * @return jwt token payload
      */
     @Nullable
-    public JwtTokenPayload parse(String jwtToken, Class<?> userType) {
+    public JwtTokenPayload parse(String jwtToken) {
         if (StringUtils.hasLength(jwtToken)) {
             Jwt jwt = jwtDecoder.decode(jwtToken);
             Map<String, Object> claims = jwt.getClaims();
-            Object user = JSON.to(userType, claims.get(AUTHENTICATION_VARIABLE_NAME));
+            JwtUser user = JSON.to(properties.getUserType(), claims.get(AUTHENTICATION_VARIABLE_NAME));
             Instant expiresAt = jwt.getExpiresAt();
             AssertUtils.notNull(expiresAt, "jwt token expire must not null");
             return new JwtTokenPayload(jwt.getSubject(), user, expiresAt.toEpochMilli());
@@ -77,15 +76,14 @@ public final class JwtTokenCodec {
     /**
      * 生成用户 token
      *
-     * @param id   用户 id
      * @param user 用户信息
      * @return 用户 token
      */
-    public String encoding(String id, Object user) {
+    public String encoding(JwtUser user) {
         Jwt jwt = jwtEncoder.encode(
                 JwtEncoderParameters.from(
                         jwsHeader,
-                        newJwtBuilder(id)
+                        newJwtBuilder(String.valueOf(user.getId()))
                                 .claim(AUTHENTICATION_VARIABLE_NAME, user)
                                 .build()
                 )
@@ -96,11 +94,11 @@ public final class JwtTokenCodec {
     /**
      * 生成 refresh token
      *
-     * @param id 用户 id
+     * @param userId 用户 id
      * @return refresh token
      */
-    public String encodingRefreshToken(String id) {
-        Jwt jwt = jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, newJwtBuilder(id).build()));
+    public String encodingRefreshToken(Long userId) {
+        Jwt jwt = jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, newJwtBuilder(String.valueOf(userId)).build()));
         return jwt.getTokenValue();
     }
 

@@ -2,7 +2,6 @@ package com.wind.security.authentication.jwt;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.util.Base64Utils;
 
@@ -18,23 +17,23 @@ class JwtTokenCodecTest {
 
     @Test
     void testCodecUserToken() {
-        User user = new User("张三", "****", Collections.emptyList());
-        String token = jwtTokenCodec.encoding("1", user);
-        User result = jwtTokenCodec.parse(token, User.class).getUser();
+        JwtUser user = new JwtUser(1L, "", Collections.emptyMap());
+        String token = jwtTokenCodec.encoding(user);
+        JwtUser result = jwtTokenCodec.parse(token).getUser();
         Assertions.assertEquals(user, result);
     }
 
     @Test
     void testCodecRefreshToken() {
-        String token = jwtTokenCodec.encodingRefreshToken("1");
+        String token = jwtTokenCodec.encodingRefreshToken(1L);
         JwtTokenPayload payload = jwtTokenCodec.parseRefreshToken(token);
-        Assertions.assertEquals("1", payload.getUserId());
+        Assertions.assertEquals(1L, payload.getUserId());
     }
 
     @Test
     void testTokenExpire() throws Exception {
         JwtTokenCodec codec = new JwtTokenCodec(jwtProperties(Duration.ofMillis(1)));
-        String token = codec.encodingRefreshToken("1");
+        String token = codec.encodingRefreshToken(1L);
         Thread.sleep(100);
         BadJwtException exception = Assertions.assertThrows(BadJwtException.class, () -> jwtTokenCodec.parseRefreshToken(token));
         Assertions.assertEquals("An error occurred while attempting to decode the Jwt: Signed JWT rejected: Invalid signature", exception.getMessage());

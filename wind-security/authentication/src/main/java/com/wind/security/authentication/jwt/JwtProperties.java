@@ -61,6 +61,8 @@ public class JwtProperties {
      */
     private String rsaPrivateKey;
 
+    private Class<? extends JwtUser> userType = JwtUser.class;
+
     @Transient
     KeyPair getKeyPair() {
         try {

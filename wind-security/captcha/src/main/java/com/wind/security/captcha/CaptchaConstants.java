@@ -10,16 +10,15 @@ import org.springframework.lang.NonNull;
  **/
 public final class CaptchaConstants {
 
-
     /**
      * 图片验证码缓存缓存 key
      */
-    private static final String CACHE_CAPTCHA_STORE_KEY = "CAPTCHA_CACHES";
+    private static final String CACHE_CAPTCHA_STORE_KEY = "CAPTCHA_CACHE";
 
     /**
      * 验证码生成次数缓存缓存 key
      */
-    private static final String CACHE_CAPTCHA_GENERATE_COUNT_STORE_KEY = "CAPTCHA_COUNT_CACHES";
+    private static final String CACHE_CAPTCHA_GENERATE_COUNT_STORE_KEY = "CAPTCHA_COUNT_CACHE";
 
     private CaptchaConstants() {
         throw new AssertionError();
