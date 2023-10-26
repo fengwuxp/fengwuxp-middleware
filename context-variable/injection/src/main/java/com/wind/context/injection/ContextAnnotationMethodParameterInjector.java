@@ -91,7 +91,7 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
             if (isSimpleType(parameterType)) {
                 ContextVariable annotation = AnnotationUtils.findAnnotation(parameters[paramterIndex], ContextVariable.class);
                 if (annotation != null) {
-                    result.add(new ParameterInjectionDescriptor(annotation, parameterType, null, paramterIndex));
+                    result.add(new ParameterInjectionDescriptor(annotation, parameterType, null, parameters[paramterIndex].getName(), paramterIndex));
                 }
             } else {
                 if (isAllowInject(parameterType)) {
@@ -113,7 +113,7 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
                     if (annotation == null) {
                         return null;
                     }
-                    return new ParameterInjectionDescriptor(annotation, parameterType, field, index);
+                    return new ParameterInjectionDescriptor(annotation, parameterType, field, null, index);
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -155,6 +155,8 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
 
         private final String expression;
 
+        private final boolean required;
+
         private final boolean override;
 
         /**
@@ -172,18 +174,22 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
          */
         private final Method getterMethod;
 
+        private final String fieldName;
+
         /**
          * 在方法参数中的索引
          */
         private final int parameterIndex;
 
-        public ParameterInjectionDescriptor(ContextVariable variable, Class<?> type, @Nullable Field field, int parameterIndex) {
+        public ParameterInjectionDescriptor(ContextVariable variable, Class<?> type, @Nullable Field field, String parameterName, int parameterIndex) {
             this.variableName = variable.name();
             this.expression = variable.expression();
             this.override = variable.override();
+            this.required = variable.required();
             this.type = type;
             this.setterMethod = field == null ? null : findSetterMethod(field);
             this.getterMethod = field == null ? null : findGetterMethod(field);
+            this.fieldName = field == null ? parameterName : field.getDeclaringClass().getName() + WindConstants.SHARP + field.getName();
             this.parameterIndex = parameterIndex;
         }
 
@@ -207,12 +213,21 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
         private void injectWithOverride(Consumer<Object> setter, Object value, Supplier<Object> getter) {
             // TODO 做类型转换？
             if (override) {
-                setter.accept(value);
+                requiredCheckWrapper(setter).accept(value);
             } else {
                 if (getter.get() == null) {
-                    setter.accept(value);
+                    requiredCheckWrapper(setter).accept(value);
                 }
             }
+        }
+
+        Consumer<Object> requiredCheckWrapper(Consumer<Object> consumer) {
+            return value -> {
+                if (required) {
+                    AssertUtils.notNull(value, () -> String.format("%s must not null", fieldName));
+                }
+                consumer.accept(value);
+            };
         }
 
 

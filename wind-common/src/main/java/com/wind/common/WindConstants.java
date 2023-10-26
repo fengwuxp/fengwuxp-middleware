@@ -145,6 +145,12 @@ public final class WindConstants {
     public static final String TRUE = "true";
 
     /**
+     * http status 同步设置 advice
+     */
+
+    public static final String WIND_SERVER_HTTP_RESPONSE_STATUS_ADVICE = "wind.server.http.status-advice";
+
+    /**
      * 配置中心支持
      */
     public static final String WIND_SERVER_CONFIG_CENTER_PROPERTIES_PREFIX = "wind.server.config-center";

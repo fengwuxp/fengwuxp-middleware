@@ -2,6 +2,7 @@ package com.wind.context.injection;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.wind.common.exception.BaseException;
 import com.wind.context.variable.annotations.ContextRequestIp;
 import com.wind.context.variable.annotations.ContextTenantId;
 import com.wind.context.variable.annotations.ContextUserId;
@@ -51,13 +52,25 @@ class ContextAnnotationMethodParameterInjectorTest {
         Assertions.assertEquals("test", arguments[1]);
     }
 
+    @Test
+    void testInjectParameterRequiredError() {
+        Method method = ReflectionUtils.findMethod(Example.class, "exampleRequired", String.class);
+        Object[] arguments = {null};
+        BaseException exception = Assertions.assertThrows(BaseException.class, () -> injector.inject(method, arguments));
+        Assertions.assertEquals("userName must not null", exception.getMessage());
+    }
+
     static class Example {
 
         public void exampleObject(ExampleRequest request) {
 
         }
 
-        public void exampleParameter(@ContextUserId Long id, @ContextVariable(expression = "#example") String userNaem) {
+        public void exampleParameter(@ContextUserId Long id, @ContextVariable(expression = "#example") String userName) {
+
+        }
+
+        public void exampleRequired(@ContextVariable(expression = "#userName_1") String userName) {
 
         }
     }

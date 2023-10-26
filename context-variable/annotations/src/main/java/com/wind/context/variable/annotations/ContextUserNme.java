@@ -22,4 +22,9 @@ public @interface ContextUserNme {
      * {@link ContextVariable#override()}
      */
     boolean override() default true;
+
+    /**
+     * {@link ContextVariable#required()}
+     */
+    boolean required() default true;
 }

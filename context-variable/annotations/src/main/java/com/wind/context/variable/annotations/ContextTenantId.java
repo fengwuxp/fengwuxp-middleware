@@ -22,4 +22,9 @@ public @interface ContextTenantId {
      * {@link ContextVariable#override()}
      */
     boolean override() default false;
+
+    /**
+     * {@link ContextVariable#required()}
+     */
+    boolean required() default false;
 }

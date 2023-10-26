@@ -22,4 +22,9 @@ public @interface ContextRequestIp {
      * {@link ContextVariable#override()}
      */
     boolean override() default false;
+
+    /**
+     * {@link ContextVariable#required()}
+     */
+    boolean required() default false;
 }
