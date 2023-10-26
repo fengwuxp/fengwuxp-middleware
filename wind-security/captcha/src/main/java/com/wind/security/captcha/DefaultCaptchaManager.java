@@ -52,7 +52,7 @@ public class DefaultCaptchaManager {
         generateChecker.preCheck(owner, type);
         CaptchaContentProvider delegate = getDelegate(type, useScene);
         CaptchaValue captchaValue = delegate.getValue(owner, useScene);
-        ImmutableCaptcha result = ImmutableCaptcha.builder()
+        Captcha result = ImmutableCaptcha.builder()
                 .content(captchaValue.getContent())
                 .value(captchaValue.getValue())
                 .owner(owner)

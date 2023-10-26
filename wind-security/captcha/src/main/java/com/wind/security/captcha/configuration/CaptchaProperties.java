@@ -33,7 +33,7 @@ public class CaptchaProperties {
     /**
      * 验证时忽略大小写
      */
-    private boolean verificationIgnoreCase;
+    private boolean verificationIgnoreCase = true;
 
     /**
      * 业务分组

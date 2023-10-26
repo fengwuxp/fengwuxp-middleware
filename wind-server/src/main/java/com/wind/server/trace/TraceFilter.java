@@ -32,6 +32,8 @@ public class TraceFilter extends OncePerRequestFilter {
         request.setAttribute(HTTP_REQUEST_IP_ATTRIBUTE_NAME, HttpTraceUtils.getRequestSourceIp(request));
         HttpTraceUtils.trace(request);
         try {
+            // 提前写入 traceId 到响应头，避免 response committed 后
+            response.setHeader(WIND_TRANCE_ID_HEADER_NAME, HttpTraceUtils.getTraceContext().getTraceId());
             chain.doFilter(request, response);
         } catch (Throwable throwable) {
             // 统一错误捕获
@@ -39,8 +41,6 @@ public class TraceFilter extends OncePerRequestFilter {
             ApiResp<Void> resp = RestfulApiRespFactory.withThrowable(throwable);
             HttpResponseMessageUtils.writeApiResp(response, resp);
         } finally {
-            // 写会 traceId
-            response.setHeader(WIND_TRANCE_ID_HEADER_NAME, HttpTraceUtils.getTraceContext().getTraceId());
             HttpTraceUtils.clearTrace();
         }
     }
