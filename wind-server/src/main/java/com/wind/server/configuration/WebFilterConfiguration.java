@@ -2,10 +2,7 @@ package com.wind.server.configuration;
 
 import com.wind.server.trace.TraceFilter;
 import com.wind.server.web.filters.IndexHtmlResourcesFilter;
-import com.wind.server.web.filters.RequestSourceIpFilter;
-import com.wind.server.web.filters.RestfulErrorHandleFilter;
 import com.wind.server.web.filters.WindWebFilterOrdered;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -17,7 +14,6 @@ import java.util.function.Function;
 
 import static com.wind.common.WindConstants.ENABLED_NAME;
 import static com.wind.common.WindConstants.INDEX_HTML_FILTER_EXPRESSION;
-import static com.wind.common.WindConstants.RESTFUL_ERROR_FILTER_EXPRESSION;
 import static com.wind.common.WindConstants.TRACE_FILTER_EXPRESSION;
 import static com.wind.common.WindConstants.TRUE;
 
@@ -35,6 +31,15 @@ public class WebFilterConfiguration {
      */
     public static final String INDEX_HTML_RESOURCE_LOADER_BEAN_NAME = "webIndexHtmlStaticResourceLoader";
 
+    @Bean
+    @ConditionalOnProperty(prefix = TRACE_FILTER_EXPRESSION, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
+    public FilterRegistrationBean<TraceFilter> traceFilter() {
+        FilterRegistrationBean<TraceFilter> result = new FilterRegistrationBean<>();
+        result.setFilter(new TraceFilter());
+        result.setOrder(WindWebFilterOrdered.TRACE_FILTER.getOrder());
+        return result;
+    }
+
     @SuppressWarnings("unchecked")
     @Bean
     @ConditionalOnProperty(prefix = INDEX_HTML_FILTER_EXPRESSION, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
@@ -43,32 +48,6 @@ public class WebFilterConfiguration {
         FilterRegistrationBean<IndexHtmlResourcesFilter> result = new FilterRegistrationBean<>();
         result.setFilter(new IndexHtmlResourcesFilter(context.getBean(INDEX_HTML_RESOURCE_LOADER_BEAN_NAME, Function.class)));
         result.setOrder(WindWebFilterOrdered.INDEX_HTML_FILTER.getOrder());
-        return result;
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = RESTFUL_ERROR_FILTER_EXPRESSION, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
-    public FilterRegistrationBean<RestfulErrorHandleFilter> restfulErrorHandleFilter() {
-        FilterRegistrationBean<RestfulErrorHandleFilter> result = new FilterRegistrationBean<>();
-        result.setFilter(new RestfulErrorHandleFilter());
-        result.setOrder(WindWebFilterOrdered.RESTFUL_ERROR_FILTER.getOrder());
-        return result;
-    }
-
-    @Bean
-    public FilterRegistrationBean<RequestSourceIpFilter> requestSourceIpFilter() {
-        FilterRegistrationBean<RequestSourceIpFilter> result = new FilterRegistrationBean<>();
-        result.setFilter(new RequestSourceIpFilter());
-        result.setOrder(WindWebFilterOrdered.REQUEST_SOURCE_FILTER.getOrder());
-        return result;
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = TRACE_FILTER_EXPRESSION, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
-    public FilterRegistrationBean<TraceFilter> traceFilter() {
-        FilterRegistrationBean<TraceFilter> result = new FilterRegistrationBean<>();
-        result.setFilter(new TraceFilter());
-        result.setOrder(WindWebFilterOrdered.TRACE_FILTER.getOrder());
         return result;
     }
 

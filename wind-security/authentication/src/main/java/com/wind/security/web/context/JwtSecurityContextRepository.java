@@ -21,6 +21,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static com.wind.security.WebSecurityConstants.LOGIN_JWT_TOKEN_INVALID;
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 /**
@@ -31,8 +32,6 @@ import static org.springframework.security.web.context.HttpSessionSecurityContex
  **/
 @AllArgsConstructor
 public class JwtSecurityContextRepository implements SecurityContextRepository {
-
-    private static final String LOGIN_JWT_TOKEN_INVALID = "$.login.jwt.token.invalid";
 
     private static final SecurityContext EMPTY = new SecurityContextImpl();
 

@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.wind.security.core.rbac.RbacResourceCache;
 import com.wind.security.core.rbac.RbacResourceCacheSupplier;
 import lombok.AllArgsConstructor;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.time.Duration;
@@ -24,7 +25,7 @@ import java.util.function.Function;
 @AllArgsConstructor
 public class CaffeineRbacResourceCacheSupplier implements RbacResourceCacheSupplier {
 
-    private final Map<String, RbacResourceCache<String, Object>> caches = new ConcurrentHashMap<>();
+    private final Map<String, RbacResourceCache<String, Object>> caches = new ConcurrentHashMap<>(8);
 
     private final Duration cacheEffectiveTime;
 
@@ -34,29 +35,26 @@ public class CaffeineRbacResourceCacheSupplier implements RbacResourceCacheSuppl
     }
 
     private RbacResourceCache<String, Object> buildCache(Executor executor) {
-        return new CaffeineRbacResourceCache<>(buildRolesCaches(executor));
+        return new CaffeineRbacResourceCache<>(cacheEffectiveTime, executor);
     }
 
-    private Cache<String, Object> buildRolesCaches(Executor executor) {
-        return Caffeine.newBuilder()
-                .executor(executor)
-                // 设置最后一次写入或访问后经过固定时间过期
-                .expireAfterWrite(cacheEffectiveTime.getSeconds() + 10, TimeUnit.SECONDS)
-                // 初始的缓存空间大小
-                .initialCapacity(200)
-                // 缓存的最大条数
-                .maximumSize(2000).build();
-    }
-
-    @AllArgsConstructor
-    static class CaffeineRbacResourceCache<K, V> implements RbacResourceCache<K, V> {
+    public static class CaffeineRbacResourceCache<K, V> implements RbacResourceCache<K, V> {
 
         private final Cache<K, V> cache;
+
+        public CaffeineRbacResourceCache(Duration cacheEffectiveTime, Executor executor) {
+            this.cache = buildRolesCaches(cacheEffectiveTime, executor);
+        }
 
         @Nullable
         @Override
         public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
             return cache.get(key, mappingFunction);
+        }
+
+        @Override
+        public Map<K, V> getAllAsMap(Collection<K> keys, Function<Iterable<? extends @NonNull K>, @NonNull Map<K, V>> mappingFunction) {
+            return cache.getAll(keys, mappingFunction);
         }
 
         @Override
@@ -72,6 +70,18 @@ public class CaffeineRbacResourceCacheSupplier implements RbacResourceCacheSuppl
         @Override
         public Collection<V> values() {
             return cache.asMap().values();
+        }
+
+        private static <K, V> Cache<K, V> buildRolesCaches(Duration cacheEffectiveTime, Executor executor) {
+            return Caffeine.newBuilder()
+                    .executor(executor)
+                    // 设置最后一次写入或访问后经过固定时间过期
+                    .expireAfterWrite(cacheEffectiveTime.getSeconds() + 10, TimeUnit.SECONDS)
+                    // 初始的缓存空间大小
+                    .initialCapacity(200)
+                    // 缓存的最大条数
+                    .maximumSize(2000)
+                    .build();
         }
     }
 }

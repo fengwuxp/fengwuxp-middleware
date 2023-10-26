@@ -1,9 +1,15 @@
 package com.wind.security.core.rbac;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * rbac 缓存 适配器
@@ -24,12 +30,51 @@ public interface RbacResourceCache<K, V> {
     V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction);
 
     /**
+     * 批量获取数据
+     * 空数据将会被过滤
+     *
+     * @param keys key 列表
+     * @return 结果集
+     */
+    default List<V> getAll(Collection<K> keys) {
+        return getAllAsMap(keys).values().stream().filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    /**
+     * 批量获取数据
+     * 数据不存在的 keys 将会被忽略
+     *
+     * @param keys key 列表
+     * @return Cache Map slice
+     */
+    default Map<K, V> getAllAsMap(Collection<K> keys) {
+        return getAllAsMap(keys, ks -> Collections.emptyMap());
+    }
+
+    /**
+     * 批量获取数据
+     *
+     * @param keys key 列表
+     * @return Cache  Map slice
+     */
+    Map<K, V> getAllAsMap(Collection<K> keys, Function<Iterable<? extends @NonNull K>, @NonNull Map<K, V>> mappingFunction);
+
+    /**
      * 添加值到缓存中
      *
      * @param key   缓存 key
      * @param value 缓存值
      */
     void put(K key, V value);
+
+    /**
+     * 从缓存中批量移除值
+     *
+     * @param keys 缓存 key
+     */
+    default void removeAll(Collection<K> keys) {
+        keys.forEach(this::remove);
+    }
 
     /**
      * 从缓存中移除值

@@ -1,6 +1,5 @@
 package com.wind.security.authority.rbac;
 
-import com.google.common.collect.ImmutableList;
 import com.wind.common.exception.AssertUtils;
 import com.wind.security.core.rbac.RbacResource;
 import com.wind.security.core.rbac.RbacResourceCache;
@@ -17,11 +16,18 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static com.wind.security.WebSecurityConstants.RBAC_PERMISSION_CACHE_NAME;
+import static com.wind.security.WebSecurityConstants.RBAC_ROLE_CACHE_NAME;
+import static com.wind.security.WebSecurityConstants.RBAC_USER_ROLE_CACHE_NAME;
 
 /**
  * 基于缓存的 RbacResourceService
@@ -32,21 +38,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @AllArgsConstructor
 public class WebRbacResourceService implements RbacResourceService, ApplicationListener<RbacResourceChangeEvent>, InitializingBean {
-
-    /**
-     * rbac 权限缓存名称
-     */
-    private static final String RBA_PERMISSION_CACHE_NAME = "RBAC_PERMISSION_CACHE";
-
-    /**
-     * rbac 角色缓存名称
-     */
-    private static final String RBA_ROLE_CACHE_NAME = "RBAC_ROLE_CACHE";
-
-    /**
-     * rbac 用户角色缓存名称
-     */
-    private static final String RBA_USER_ROLE_CACHE_NAME = "RBAC_USER_ROLE_CACHE";
 
     private final RbacResourceCacheSupplier cacheSupplier;
 
@@ -64,17 +55,13 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public List<RbacResource.Permission> getAllPermissions() {
-        List result = ImmutableList.copyOf(getPermissionCache().values());
-        return (List<RbacResource.Permission>) result;
+        return getPermissionCache().values().stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public List<RbacResource.Role> getAllRoles() {
-        List result = ImmutableList.copyOf(getRoleCache().values());
-        return (List<RbacResource.Role>) result;
+        return getRoleCache().values().stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     @Nullable
@@ -83,10 +70,21 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
         return getPermissionCache().computeIfAbsent(permissionId, delegate::findPermissionById);
     }
 
+    @Override
+    public List<RbacResource.Permission> findPermissionByIds(Collection<String> permissionIds) {
+        return getPermissionCache().getAll(permissionIds);
+    }
+
     @Nullable
     @Override
     public RbacResource.Role findRoleById(String roleId) {
         return getRoleCache().computeIfAbsent(roleId, delegate::findRoleById);
+    }
+
+    @Nullable
+    @Override
+    public List<RbacResource.Role> findRoleByIds(Collection<String> roleIds) {
+        return getRoleCache().getAll(roleIds);
     }
 
     @Override
@@ -98,38 +96,33 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     public void onApplicationEvent(@NonNull RbacResourceChangeEvent event) {
         log.info("refresh rbac cache , type = {} , ids = {}", event.getResourceType().getName(), event.getResourceIds());
         if (event.getResourceType() == RbacResource.Permission.class) {
-            // 权限内容变更
-            event.getResourceIds().forEach(id -> {
-                RbacResource.Permission permission = delegate.findPermissionById(id);
-                if (permission == null) {
-                    getPermissionCache().remove(id);
-                } else {
-                    putPermissionCaches(permission);
-                }
-            });
+            if (event.isDeleted()) {
+                // 权限删除
+                getPermissionCache().removeAll(event.getResourceIds());
+            } else {
+                // 权限内容变更
+                delegate.findPermissionByIds(event.getResourceIds()).forEach(this::putPermissionCaches);
+            }
         }
 
         if (event.getResourceType() == RbacResource.Role.class) {
-            // 角色内容变更
-            event.getResourceIds().forEach(id -> {
-                RbacResource.Role role = delegate.findRoleById(id);
-                if (role == null) {
-                    getRoleCache().remove(id);
-                } else {
-                    putRoleCaches(role);
-                }
-            });
+            if (event.isDeleted()) {
+                // 角色删除
+                getRoleCache().removeAll(event.getResourceIds());
+            } else {
+                // 角色内容变更
+                delegate.findRoleByIds(event.getResourceIds()).forEach(this::putRoleCaches);
+            }
         }
+
         if (event.getResourceType() == RbacResource.User.class) {
-            // 用户角色内容变更
-            event.getResourceIds().forEach(id -> {
-                Set<RbacResource.Role> roles = delegate.findRolesByUserId(id);
-                if (roles == null) {
-                    getUserRoleCache().remove(id);
-                } else {
-                    getUserRoleCache().put(id, roles);
-                }
-            });
+            if (event.isDeleted()) {
+                // 用户角色删除
+                getUserRoleCache().removeAll(event.getResourceIds());
+            } else {
+                // 用户角色内容变更
+                event.getResourceIds().forEach(id -> getUserRoleCache().put(id, delegate.findRolesByUserId(id)));
+            }
         }
     }
 
@@ -165,17 +158,17 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
 
     @Nonnull
     private RbacResourceCache<String, RbacResource.Permission> getPermissionCache() {
-        return requiredCache(RBA_PERMISSION_CACHE_NAME);
+        return requiredCache(RBAC_PERMISSION_CACHE_NAME);
     }
 
     @Nonnull
     private RbacResourceCache<String, RbacResource.Role> getRoleCache() {
-        return requiredCache(RBA_ROLE_CACHE_NAME);
+        return requiredCache(RBAC_ROLE_CACHE_NAME);
     }
 
     @Nonnull
     private RbacResourceCache<String, Set<RbacResource.Role>> getUserRoleCache() {
-        return requiredCache(RBA_USER_ROLE_CACHE_NAME);
+        return requiredCache(RBAC_USER_ROLE_CACHE_NAME);
     }
 
     private void putPermissionCaches(RbacResource.Permission permission) {

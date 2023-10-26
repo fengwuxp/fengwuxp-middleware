@@ -44,11 +44,11 @@ public interface RbacResourceService {
      * @param permissionIds 权限 id 集合
      * @return 权限集合
      */
-    default Set<RbacResource.Permission> findPermissionByIds(Collection<String> permissionIds) {
+    default List<RbacResource.Permission> findPermissionByIds(Collection<String> permissionIds) {
         if (permissionIds == null) {
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
-        return Collections.unmodifiableSet(permissionIds.stream().map(this::findPermissionById).collect(Collectors.toSet()));
+        return Collections.unmodifiableList(permissionIds.stream().map(this::findPermissionById).collect(Collectors.toList()));
     }
 
     /**
@@ -59,6 +59,18 @@ public interface RbacResourceService {
     RbacResource.Role findRoleById(String roleId);
 
     /**
+     * @param roleIds 角色 ids
+     * @return 角色
+     */
+    @Nullable
+    default List<RbacResource.Role> findRoleByIds(Collection<String> roleIds) {
+        if (roleIds == null) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableList(roleIds.stream().map(this::findRoleById).collect(Collectors.toList()));
+    }
+
+    /**
      * 获取用户拥有的角色
      * 如果系统中有多种类型的用户 {@param userId}，可以使用 {type}_{id} 组合
      *
@@ -67,5 +79,6 @@ public interface RbacResourceService {
      */
     @NotEmpty()
     Set<RbacResource.Role> findRolesByUserId(String userId);
+
 
 }

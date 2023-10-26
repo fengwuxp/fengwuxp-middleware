@@ -1,15 +1,21 @@
 package com.wind.trace.http;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.wind.common.WindConstants;
+import com.wind.common.utils.IpAddressUtils;
 import com.wind.sequence.SequenceGenerator;
 import com.wind.trace.WindTraceContext;
 import com.wind.web.utils.HttpServletRequestUtils;
 import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.NonNull;
 
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 
 import static com.wind.common.WindConstants.HTTP_REQUEST_UR_TRACE_NAME;
 import static com.wind.common.WindConstants.TRACE_ID_NAME;
@@ -24,6 +30,21 @@ import static com.wind.common.WindHttpConstants.HTTP_USER_AGENT_HEADER_NAME;
  * @date 2023-10-18 22:32
  **/
 public final class HttpTraceUtils {
+
+    /**
+     * ip 头名称
+     */
+    private static final Set<String> IP_HEAD_NAMES = ImmutableSet.copyOf(
+            Arrays.asList(
+                    "X-Real-IP",
+                    "X-Forwarded-For",
+                    "Proxy-Client-IP",
+                    "WL-Proxy-Client-IP",
+                    "REMOTE-HOST",
+                    "HTTP_CLIENT_IP",
+                    "HTTP_X_FORWARDED_FOR")
+    );
+
     private static final SequenceGenerator TRACE_ID = SequenceGenerator.randomAlphanumeric(32);
 
     private HttpTraceUtils() {
@@ -82,5 +103,30 @@ public final class HttpTraceUtils {
             context.forEach(MDC::put);
         }
         return context;
+    }
+
+    /**
+     * 获取请求来源 IP 地址, 如果通过代理进来，则透过防火墙获取真实IP地址
+     *
+     * @param request 请求对象
+     * @return 真实 ip
+     */
+    @NonNull
+    public static String getRequestSourceIp(HttpServletRequest request) {
+        for (String headName : IP_HEAD_NAMES) {
+            String ip = request.getHeader(headName);
+            if (ip == null || ip.trim().isEmpty()) {
+                continue;
+            }
+            ip = ip.trim();
+            // 对于通过多个代理的情况， 第一个 ip 为客户端真实IP,多个IP按照 ',' 分隔
+            String[] sections = ip.split(WindConstants.COMMA);
+            for (String section : sections) {
+                if (IpAddressUtils.isValidIp(section)) {
+                    return section;
+                }
+            }
+        }
+        return request.getRemoteAddr();
     }
 }

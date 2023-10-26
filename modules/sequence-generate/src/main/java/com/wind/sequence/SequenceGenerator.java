@@ -35,7 +35,7 @@ public interface SequenceGenerator {
      * @return 序列号生成器
      */
     static SequenceGenerator randomAlphanumeric(int len) {
-        return () -> RandomStringUtils.randomNumeric(len);
+        return () -> RandomStringUtils.randomAlphanumeric(len);
     }
 
 }

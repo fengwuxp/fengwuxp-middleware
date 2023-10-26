@@ -22,9 +22,15 @@ public class RbacResourceChangeEvent extends ApplicationEvent {
 
     private final Class<?> resourceType;
 
-    private RbacResourceChangeEvent(Collection<String> ids, Class<?> resourceType) {
+    /**
+     * 删除操作
+     */
+    private final boolean deleted;
+
+    private RbacResourceChangeEvent(Collection<String> ids, Class<?> resourceType, boolean deleted) {
         super(ids == null ? Collections.emptyList() : Collections.unmodifiableCollection(ids));
         this.resourceType = resourceType;
+        this.deleted = deleted;
     }
 
     /**
@@ -35,28 +41,82 @@ public class RbacResourceChangeEvent extends ApplicationEvent {
         return (Collection<String>) getSource();
     }
 
-    public static void refreshPermission(Collection<Long> ids) {
+    /**
+     * 刷新权限缓存
+     *
+     * @param ids 权限 id
+     */
+    public static void refreshPermissions(Collection<Long> ids) {
         refreshPermissionTextIds(idAsText(ids));
     }
 
-    public static void refreshRole(Collection<Long> ids) {
-        refreshRoleTextIds(idAsText(ids));
+    /**
+     * 刷新角色缓存
+     *
+     * @param roleIds 角色 id
+     */
+    public static void refreshRoles(Collection<Long> roleIds) {
+        refreshRoleTextIds(idAsText(roleIds));
     }
 
-    public static void refreshUser(Collection<Long> ids) {
-        refreshUserTextIds(idAsText(ids));
+    /**
+     * 刷新用户关联角色缓存
+     *
+     * @param userIds 用户 id
+     */
+    public static void refreshUserRoles(Collection<Long> userIds) {
+        refreshUserRoleTextIds(idAsText(userIds));
     }
 
     public static void refreshPermissionTextIds(Collection<String> ids) {
-        publish(new RbacResourceChangeEvent(ids, RbacResource.Permission.class));
+        publish(new RbacResourceChangeEvent(ids, RbacResource.Permission.class, false));
     }
 
     public static void refreshRoleTextIds(Collection<String> ids) {
-        publish(new RbacResourceChangeEvent(ids, RbacResource.Role.class));
+        publish(new RbacResourceChangeEvent(ids, RbacResource.Role.class, false));
     }
 
-    public static void refreshUserTextIds(Collection<String> ids) {
-        publish(new RbacResourceChangeEvent(ids, RbacResource.User.class));
+    public static void refreshUserRoleTextIds(Collection<String> ids) {
+        publish(new RbacResourceChangeEvent(ids, RbacResource.User.class, false));
+    }
+
+    /**
+     * 删除权限
+     *
+     * @param permissionIds 权限 id
+     */
+    public static void removePermissions(Collection<Long> permissionIds) {
+        removePermissionTextIds(idAsText(permissionIds));
+    }
+
+    /**
+     * 删除角色
+     *
+     * @param roleIds 角色 id
+     */
+    public static void removeRoles(Collection<Long> roleIds) {
+        removeRoleTextIds(idAsText(roleIds));
+    }
+
+    /**
+     * 删除用户关联的角色
+     *
+     * @param userIds 用户 id
+     */
+    public static void removeUserRoles(Collection<Long> userIds) {
+        removeUserRoleTextIds(idAsText(userIds));
+    }
+
+    public static void removePermissionTextIds(Collection<String> ids) {
+        publish(new RbacResourceChangeEvent(ids, RbacResource.Permission.class, true));
+    }
+
+    public static void removeRoleTextIds(Collection<String> ids) {
+        publish(new RbacResourceChangeEvent(ids, RbacResource.Role.class, true));
+    }
+
+    public static void removeUserRoleTextIds(Collection<String> ids) {
+        publish(new RbacResourceChangeEvent(ids, RbacResource.User.class, true));
     }
 
     private static void publish(RbacResourceChangeEvent event) {

@@ -15,4 +15,24 @@ public final class WebSecurityConstants {
      * 保存在请求上线文中，当前请求需要的权限
      */
     public static final String REQUEST_REQUIRED_ROLES_ATTRIBUTE_NAME = "REQUEST_REQUIRED_ROLES";
+
+    /**
+     * rbac 权限缓存名称
+     */
+    public static final String RBAC_PERMISSION_CACHE_NAME = "RBAC_PERMISSION_CACHE";
+
+    /**
+     * rbac 角色缓存名称
+     */
+    public static final String RBAC_ROLE_CACHE_NAME = "RBAC_ROLE_CACHE";
+
+    /**
+     * rbac 用户角色缓存名称
+     */
+    public static final String RBAC_USER_ROLE_CACHE_NAME = "RBAC_USER_ROLE_CACHE";
+
+    /**
+     * 登录已失效
+     */
+    public static final String LOGIN_JWT_TOKEN_INVALID = "$.login.jwt.token.invalid";
 }

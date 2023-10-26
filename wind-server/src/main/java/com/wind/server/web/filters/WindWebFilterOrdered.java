@@ -13,24 +13,15 @@ import org.springframework.core.Ordered;
 @Getter
 public enum WindWebFilterOrdered implements Ordered, DescriptiveEnum {
 
-
-    RESTFUL_ERROR_FILTER(Ordered.HIGHEST_PRECEDENCE + 30, "RestfulErrorHandleFilter"),
-
+    TRACE_FILTER(Ordered.HIGHEST_PRECEDENCE + 30, "TraceFilter"),
 
     INDEX_HTML_FILTER(Ordered.HIGHEST_PRECEDENCE + 100, "RestfulErrorHandleFilter"),
 
-    REQUEST_SOURCE_FILTER(Ordered.HIGHEST_PRECEDENCE + 1000, "RequestSourceIpFilter"),
-
-    TRACE_FILTER(Ordered.HIGHEST_PRECEDENCE + 1010, "TraceFilter"),
-
     REQUEST_SIGN_FILTER(Ordered.HIGHEST_PRECEDENCE + 1030, "RequestSignFilter"),
-
     ;
-
 
     private final int order;
 
     private final String desc;
-
 
 }
