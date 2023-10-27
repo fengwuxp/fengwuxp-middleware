@@ -1,6 +1,7 @@
 package com.wind.server.configuration;
 
 import com.wind.common.exception.AssertUtils;
+import com.wind.common.spring.ApplicationContextUtils;
 import com.wind.context.injection.MethodParameterInjector;
 import com.wind.script.auditlog.AuditLogRecorder;
 import com.wind.script.auditlog.ScriptAuditLogRecorder;
@@ -40,6 +41,11 @@ import static com.wind.common.WindConstants.WIND_SERVER_PROPERTIES_PREFIX;
 @ConditionalOnProperty(prefix = WIND_SERVER_PROPERTIES_PREFIX, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
 @Slf4j
 public class WindServerAutoConfiguration {
+
+    @Bean
+    public ApplicationContextUtils applicationContextUtils(ApplicationContext context) {
+        return new ApplicationContextUtils(context);
+    }
 
     @Bean
     public RespfulErrorAttributes respfulErrorAttributes() {

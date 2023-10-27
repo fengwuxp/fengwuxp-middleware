@@ -3,7 +3,6 @@ package com.wind.security.core.rbac;
 import com.wind.common.spring.ApplicationContextUtils;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -120,7 +119,7 @@ public class RbacResourceChangeEvent extends ApplicationEvent {
     }
 
     private static void publish(RbacResourceChangeEvent event) {
-        ApplicationContextUtils.getBean(ApplicationEventPublisher.class).publishEvent(event);
+        ApplicationContextUtils.getContext().publishEvent(event);
     }
 
     private static Collection<String> idAsText(Collection<Long> ids) {
