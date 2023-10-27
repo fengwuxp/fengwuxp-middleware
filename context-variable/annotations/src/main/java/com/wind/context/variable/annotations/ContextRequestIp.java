@@ -15,7 +15,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  **/
 @Target({FIELD, PARAMETER})
 @Retention(RUNTIME)
-@ContextVariable(name = ContextVariableNames.REQUEST_IP, override = false)
+@ContextVariable(name = ContextVariableNames.REQUEST_IP, override = false, required = false)
 public @interface ContextRequestIp {
 
     /**

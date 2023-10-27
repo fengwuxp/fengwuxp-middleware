@@ -15,7 +15,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  **/
 @Target({FIELD, PARAMETER})
 @Retention(RUNTIME)
-@ContextVariable(name = ContextVariableNames.TENANT_ID, override = false)
+@ContextVariable(name = ContextVariableNames.TENANT_ID, override = false, required = false)
 public @interface ContextTenantId {
 
     /**

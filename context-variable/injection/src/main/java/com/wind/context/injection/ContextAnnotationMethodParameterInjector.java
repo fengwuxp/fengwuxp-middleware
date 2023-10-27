@@ -224,7 +224,7 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
         Consumer<Object> requiredCheckWrapper(Consumer<Object> consumer) {
             return value -> {
                 if (required) {
-                    AssertUtils.notNull(value, () -> String.format("%s must not null", fieldName));
+                    AssertUtils.state(value != null, () -> BaseException.badRequest(String.format("%s must not null", fieldName)));
                 }
                 consumer.accept(value);
             };
