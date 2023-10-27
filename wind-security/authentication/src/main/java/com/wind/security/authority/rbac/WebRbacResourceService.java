@@ -17,6 +17,7 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -127,7 +128,7 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet()  {
         refreshRefresh();
     }
 
@@ -150,33 +151,68 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
 
     @NonNull
     @SuppressWarnings("unchecked")
-    private <T> RbacResourceCache<String, T> requiredCache(String cacheName) {
-        RbacResourceCache<String, Object> result = cacheSupplier.apply(cacheName, schedule);
+    private <T> RbacResourceCache<String, T> requiredCache(String cacheName, RbacResourceCache.CacheLoader<String, Object> loader) {
+        RbacResourceCache<String, Object> result = cacheSupplier.apply(cacheName, loader);
         AssertUtils.notNull(result, String.format("获取 Cache 失败，CacheName = %s", cacheName));
         return (RbacResourceCache<String, T>) result;
     }
 
     @Nonnull
     private RbacResourceCache<String, RbacResource.Permission> getPermissionCache() {
-        return requiredCache(RBAC_PERMISSION_CACHE_NAME);
+        return requiredCache(RBAC_PERMISSION_CACHE_NAME, new RbacResourceCache.CacheLoader<String, Object>() {
+            @Override
+            public Object load(String key) {
+                return delegate.findPermissionById(key);
+            }
+
+            @Override
+            public Iterable<String> loadAllKeys() {
+                return delegate.getAllPermissions().stream().map(RbacResource.Permission::getId).collect(Collectors.toSet());
+            }
+        });
     }
 
     @Nonnull
     private RbacResourceCache<String, RbacResource.Role> getRoleCache() {
-        return requiredCache(RBAC_ROLE_CACHE_NAME);
+        return requiredCache(RBAC_ROLE_CACHE_NAME, new RbacResourceCache.CacheLoader<String, Object>() {
+            @Override
+            public Object load(String key) {
+                return delegate.findRoleById(key);
+            }
+
+            @Override
+            public Iterable<String> loadAllKeys() {
+                return delegate.getAllRoles().stream().map(RbacResource.Role::getId).collect(Collectors.toSet());
+            }
+        });
     }
 
     @Nonnull
     private RbacResourceCache<String, Set<RbacResource.Role>> getUserRoleCache() {
-        return requiredCache(RBAC_USER_ROLE_CACHE_NAME);
+        return requiredCache(RBAC_USER_ROLE_CACHE_NAME, new RbacResourceCache.CacheLoader<String, Object>() {
+            @Override
+            public Object load(String key) {
+                return delegate.findRolesByUserId(key);
+            }
+
+            @Override
+            public Iterable<String> loadAllKeys() {
+                // 由于已登录用户数量不确定，返回空
+                return Collections.emptyList();
+            }
+        });
     }
 
     private void putPermissionCaches(RbacResource.Permission permission) {
-        getPermissionCache().put(permission.getId(), permission);
+        if (permission != null) {
+            getPermissionCache().put(permission.getId(), permission);
+        }
     }
 
     private void putRoleCaches(RbacResource.Role role) {
-        getRoleCache().put(role.getId(), role);
+        if (role != null) {
+            getRoleCache().put(role.getId(), role);
+        }
     }
 
 }

@@ -89,4 +89,25 @@ public interface RbacResourceCache<K, V> {
      * @return 缓存内容
      */
     Collection<V> values();
+
+
+     interface CacheLoader<K, V> {
+
+        /**
+         * Loads map value by key.
+         *
+         * @param key - map key
+         * @return value or <code>null</code> if value doesn't exists
+         */
+        V load(K key);
+
+        /**
+         * Loads all keys.
+         *
+         * @return Iterable object. It's helpful if all keys don't fit in memory.
+         */
+        Iterable<K> loadAllKeys();
+
+    }
+
 }

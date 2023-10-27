@@ -109,7 +109,9 @@ public class WebRequestAuthorizationManager implements AuthorizationManager<Requ
      * @return 有 {@param permissionIds} 权限的角色
      */
     private Set<String> getRolesByPermissionIds(Set<String> permissionIds) {
-        List<RbacResource.Role> roles = rbacResourceService.getAllRoles();
+        List<RbacResource.Role> roles = rbacResourceService.getAllRoles().stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
         Set<String> result = permissionIds.stream()
                 .map(id -> findRoleByPermissionId(id, roles))
                 .filter(Objects::nonNull)
@@ -129,7 +131,9 @@ public class WebRequestAuthorizationManager implements AuthorizationManager<Requ
 
     private Map<String, Set<RequestMatcher>> getRequestPermissionMatchers() {
         Map<String, Set<RequestMatcher>> result = new HashMap<>();
-        rbacResourceService.getAllPermissions().forEach(permission -> result.put(permission.getId(), RequestMatcherUtils.convertMatchers(permission.getAttributes())));
+        rbacResourceService.getAllPermissions().stream()
+                .filter(Objects::nonNull)
+                .forEach(permission -> result.put(permission.getId(), RequestMatcherUtils.convertMatchers(permission.getAttributes())));
         return result;
     }
 }

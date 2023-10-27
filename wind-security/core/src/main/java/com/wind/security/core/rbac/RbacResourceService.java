@@ -44,6 +44,7 @@ public interface RbacResourceService {
      * @param permissionIds 权限 id 集合
      * @return 权限集合
      */
+    @NotEmpty()
     default List<RbacResource.Permission> findPermissionByIds(Collection<String> permissionIds) {
         if (permissionIds == null) {
             return Collections.emptyList();
@@ -62,7 +63,7 @@ public interface RbacResourceService {
      * @param roleIds 角色 ids
      * @return 角色
      */
-    @Nullable
+    @NotEmpty()
     default List<RbacResource.Role> findRoleByIds(Collection<String> roleIds) {
         if (roleIds == null) {
             return Collections.emptyList();

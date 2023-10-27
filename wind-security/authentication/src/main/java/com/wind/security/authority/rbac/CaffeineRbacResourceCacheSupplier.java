@@ -12,7 +12,6 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -30,20 +29,20 @@ public class CaffeineRbacResourceCacheSupplier implements RbacResourceCacheSuppl
     private final Duration cacheEffectiveTime;
 
     @Override
-    public RbacResourceCache<String, Object> apply(String cacheName, Executor executor) {
-        return caches.computeIfAbsent(cacheName, k -> buildCache(executor));
+    public RbacResourceCache<String, Object> apply(String cacheName, RbacResourceCache.CacheLoader<String, Object> loader) {
+        return caches.computeIfAbsent(cacheName, k -> buildCache(loader));
     }
 
-    private RbacResourceCache<String, Object> buildCache(Executor executor) {
-        return new CaffeineRbacResourceCache<>(cacheEffectiveTime, executor);
+    private RbacResourceCache<String, Object> buildCache(RbacResourceCache.CacheLoader<String, Object> loader) {
+        return new CaffeineRbacResourceCache<>(cacheEffectiveTime, loader);
     }
 
     public static class CaffeineRbacResourceCache<K, V> implements RbacResourceCache<K, V> {
 
         private final Cache<K, V> cache;
 
-        public CaffeineRbacResourceCache(Duration cacheEffectiveTime, Executor executor) {
-            this.cache = buildRolesCaches(cacheEffectiveTime, executor);
+        public CaffeineRbacResourceCache(Duration cacheEffectiveTime, RbacResourceCache.CacheLoader<K, V> loader) {
+            this.cache = buildRolesCaches(cacheEffectiveTime, loader);
         }
 
         @Nullable
@@ -72,16 +71,15 @@ public class CaffeineRbacResourceCacheSupplier implements RbacResourceCacheSuppl
             return cache.asMap().values();
         }
 
-        private static <K, V> Cache<K, V> buildRolesCaches(Duration cacheEffectiveTime, Executor executor) {
+        private static <K, V> Cache<K, V> buildRolesCaches(Duration cacheEffectiveTime, RbacResourceCache.CacheLoader<K, V> loader) {
             return Caffeine.newBuilder()
-                    .executor(executor)
                     // 设置最后一次写入或访问后经过固定时间过期
                     .expireAfterWrite(cacheEffectiveTime.getSeconds() + 10, TimeUnit.SECONDS)
                     // 初始的缓存空间大小
                     .initialCapacity(200)
                     // 缓存的最大条数
                     .maximumSize(2000)
-                    .build();
+                    .build(loader::load);
         }
     }
 }
