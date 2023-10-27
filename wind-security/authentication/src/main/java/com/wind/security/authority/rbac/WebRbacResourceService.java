@@ -57,12 +57,14 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
 
     @Override
     public List<RbacResource.Permission> getAllPermissions() {
-        return getPermissionCache().values().stream().filter(Objects::nonNull).collect(Collectors.toList());
+        Collection<RbacResource.Permission> result = getPermissionCache().values();
+        return result == null ? Collections.emptyList() : result.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     @Override
     public List<RbacResource.Role> getAllRoles() {
-        return getRoleCache().values().stream().filter(Objects::nonNull).collect(Collectors.toList());
+        Collection<RbacResource.Role> result = getRoleCache().values();
+        return result == null ? Collections.emptyList() : result.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     @Nullable
@@ -73,7 +75,8 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
 
     @Override
     public List<RbacResource.Permission> findPermissionByIds(Collection<String> permissionIds) {
-        return getPermissionCache().getAll(permissionIds);
+        List<RbacResource.Permission> result = getPermissionCache().getAll(permissionIds);
+        return result == null ? Collections.emptyList() : result;
     }
 
     @Nullable
@@ -85,12 +88,14 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     @Nullable
     @Override
     public List<RbacResource.Role> findRoleByIds(Collection<String> roleIds) {
-        return getRoleCache().getAll(roleIds);
+        List<RbacResource.Role> result = getRoleCache().getAll(roleIds);
+        return result == null ? Collections.emptyList() : result;
     }
 
     @Override
     public Set<RbacResource.Role> findRolesByUserId(String userId) {
-        return getUserRoleCache().computeIfAbsent(userId, delegate::findRolesByUserId);
+        Set<RbacResource.Role> result = getUserRoleCache().computeIfAbsent(userId, delegate::findRolesByUserId);
+        return result == null ? Collections.emptySet() : result;
     }
 
     @Override
@@ -128,7 +133,7 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     }
 
     @Override
-    public void afterPropertiesSet()  {
+    public void afterPropertiesSet() {
         refreshRefresh();
     }
 

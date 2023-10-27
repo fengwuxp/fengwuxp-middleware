@@ -44,6 +44,11 @@ public class IndexHtmlResourcesFilter extends OncePerRequestFilter {
     public static final String INDEX_HTML_NAME = "/index.html";
 
     /**
+     * 默认缓存 180 天
+     */
+    private static final int CACHE_TIMES = 24 * 3600 * 180;
+
+    /**
      * 请求 index.html 页面的请求路径
      */
     private static final Set<String> INDEX_HTML_PATHS = ImmutableSet.of("/", INDEX_HTML_NAME, "/index.htm", "/web");
@@ -117,6 +122,7 @@ public class IndexHtmlResourcesFilter extends OncePerRequestFilter {
                 // js css 资源访问
                 response.getOutputStream().write(resourceLoader.apply(requestUri));
                 writeHeaders(response, requestUri);
+                response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=" + CACHE_TIMES);
                 return;
             }
         }
@@ -126,7 +132,7 @@ public class IndexHtmlResourcesFilter extends OncePerRequestFilter {
     private void writeHeaders(@Nonnull HttpServletResponse response, String requestUri) {
         HttpHeaders headers = HEADER_CACHES.getIfPresent(requestUri);
         if (headers == null) {
-           return;
+            return;
         }
         headers.forEach((name, values) -> {
             if (!ObjectUtils.isEmpty(values)) {
