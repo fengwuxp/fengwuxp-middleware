@@ -23,6 +23,8 @@ import java.nio.charset.StandardCharsets;
 @FieldNameConstants
 public class SignatureRequest {
 
+    private static final String MD5_TAG = "Md5";
+
     /**
      * http 请求方法
      */
@@ -77,7 +79,6 @@ public class SignatureRequest {
      * @return 获取签名字符串
      */
     public String getSignText() {
-        AssertUtils.isTrue(StringUtils.hasLength(nonce) && StringUtils.hasLength(timestamp), "验签请缺少必要参数");
         StringBuilder builder = new StringBuilder()
                 .append(Fields.method).append(WindConstants.EQ).append(method).append(WindConstants.AND)
                 .append(Fields.requestPath).append(WindConstants.EQ).append(requestPath).append(WindConstants.AND)
@@ -85,13 +86,13 @@ public class SignatureRequest {
                 .append(Fields.timestamp).append(WindConstants.EQ).append(timestamp);
         if (StringUtils.hasLength(queryString)) {
             builder.append(WindConstants.AND)
-                    .append(Fields.queryString)
+                    .append(String.format("%s%s", Fields.queryString, MD5_TAG))
                     .append(WindConstants.EQ)
                     .append(DigestUtils.md5DigestAsHex(queryString.getBytes(StandardCharsets.UTF_8)));
         }
         if (StringUtils.hasLength(requestBody)) {
             builder.append(WindConstants.AND)
-                    .append(Fields.requestBody)
+                    .append(String.format("%s%s", Fields.requestBody, MD5_TAG))
                     .append(WindConstants.EQ)
                     .append(DigestUtils.md5DigestAsHex(requestBody.getBytes(StandardCharsets.UTF_8)));
         }
