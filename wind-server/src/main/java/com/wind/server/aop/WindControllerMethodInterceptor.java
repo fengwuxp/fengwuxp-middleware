@@ -19,7 +19,7 @@ import java.lang.reflect.Method;
  **/
 @Slf4j
 @AllArgsConstructor
-public class WindControllerMethodAspect implements MethodInterceptor {
+public class WindControllerMethodInterceptor implements MethodInterceptor {
 
     private final ScriptAuditLogRecorder auditLogBuilder;
 

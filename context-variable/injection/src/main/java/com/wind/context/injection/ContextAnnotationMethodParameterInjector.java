@@ -85,35 +85,32 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
 
     private ParameterInjectionDescriptor[] parseParameterInjectionDescriptors(Method method) {
         List<ParameterInjectionDescriptor> result = new ArrayList<>(4);
-        int paramterIndex = 0;
         Parameter[] parameters = method.getParameters();
-        for (Class<?> parameterType : method.getParameterTypes()) {
-            if (isSimpleType(parameterType)) {
-                ContextVariable annotation = AnnotationUtils.findAnnotation(parameters[paramterIndex], ContextVariable.class);
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        for (int i = 0; i < parameters.length; i++) {
+            if (isSimpleType(parameterTypes[i])) {
+                ContextVariable annotation = AnnotationUtils.findAnnotation(parameters[i], ContextVariable.class);
                 if (annotation != null) {
-                    result.add(new ParameterInjectionDescriptor(annotation, parameterType, null, parameters[paramterIndex].getName(), paramterIndex));
+                    result.add(new ParameterInjectionDescriptor(annotation, parameterTypes[i], parameters[i], null, i));
                 }
             } else {
-                if (isAllowInject(parameterType)) {
-                    result.addAll(parseParameterInjectionDescriptors(parameterType, paramterIndex));
+                if (isAllowInject(parameterTypes[i])) {
+                    result.addAll(parseParameterInjectionDescriptors(parameters[i], parameterTypes[i], i));
                 }
             }
-            paramterIndex++;
         }
-        if (result.isEmpty()) {
-            return EMPTY;
-        }
-        return result.toArray(new ParameterInjectionDescriptor[0]);
+
+        return result.isEmpty() ? EMPTY : result.toArray(new ParameterInjectionDescriptor[0]);
     }
 
-    private List<ParameterInjectionDescriptor> parseParameterInjectionDescriptors(Class<?> parameterType, final int index) {
+    private List<ParameterInjectionDescriptor> parseParameterInjectionDescriptors(Parameter parameter, Class<?> parameterType, final int index) {
         return getClassFields(parameterType).stream()
                 .map(field -> {
                     ContextVariable annotation = AnnotationUtils.findAnnotation(field, ContextVariable.class);
                     if (annotation == null) {
                         return null;
                     }
-                    return new ParameterInjectionDescriptor(annotation, parameterType, field, null, index);
+                    return new ParameterInjectionDescriptor(annotation, parameterType, parameter, field, index);
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -155,9 +152,9 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
 
         private final String expression;
 
-        private final boolean required;
-
         private final boolean override;
+
+        private final Parameter parameter;
 
         /**
          * 注入字段或参数的类型
@@ -181,15 +178,15 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
          */
         private final int parameterIndex;
 
-        public ParameterInjectionDescriptor(ContextVariable variable, Class<?> type, @Nullable Field field, String parameterName, int parameterIndex) {
+        public ParameterInjectionDescriptor(ContextVariable variable, Class<?> type, Parameter parameter, @Nullable Field field, int parameterIndex) {
             this.variableName = variable.name();
             this.expression = variable.expression();
             this.override = variable.override();
-            this.required = variable.required();
+            this.parameter = parameter;
             this.type = type;
             this.setterMethod = field == null ? null : findSetterMethod(field);
             this.getterMethod = field == null ? null : findGetterMethod(field);
-            this.fieldName = field == null ? parameterName : field.getDeclaringClass().getName() + WindConstants.SHARP + field.getName();
+            this.fieldName = field == null ? parameter.getName() : field.getDeclaringClass().getName() + WindConstants.SHARP + field.getName();
             this.parameterIndex = parameterIndex;
         }
 
@@ -209,27 +206,15 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
                     () -> ReflectionUtils.invokeMethod(getterMethod, owner));
         }
 
-        @SuppressWarnings({"unchecked", "rawtypes"})
         private void injectWithOverride(Consumer<Object> setter, Object value, Supplier<Object> getter) {
-            // TODO 做类型转换？
             if (override) {
-                requiredCheckWrapper(setter).accept(value);
+                setter.accept(value);
             } else {
                 if (getter.get() == null) {
-                    requiredCheckWrapper(setter).accept(value);
+                    setter.accept(value);
                 }
             }
         }
-
-        Consumer<Object> requiredCheckWrapper(Consumer<Object> consumer) {
-            return value -> {
-                if (required) {
-                    AssertUtils.state(value != null, () -> BaseException.badRequest(String.format("%s must not null", fieldName)));
-                }
-                consumer.accept(value);
-            };
-        }
-
 
         Object evalVariable(Map<String, Object> contextVariables) {
             if (StringUtils.hasLength(variableName)) {

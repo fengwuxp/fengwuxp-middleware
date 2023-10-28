@@ -15,16 +15,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  **/
 @Target({FIELD, PARAMETER})
 @Retention(RUNTIME)
-@ContextVariable(name = ContextVariableNames.TENANT_ID, override = false, required = false)
+@ContextVariable(name = ContextVariableNames.TENANT_ID, override = false)
 public @interface ContextTenantId {
 
     /**
      * {@link ContextVariable#override()}
      */
     boolean override() default false;
-
-    /**
-     * {@link ContextVariable#required()}
-     */
-    boolean required() default false;
 }

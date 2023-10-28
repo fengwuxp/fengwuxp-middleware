@@ -6,7 +6,7 @@ import com.wind.context.injection.MethodParameterInjector;
 import com.wind.script.auditlog.AuditLogRecorder;
 import com.wind.script.auditlog.ScriptAuditLogRecorder;
 import com.wind.server.actuate.health.GracefulShutdownHealthIndicator;
-import com.wind.server.aop.WindControllerMethodAspect;
+import com.wind.server.aop.WindControllerMethodInterceptor;
 import com.wind.server.initialization.SystemInitializationListener;
 import com.wind.server.initialization.SystemInitializer;
 import com.wind.server.logging.WebAuditLogRecorder;
@@ -23,6 +23,7 @@ import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 
 import java.util.Collection;
 import java.util.Map;
@@ -61,7 +62,7 @@ public class WindServerAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = CONTROLLER_METHOD_ASPECT_NAME, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
-    public WindControllerMethodAspect windControllerMethodAspect(ApplicationContext context) {
+    public WindControllerMethodInterceptor windControllerMethodInterceptor(ApplicationContext context) {
         ScriptAuditLogRecorder recorder = null;
         try {
             recorder = context.getBean(ScriptAuditLogRecorder.class);
@@ -69,17 +70,19 @@ public class WindServerAutoConfiguration {
             log.debug("un enable audit log");
         }
         Map<String, MethodParameterInjector> injectors = context.getBeansOfType(MethodParameterInjector.class);
-        return new WindControllerMethodAspect(recorder, MethodParameterInjector.composite(injectors.values()));
+        return new WindControllerMethodInterceptor(recorder, MethodParameterInjector.composite(injectors.values()));
     }
 
     @Bean
-    @ConditionalOnBean(WindControllerMethodAspect.class)
-    public DefaultBeanFactoryPointcutAdvisor windControllerMethodAspectPointcutAdvisor(WindControllerMethodAspect advice, WindServerProperties properties) {
+    @ConditionalOnBean(WindControllerMethodInterceptor.class)
+    public DefaultBeanFactoryPointcutAdvisor windControllerMethodAspectPointcutAdvisor(WindControllerMethodInterceptor advice, WindServerProperties properties) {
         String expression = properties.getControllerMethodAspect().getExpression();
         AssertUtils.hasLength(expression, String.format("%s 未配置", CONTROLLER_METHOD_ASPECT_NAME));
         AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
         pointcut.setExpression(expression);
         DefaultBeanFactoryPointcutAdvisor advisor = new DefaultBeanFactoryPointcutAdvisor();
+        // 拦截优先级设置为最高
+        advisor.setOrder(Ordered.HIGHEST_PRECEDENCE);
         advisor.setPointcut(pointcut);
         advisor.setAdvice(advice);
         return advisor;

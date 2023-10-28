@@ -32,11 +32,6 @@ public @interface ContextVariable {
     String expression() default "";
 
     /**
-     * @return 字段是否必填
-     */
-    boolean required() default true;
-
-    /**
      * @return 注入时是允许否覆盖原有值
      */
     boolean override() default true;

@@ -23,8 +23,4 @@ public @interface ContextUserId {
      */
     boolean override() default true;
 
-    /**
-     * {@link ContextVariable#required()}
-     */
-    boolean required() default true;
 }
