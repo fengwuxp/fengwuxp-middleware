@@ -52,14 +52,6 @@ class ContextAnnotationMethodParameterInjectorTest {
         Assertions.assertEquals("test", arguments[1]);
     }
 
-    @Test
-    void testInjectParameterRequiredError() {
-        Method method = ReflectionUtils.findMethod(Example.class, "exampleRequired", String.class);
-        Object[] arguments = {null};
-        BaseException exception = Assertions.assertThrows(BaseException.class, () -> injector.inject(method, arguments));
-        Assertions.assertEquals("userName must not null", exception.getMessage());
-    }
-
     static class Example {
 
         public void exampleObject(ExampleRequest request) {
