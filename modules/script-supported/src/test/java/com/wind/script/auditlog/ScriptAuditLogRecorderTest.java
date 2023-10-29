@@ -12,14 +12,15 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
-class ScriptAuditLogRecoderTest {
+class ScriptAuditLogRecorderTest {
+
     private final SimpleScriptAuditLogRecorder logAspectRecorder = new SimpleScriptAuditLogRecorder();
 
     private final ExampleService exampleService = new ExampleService();
 
     private final Method getUserMethod = ReflectionUtils.findMethod(ExampleService.class, "getUser", String.class, String.class, Integer.class);
-    private final Method testMethod = ReflectionUtils.findMethod(ExampleService.class, "test", String.class, String.class, Integer.class);
 
+    private final Method testMethod = ReflectionUtils.findMethod(ExampleService.class, "test", String.class, String.class, Integer.class);
 
     @Test
     void testEvalLogContent() {
@@ -57,6 +58,7 @@ class ScriptAuditLogRecoderTest {
     static class SimpleScriptAuditLogRecorder extends ScriptAuditLogRecorder {
 
         private static final AtomicReference<AuditLogContent> AUDIT_LOG_CONTENT = new AtomicReference<>();
+
         private static final AtomicReference<Throwable> THROWABLE = new AtomicReference<>();
 
         public SimpleScriptAuditLogRecorder() {

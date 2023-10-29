@@ -19,12 +19,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 /**
+ * 将 spring web 默认的错误响应，适配为 {@link ApiResp}
+ *
  * @author wuxp
  * @date 2023-09-26 21:30
  **/
 public class RespfulErrorAttributes implements ErrorAttributes, HandlerExceptionResolver {
 
     public static final ExceptionCode WRAPPER_SPRING_HANDLE_ERROR = new ExceptionCode() {
+
         private static final long serialVersionUID = -7482532827509230523L;
 
         @Override

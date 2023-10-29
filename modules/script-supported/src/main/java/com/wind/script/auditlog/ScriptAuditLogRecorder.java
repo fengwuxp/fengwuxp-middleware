@@ -5,6 +5,7 @@ import com.wind.script.spring.SpringExpressionExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.lang.Nullable;
@@ -76,13 +77,13 @@ public class ScriptAuditLogRecorder {
         if (content == null) {
             return;
         }
-        auditLogRecorder.record(content, throwable);
+        auditLogRecorder.write(content, throwable);
     }
 
     @VisibleForTesting
     @Nullable
     AuditLogContent buildLogContent(Object[] arguments, @Nullable Object methodReturnValue, Method method, Throwable throwable) {
-        AuditLog auditLog = method == null ? null : method.getAnnotation(AuditLog.class);
+        AuditLog auditLog = method == null ? null : AnnotationUtils.getAnnotation(method, AuditLog.class);
         if (auditLog == null) {
             return null;
         }
@@ -95,7 +96,7 @@ public class ScriptAuditLogRecorder {
                 .args(arguments)
                 .resultValue(methodReturnValue)
                 .log(evalLog(auditLog.value(), evaluationContext, throwable))
-                .remark(StringUtils.hasLength(remark) ? evalLog(remark, evaluationContext, throwable) :(String) variables.get(AUDIT_LOG_REMARK_ATTRIBUTE_NAME))
+                .remark(StringUtils.hasLength(remark) ? evalLog(remark, evaluationContext, throwable) : (String) variables.get(AUDIT_LOG_REMARK_ATTRIBUTE_NAME))
                 .group(auditLog.group())
                 .type(auditLog.resourceType())
                 .operation(auditLog.operation())

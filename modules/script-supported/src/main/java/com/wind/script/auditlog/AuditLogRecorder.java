@@ -17,7 +17,7 @@ public interface AuditLogRecorder {
      * @param content   日志内容
      * @param throwable 请求异常，没有则为空
      */
-    void record(AuditLogContent content, @Nullable Throwable throwable);
+    void write(AuditLogContent content, @Nullable Throwable throwable);
 
 
 }
