@@ -1,6 +1,7 @@
 package com.wind.common.exception;
 
 
+import com.wind.common.message.MessagePlaceholder;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -50,10 +51,11 @@ public final class AssertUtils {
      *
      * @param expression a boolean expression
      * @param message    the exception message to use if the assertion fails
+     * @param args       message placeholder arguments
      * @throws BaseException if {@code expression} is {@code false}
      */
-    public static void isTrue(boolean expression, String message) {
-        state(expression, () -> BaseException.common(message));
+    public static void isTrue(boolean expression, String message, Object... args) {
+        state(expression, () -> BaseException.common(MessagePlaceholder.of(message, args)));
     }
 
     /**
@@ -73,8 +75,8 @@ public final class AssertUtils {
         state(expression, () -> BaseException.common(nullSafeGet(messageSupplier)));
     }
 
-    public static void isFalse(boolean expression, String message) {
-        isTrue(!expression, message);
+    public static void isFalse(boolean expression, String message, Object... args) {
+        isTrue(!expression, message, args);
     }
 
     public static void isFalse(boolean expression, Supplier<String> messageSupplier) {
@@ -87,10 +89,11 @@ public final class AssertUtils {
      *
      * @param object  the object to check
      * @param message the exception message to use if the assertion fails
+     * @param args       message placeholder arguments
      * @throws BaseException if the object is not {@code null}
      */
-    public static void isNull(@Nullable Object object, String message) {
-        isTrue(object == null, message);
+    public static void isNull(@Nullable Object object, String message, Object... args) {
+        isTrue(object == null, message, args);
     }
 
     /**
@@ -117,8 +120,8 @@ public final class AssertUtils {
      * @param message the exception message to use if the assertion fails
      * @throws BaseException if the object is {@code null}
      */
-    public static void notNull(@Nullable Object object, String message) {
-        isTrue(object != null, message);
+    public static void notNull(@Nullable Object object, String message, Object... args) {
+        isTrue(object != null, message, args);
     }
 
     /**
@@ -148,8 +151,8 @@ public final class AssertUtils {
      * @throws BaseException if the text is empty
      * @see StringUtils#hasLength
      */
-    public static void hasLength(@Nullable String text, String message) {
-        isTrue(StringUtils.hasLength(text), message);
+    public static void hasLength(@Nullable String text, String message, Object... args) {
+        isTrue(StringUtils.hasLength(text), message, args);
     }
 
     /**
@@ -181,8 +184,8 @@ public final class AssertUtils {
      * @throws BaseException if the text does not contain valid text content
      * @see StringUtils#hasText
      */
-    public static void hasText(@Nullable String text, String message) {
-        isTrue(StringUtils.hasText(text), message);
+    public static void hasText(@Nullable String text, String message, Object... args) {
+        isTrue(StringUtils.hasText(text), message, args);
     }
 
     /**
@@ -214,9 +217,9 @@ public final class AssertUtils {
      * @param message      the exception message to use if the assertion fails
      * @throws BaseException if the text contains the substring
      */
-    public static void doesNotContain(@Nullable String textToSearch, String substring, String message) {
+    public static void doesNotContain(@Nullable String textToSearch, String substring, String message, Object... args) {
         isFalse(StringUtils.hasLength(textToSearch) && StringUtils.hasLength(substring) &&
-                textToSearch.contains(substring), message);
+                textToSearch.contains(substring), message, args);
     }
 
     /**
@@ -247,8 +250,8 @@ public final class AssertUtils {
      * @param message the exception message to use if the assertion fails
      * @throws BaseException if the object array is {@code null} or contains no elements
      */
-    public static void notEmpty(@Nullable Object[] array, String message) {
-        isFalse(ObjectUtils.isEmpty(array), message);
+    public static void notEmpty(@Nullable Object[] array, String message, Object... args) {
+        isFalse(ObjectUtils.isEmpty(array), message, args);
     }
 
     /**
@@ -277,11 +280,11 @@ public final class AssertUtils {
      * @param message the exception message to use if the assertion fails
      * @throws BaseException if the object array contains a {@code null} element
      */
-    public static void noNullElements(@Nullable Object[] array, String message) {
+    public static void noNullElements(@Nullable Object[] array, String message, Object... args) {
         if (array != null) {
             for (Object element : array) {
                 if (element == null) {
-                    throw BaseException.common(message);
+                    throw BaseException.common(MessagePlaceholder.of(message, args));
                 }
             }
         }
@@ -321,8 +324,8 @@ public final class AssertUtils {
      * @throws BaseException if the collection is {@code null} or
      *                       contains no elements
      */
-    public static void notEmpty(@Nullable Collection<?> collection, String message) {
-        isFalse(CollectionUtils.isEmpty(collection), message);
+    public static void notEmpty(@Nullable Collection<?> collection, String message, Object... args) {
+        isFalse(CollectionUtils.isEmpty(collection), message, args);
     }
 
     /**
@@ -353,11 +356,11 @@ public final class AssertUtils {
      * @throws BaseException if the collection contains a {@code null} element
      * @since 5.2
      */
-    public static void noNullElements(@Nullable Collection<?> collection, String message) {
+    public static void noNullElements(@Nullable Collection<?> collection, String message, Object... args) {
         if (collection != null) {
             for (Object element : collection) {
                 if (element == null) {
-                    throw BaseException.common(message);
+                    throw BaseException.common(MessagePlaceholder.of(message, args));
                 }
             }
         }
@@ -395,8 +398,8 @@ public final class AssertUtils {
      * @param message the exception message to use if the assertion fails
      * @throws BaseException if the map is {@code null} or contains no entries
      */
-    public static void notEmpty(@Nullable Map<?, ?> map, String message) {
-        isFalse(CollectionUtils.isEmpty(map), message);
+    public static void notEmpty(@Nullable Map<?, ?> map, String message, Object... args) {
+        isFalse(CollectionUtils.isEmpty(map), message, args);
     }
 
     /**

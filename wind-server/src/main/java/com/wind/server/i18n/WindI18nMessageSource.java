@@ -3,6 +3,7 @@ package com.wind.server.i18n;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.wind.configcenter.core.ConfigRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.AbstractResourceBasedMessageSource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertyResolver;
@@ -23,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author wuxp
  * @date 2023-10-30 08:43
  **/
+@Slf4j
 public class WindI18nMessageSource extends AbstractResourceBasedMessageSource {
 
     /**
@@ -56,7 +58,10 @@ public class WindI18nMessageSource extends AbstractResourceBasedMessageSource {
             ConfigRepository.ConfigDescriptor descriptor = ConfigRepository.ConfigDescriptor.immutable(name, I18N_GROUP, properties.getFileType());
             result.put(locale, buildPropertyResolver(repository.getConfigs(descriptor)));
             // 监听配置变化
-            repository.onChange(descriptor, configs -> result.put(locale, buildPropertyResolver(configs)));
+            repository.onChange(descriptor, configs -> {
+                log.info("i18n message refresh dataId = {}", descriptor.getConfigId());
+                result.put(locale, buildPropertyResolver(configs));
+            });
         }
         return result;
     }
