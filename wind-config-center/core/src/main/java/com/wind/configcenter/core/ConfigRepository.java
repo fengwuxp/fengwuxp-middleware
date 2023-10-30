@@ -58,6 +58,24 @@ public interface ConfigRepository {
         }
     }
 
+    /**
+     * 配置监听
+     *
+     * @param descriptor 配置描述符
+     * @param listener   监听配置
+     */
+    default void onChange(ConfigDescriptor descriptor, ConfigListener listener) {
+        throw new UnsupportedOperationException("un support config listener");
+    }
+
+    interface ConfigListener {
+        default void change(String config) {
+
+        }
+
+        void change(List<PropertySource<?>> configs);
+    }
+
     interface ConfigDescriptor {
 
         /**

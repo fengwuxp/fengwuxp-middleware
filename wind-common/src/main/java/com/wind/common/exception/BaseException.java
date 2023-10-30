@@ -1,10 +1,11 @@
 package com.wind.common.exception;
 
 
+import com.wind.common.message.MessageFormatter;
+import com.wind.common.message.MessagePlaceholder;
 import lombok.Getter;
 
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.UnaryOperator;
 
 /**
  * 通用基础业务异常，不同的业务场景可以继承该类做扩展
@@ -20,7 +21,7 @@ public class BaseException extends RuntimeException {
     /**
      * 异常消息 i18n 支持
      */
-    private static final AtomicReference<UnaryOperator<String>> MESSAGE_I18N = new AtomicReference<>(t -> t);
+    private static final AtomicReference<MessageFormatter> MESSAGE_I18N = new AtomicReference<>(MessageFormatter.none());
 
     private final ExceptionCode code;
 
@@ -33,7 +34,20 @@ public class BaseException extends RuntimeException {
     }
 
     public BaseException(ExceptionCode code, String message, Throwable cause) {
-        super(MESSAGE_I18N.get().apply(message), cause);
+        super(MESSAGE_I18N.get().format(message), cause);
+        this.code = code;
+    }
+
+    public BaseException(MessagePlaceholder placeholder) {
+        this(DefaultExceptionCode.COMMON_ERROR, placeholder);
+    }
+
+    public BaseException(ExceptionCode code, MessagePlaceholder placeholder) {
+        this(code, placeholder, null);
+    }
+
+    public BaseException(ExceptionCode code, MessagePlaceholder placeholder, Throwable cause) {
+        super(MESSAGE_I18N.get().format(placeholder.getPattern(), placeholder.getArgs()), cause);
         this.code = code;
     }
 
@@ -61,9 +75,29 @@ public class BaseException extends RuntimeException {
         return new BaseException(message);
     }
 
+    public static BaseException badRequest(MessagePlaceholder message) {
+        return new BaseException(DefaultExceptionCode.BAD_REQUEST, message);
+    }
 
-    public static void setMessageI18n(UnaryOperator<String> converter) {
-        MESSAGE_I18N.set(converter);
+    public static BaseException unAuthorized(MessagePlaceholder message) {
+        return new BaseException(DefaultExceptionCode.UNAUTHORIZED, message);
+    }
+
+    public static BaseException forbidden(MessagePlaceholder message) {
+        return new BaseException(DefaultExceptionCode.FORBIDDEN, message);
+    }
+
+    public static BaseException notFound(MessagePlaceholder message) {
+        return new BaseException(DefaultExceptionCode.NOT_FOUND, message);
+    }
+
+    public static BaseException common(MessagePlaceholder message) {
+        return new BaseException(message);
+    }
+
+
+    public static void setI18nMessageFormatter(MessageFormatter formatter) {
+        MESSAGE_I18N.set(formatter);
     }
 
 }

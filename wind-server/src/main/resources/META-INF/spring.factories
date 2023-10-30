@@ -9,4 +9,5 @@ com.wind.server.configcenter.ConfigCenterBootstrapAutoConfiguration
 
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.wind.server.configuration.WindServerAutoConfiguration
+com.wind.server.configuration.WindServerAutoConfiguration,\
+com.wind.server.configuration.I18nMessageSourceAutoConfiguration

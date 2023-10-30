@@ -1,6 +1,7 @@
 package com.wind.nacos;
 
 import com.alibaba.nacos.api.config.ConfigService;
+import com.alibaba.nacos.api.config.listener.AbstractListener;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
@@ -8,6 +9,7 @@ import com.wind.configcenter.core.ConfigRepository;
 import com.wind.nacos.client.NacosPropertySource;
 import com.wind.nacos.parser.NacosDataParserHandler;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.PropertySource;
 
 import java.io.IOException;
@@ -16,10 +18,12 @@ import java.util.List;
 
 /**
  * 从 nacos 中加载配置
+ *
  * @author wuxp
  * @date 2023-10-15 14:59
  **/
 @AllArgsConstructor
+@Slf4j
 public class NacosConfigRepository implements ConfigRepository {
 
     private final ConfigService configService;
@@ -38,10 +42,34 @@ public class NacosConfigRepository implements ConfigRepository {
     @Override
     public List<PropertySource<?>> getConfigs(ConfigDescriptor descriptor) {
         String config = getTextConfig(descriptor);
+        List<PropertySource<?>> result = getPropertySources(descriptor, config);
+        collectNacosPropertySource(result, descriptor);
+        return result;
+    }
+
+    @Override
+    public void onChange(ConfigDescriptor descriptor, ConfigListener listener) {
+        if (descriptor.isRefreshable()) {
+            log.warn("config unsupported refresh = {}", descriptor);
+            return;
+        }
         try {
-            List<PropertySource<?>> result = NacosDataParserHandler.getInstance().parseNacosData(descriptor.getConfigId(), config, descriptor.getFileType().getFileExtension());
-            collectNacosPropertySource(result, descriptor);
-            return result;
+            configService.addListener(descriptor.getConfigId(), descriptor.getGroup(), new AbstractListener() {
+                @Override
+                public void receiveConfigInfo(String content) {
+                    listener.change(content);
+                    List<PropertySource<?>> configs = getPropertySources(descriptor, content);
+                    listener.change(configs);
+                }
+            });
+        } catch (NacosException exception) {
+            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, exception.getMessage(), exception);
+        }
+    }
+
+    private List<PropertySource<?>> getPropertySources(ConfigDescriptor descriptor, String content) {
+        try {
+            return NacosDataParserHandler.getInstance().parseNacosData(descriptor.getConfigId(), content, descriptor.getFileType().getFileExtension());
         } catch (IOException exception) {
             throw new BaseException(DefaultExceptionCode.COMMON_ERROR, String.format("parse config：%s failure", descriptor.getConfigId()), exception);
         }

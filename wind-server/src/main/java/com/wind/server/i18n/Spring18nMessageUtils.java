@@ -27,6 +27,7 @@ import java.util.function.Predicate;
  * @see org.springframework.boot.autoconfigure.web.WebProperties.LocaleResolver#ACCEPT_HEADER
  * @see org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration
  * @see org.springframework.web.servlet.LocaleResolver
+ * @see com.wind.server.configuration.I18nMessageSourceAutoConfiguration
  **/
 @Slf4j
 public class Spring18nMessageUtils implements ApplicationListener<ApplicationStartedEvent> {
@@ -42,14 +43,9 @@ public class Spring18nMessageUtils implements ApplicationListener<ApplicationSta
     private static final AtomicReference<MessageSource> MESSAGE_SOURCE = new AtomicReference<>();
 
     /**
-     * 判断字符串是否为 i18n 消息 key 的匹配器
-     */
-    private static final String DEFAULT_I18N_KEY_PREFIX = "$.";
-
-    /**
      * i18n 消息 key 匹配器
      */
-    private static final AtomicReference<Predicate<String>> I18N_KEY_MATCHER = new AtomicReference<>(text -> text.startsWith(DEFAULT_I18N_KEY_PREFIX));
+    private static final AtomicReference<Predicate<String>> I18N_KEY_MATCHER = new AtomicReference<>(text -> true);
 
     public static String getMessage(String message) {
         return getMessage(message, WindConstants.EMPTY);
@@ -63,8 +59,12 @@ public class Spring18nMessageUtils implements ApplicationListener<ApplicationSta
         return getMessage(message, null, defaultMessage, locale);
     }
 
-    public static String getMessage(String code, @Nullable Object[] args, Locale locale) {
-        return getMessage(code, args, null, locale);
+    public static String getMessage(String message, @Nullable Object[] args) {
+        return getMessage(message, args, null, null);
+    }
+
+    public static String getMessage(String message, @Nullable Object[] args, Locale locale) {
+        return getMessage(message, args, null, locale);
     }
 
     public static String getMessage(String message, @Nullable Object[] args, @Nullable String defaultMessage, Locale locale) {
@@ -87,7 +87,7 @@ public class Spring18nMessageUtils implements ApplicationListener<ApplicationSta
         try {
             LOCALE_RESOLVER.set(event.getApplicationContext().getBean(LocaleResolver.class));
             MESSAGE_SOURCE.set(event.getApplicationContext().getBean(MessageSource.class));
-            BaseException.setMessageI18n(Spring18nMessageUtils::getMessage);
+            BaseException.setI18nMessageFormatter(Spring18nMessageUtils::getMessage);
             log.info("enabled i18n supported");
         } catch (Exception ignore) {
             log.info("un enabled i18n supported");

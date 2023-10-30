@@ -131,9 +131,19 @@ public final class WindConstants {
     public static final String WIND_ROCKETMQ_NAME = "wind.rocketmq.name";
 
     /**
+     * elastic-job 名称
+     */
+    public static final String WIND_ELASTIC_JOB_NAME = "wind.elastic-job.name";
+
+    /**
      * oss 配置名称
      */
     public static final String WIND_OSS_NAME = "wind.oss.name";
+
+    /**
+     * i18n 消息配置
+     */
+    public static final String WIND_I18N_MESSAGE_PREFIX = "wind.i18n.messages";
 
     /**
      * 配置前缀
