@@ -2,6 +2,7 @@ package com.wind.server.configuration;
 
 import com.wind.common.WindConstants;
 import com.wind.configcenter.core.ConfigRepository;
+import com.wind.server.i18n.Spring18nMessageUtils;
 import com.wind.server.i18n.WindI18nMessageSource;
 import com.wind.server.i18n.WindMessageSourceProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -10,6 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.util.StringUtils;
 
 import java.time.Duration;
 
@@ -44,6 +46,11 @@ public class I18nMessageSourceAutoConfiguration {
         }
         result.setAlwaysUseMessageFormat(properties.isAlwaysUseMessageFormat());
         result.setUseCodeAsDefaultMessage(properties.isUseCodeAsDefaultMessage());
+        if (StringUtils.hasText(properties.getI18nMessageKeyPrefix())) {
+            Spring18nMessageUtils.setI18nKeyMatcher(text -> text.startsWith(properties.getI18nMessageKeyPrefix()));
+        } else {
+            Spring18nMessageUtils.setI18nKeyMatcher(text -> true);
+        }
         return result;
     }
 }

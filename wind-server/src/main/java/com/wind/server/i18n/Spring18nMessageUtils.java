@@ -45,7 +45,7 @@ public class Spring18nMessageUtils implements ApplicationListener<ApplicationSta
     /**
      * i18n 消息 key 匹配器
      */
-    private static final AtomicReference<Predicate<String>> I18N_KEY_MATCHER = new AtomicReference<>(text -> true);
+    private static final AtomicReference<Predicate<String>> I18N_KEY_MATCHER = new AtomicReference<>(text -> text.startsWith("$."));
 
     public static String getMessage(String message) {
         return getMessage(message, WindConstants.EMPTY);
@@ -68,7 +68,10 @@ public class Spring18nMessageUtils implements ApplicationListener<ApplicationSta
     }
 
     public static String getMessage(String message, @Nullable Object[] args, @Nullable String defaultMessage, Locale locale) {
-        if (MESSAGE_SOURCE.get() != null && StringUtils.hasLength(message) && I18N_KEY_MATCHER.get().test(message)) {
+        if (message == null) {
+            return "null";
+        }
+        if (MESSAGE_SOURCE.get() != null && I18N_KEY_MATCHER.get().test(message)) {
             return MESSAGE_SOURCE.get().getMessage(message, args, defaultMessage, getLocalWithRequest(locale));
         }
         return message;

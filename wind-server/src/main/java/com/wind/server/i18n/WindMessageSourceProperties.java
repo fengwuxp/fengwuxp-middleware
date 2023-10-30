@@ -50,6 +50,11 @@ public class WindMessageSourceProperties {
     private boolean useCodeAsDefaultMessage = false;
 
     /**
+     * i18n 国际化 key 配置的前缀
+     */
+    private String i18nMessageKeyPrefix = "";
+
+    /**
      * 国际化配置名称，一般是应用名
      */
     private String name;
