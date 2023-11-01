@@ -70,7 +70,7 @@ public abstract class AbstractPageQuery<F extends QueryOrderField> {
      *
      * @param querySize 查询大小
      */
-    public void configureMaxQuerySize(int querySize) {
+    public static void configureMaxQuerySize(int querySize) {
         AssertUtils.isTrue(querySize > 0, "查询大小必须大于 0");
         MAX_QUERY_SIZE.set(querySize);
     }
