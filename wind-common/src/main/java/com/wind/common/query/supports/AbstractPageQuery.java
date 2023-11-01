@@ -5,6 +5,7 @@ import com.wind.common.exception.AssertUtils;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 分页查询对象基类
@@ -17,7 +18,7 @@ public abstract class AbstractPageQuery<F extends QueryOrderField> {
     /**
      * 避免查询页面数据过大，拖垮数据库
      */
-    public static final int MAX_QUERY_SIZE = 5000;
+    private static final AtomicInteger MAX_QUERY_SIZE = new AtomicInteger(5000);
 
     /**
      * 当前查询页码
@@ -47,10 +48,9 @@ public abstract class AbstractPageQuery<F extends QueryOrderField> {
      */
     private QueryOrderType[] orderTypes;
 
-
-    public Integer getQuerySize() {
-        AssertUtils.isTrue(queryPage <= MAX_QUERY_SIZE, String.format("查询大小不能超过：%d", MAX_QUERY_SIZE));
-        return querySize;
+    public void setQuerySize(Integer querySize) {
+        AssertUtils.isTrue(querySize <= MAX_QUERY_SIZE.get(), () -> String.format("查询大小不能超过：%d", MAX_QUERY_SIZE.get()));
+        this.querySize = querySize;
     }
 
     /**
@@ -63,6 +63,23 @@ public abstract class AbstractPageQuery<F extends QueryOrderField> {
             return false;
         }
         return orderFields.length > 0 && orderFields.length == orderTypes.length;
+    }
+
+    /**
+     * 配置查询大小最大值
+     *
+     * @param querySize 查询大小
+     */
+    public void configureMaxQuerySize(int querySize) {
+        AssertUtils.isTrue(querySize > 0, "查询大小必须大于 0");
+        MAX_QUERY_SIZE.set(querySize);
+    }
+
+    /**
+     * @return 查询大小最大值
+     */
+    public int getMaxQuerySize() {
+        return MAX_QUERY_SIZE.get();
     }
 
 }

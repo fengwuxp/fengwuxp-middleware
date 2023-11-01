@@ -20,9 +20,7 @@ public final class IpAddressUtils {
      * @return if <code>true</code> 是
      */
     public static boolean isValidIp(String ip) {
-
         return isIpV6(ip) || isIpV4(ip);
-
     }
 
     /**
@@ -51,12 +49,10 @@ public final class IpAddressUtils {
             return false;
         }
 
-
         //0:0:0:0:0:0:0:0 → ::
         if ("::".equals(ip)) {
             return true;
         }
-
 
         // 0 位压缩表示法
         if (ip.contains("::")) {
@@ -115,9 +111,7 @@ public final class IpAddressUtils {
                 return false;
             }
         }
-
         return true;
-
     }
 
 
@@ -145,6 +139,5 @@ public final class IpAddressUtils {
 
         return true;
     }
-
 
 }
