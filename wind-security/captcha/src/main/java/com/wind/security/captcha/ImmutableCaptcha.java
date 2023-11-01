@@ -60,14 +60,7 @@ public class ImmutableCaptcha implements Captcha {
      * 为了给序列化框架使用，提供一个空构造
      */
     ImmutableCaptcha() {
-        this.owner = null;
-        this.type = null;
-        this.useScene = null;
-        this.value = null;
-        this.content = null;
-        this.verificationCount = 0;
-        this.allowVerificationTimes = 0;
-        this.expireTime = null;
+        this(null,null,null,null,null,0,0,null);
     }
 
     /**
