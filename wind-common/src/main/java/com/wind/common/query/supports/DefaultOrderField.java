@@ -28,4 +28,21 @@ public enum DefaultOrderField implements QueryOrderField {
      */
     private final String orderField;
 
+    private static final DefaultOrderField[] CREATE_ORDER_FIELDS = QueryOrderField.of(DefaultOrderField.GMT_CREATE);
+
+    private static final DefaultOrderField[] MODIFIED_ORDER_FIELDS = QueryOrderField.of(DefaultOrderField.GMT_MODIFIED);
+
+    /**
+     * @return 返回按照创建时间排序
+     */
+    public static DefaultOrderField[] gmtCreate() {
+        return CREATE_ORDER_FIELDS;
+    }
+
+    /**
+     * @return 返回按照更新时间排序
+     */
+    public static DefaultOrderField[] gmtModified() {
+        return MODIFIED_ORDER_FIELDS;
+    }
 }
