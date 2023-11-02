@@ -1,5 +1,6 @@
 package com.wind.security.configuration;
 
+import com.wind.security.authentication.WindAuthenticationProperties;
 import com.wind.security.authentication.jwt.JwtProperties;
 import com.wind.security.authentication.jwt.JwtTokenCodec;
 import com.wind.security.authority.rbac.CaffeineRbacResourceCacheSupplier;
@@ -41,6 +42,12 @@ public class WindSecurityAutoConfiguration {
      */
     public static final String RBAC_PREFIX = WindSecurityProperties.PREFIX + ".rbac";
 
+
+    /**
+     * Authentication 配置 prefix
+     */
+    public static final String AUTHENTICATION_PREFIX = WindSecurityProperties.PREFIX + ".authentication.crypto";
+
     @Bean
     @ConfigurationProperties(prefix = JWT_PREFIX)
     public JwtProperties jwtProperties() {
@@ -51,6 +58,13 @@ public class WindSecurityAutoConfiguration {
     @ConfigurationProperties(prefix = RBAC_PREFIX)
     public WindSecurityRbacProperties windSecurityRbacProperties() {
         return new WindSecurityRbacProperties();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = AUTHENTICATION_PREFIX, value = ENABLED_NAME)
+    @ConfigurationProperties(prefix = AUTHENTICATION_PREFIX)
+    public WindAuthenticationProperties windAuthenticationProperties() {
+        return new WindAuthenticationProperties();
     }
 
     @Bean
