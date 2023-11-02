@@ -14,6 +14,8 @@ import org.springframework.core.env.MapPropertySource;
 
 import java.util.Collections;
 
+import static com.wind.common.WindConstants.ENABLED_NAME;
+import static com.wind.common.WindConstants.TRUE;
 import static com.wind.common.WindConstants.WIND_SERVER_CONFIG_CENTER_PROPERTIES_PREFIX;
 
 /**
@@ -23,7 +25,7 @@ import static com.wind.common.WindConstants.WIND_SERVER_CONFIG_CENTER_PROPERTIES
  * @date 2023-10-15 16:42
  **/
 @Configuration
-@ConditionalOnProperty(prefix = WIND_SERVER_CONFIG_CENTER_PROPERTIES_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = WIND_SERVER_CONFIG_CENTER_PROPERTIES_PREFIX, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
 public class ConfigCenterBootstrapAutoConfiguration {
 
     @Bean

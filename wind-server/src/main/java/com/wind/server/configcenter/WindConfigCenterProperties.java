@@ -16,6 +16,11 @@ import java.util.List;
 public class WindConfigCenterProperties {
 
     /**
+     * 是否启用
+     */
+    private boolean enabled = true;
+
+    /**
      * APP 分组的共享配置名称
      * {@link com.wind.common.WindConstants#APP_SHARED_CONFIG_GROUP}
      */
