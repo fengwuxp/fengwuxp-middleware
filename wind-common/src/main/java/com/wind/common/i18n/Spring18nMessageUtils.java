@@ -69,9 +69,14 @@ public final class Spring18nMessageUtils {
             return "null";
         }
         if (MESSAGE_SOURCE.get() == null || !I18N_KEY_MATCHER.get().test(message)) {
-            return message;
+            return defaultMessage == null ? message : defaultMessage;
         }
-        return MESSAGE_SOURCE.get().getMessage(message, args, defaultMessage, getLocale(locale));
+        String result = MESSAGE_SOURCE.get().getMessage(message, args, defaultMessage, getLocale(locale));
+        // 未获取到消息返回默认消息或原本消息
+        if (result == null) {
+            return defaultMessage == null ? message : defaultMessage;
+        }
+        return result;
     }
 
     private static Locale getLocale(Locale locale) {
