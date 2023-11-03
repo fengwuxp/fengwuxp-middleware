@@ -16,9 +16,5 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class WindAuthenticationProperties extends AbstractRsaProperties {
 
-    /**
-     * 是否加密手机号码、用户名等登录信息
-     */
-    private boolean encryptPrincipal = false;
 
 }

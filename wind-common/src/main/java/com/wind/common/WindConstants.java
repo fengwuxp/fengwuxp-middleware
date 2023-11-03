@@ -157,7 +157,6 @@ public final class WindConstants {
     /**
      * http status 同步设置 advice
      */
-
     public static final String WIND_SERVER_HTTP_RESPONSE_STATUS_ADVICE = "wind.server.http.status-advice";
 
     /**

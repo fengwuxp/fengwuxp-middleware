@@ -34,5 +34,5 @@ public final class WebSecurityConstants {
     /**
      * 登录已失效
      */
-    public static final String LOGIN_JWT_TOKEN_INVALID = "$.login.jwt.token.invalid";
+    public static final String LOGIN_JWT_TOKEN_INVALID = "登录凭证不存在或已过期";
 }

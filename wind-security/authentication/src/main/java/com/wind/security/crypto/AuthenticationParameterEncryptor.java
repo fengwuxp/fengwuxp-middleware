@@ -8,11 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.security.crypto.encrypt.TextEncryptor;
-import org.springframework.security.rsa.crypto.RsaAlgorithm;
-import org.springframework.security.rsa.crypto.RsaSecretEncryptor;
+import org.springframework.util.StringUtils;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.security.KeyPair;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -26,16 +24,26 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class AuthenticationParameterEncryptor implements ApplicationListener<ApplicationStartedEvent> {
 
     /**
-     * 是否加解密 Principal
+     * 加密配置
      */
     @VisibleForTesting
-    static final AtomicBoolean ENCRYPT_PRINCIPAL = new AtomicBoolean(false);
+    static final AtomicReference<KeyPair> KEY_PAIR = new AtomicReference<>();
 
-    /**
-     * 加密器
-     */
-    @VisibleForTesting
-    static final AtomicReference<TextEncryptor> ENCRYPTOR = new AtomicReference<>();
+    public static String tryEncrypt(String content) {
+        KeyPair keyPair = KEY_PAIR.get();
+        if (keyPair == null) {
+            return content;
+        }
+        return StringUtils.hasLength(content) ? RSAUtils.encryptAsText(content, keyPair.getPublic()) : content;
+    }
+
+    public static String tryDecrypt(String content) {
+        KeyPair keyPair = KEY_PAIR.get();
+        if (keyPair == null) {
+            return content;
+        }
+        return StringUtils.hasLength(content) ? RSAUtils.decrypt(content, keyPair.getPrivate()) : content;
+    }
 
     /**
      * 认证相关参数（公钥加密）
@@ -45,14 +53,7 @@ public final class AuthenticationParameterEncryptor implements ApplicationListen
      * @return 认证参数
      */
     public static AuthenticationParameter encrypt(String principal, String credentials) {
-        TextEncryptor encryptor = ENCRYPTOR.get();
-        if (encryptor != null) {
-            if (ENCRYPT_PRINCIPAL.get()) {
-                principal = encryptor.encrypt(principal);
-            }
-            credentials = encryptor.encrypt(credentials);
-        }
-        return new AuthenticationParameter(principal, credentials);
+        return new AuthenticationParameter(tryEncrypt(principal), tryEncrypt(credentials));
     }
 
     /**
@@ -63,26 +64,19 @@ public final class AuthenticationParameterEncryptor implements ApplicationListen
      * @return 认证参数
      */
     public static AuthenticationParameter decrypt(String principal, String credentials) {
-        TextEncryptor encryptor = ENCRYPTOR.get();
-        if (encryptor != null) {
-            if (ENCRYPT_PRINCIPAL.get()) {
-                principal = encryptor.decrypt(principal);
-            }
-            credentials = encryptor.decrypt(credentials);
-        }
-        return new AuthenticationParameter(principal, credentials);
+        return new AuthenticationParameter(tryDecrypt(principal), tryDecrypt(credentials));
     }
 
     @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
         try {
             WindAuthenticationProperties properties = event.getApplicationContext().getBean(WindAuthenticationProperties.class);
-            ENCRYPTOR.set(new RsaSecretEncryptor(properties.getKeyPair(), RsaAlgorithm.OAEP));
-            ENCRYPT_PRINCIPAL.set(properties.isEncryptPrincipal());
+            KEY_PAIR.set(properties.getKeyPair());
         } catch (BeansException e) {
             log.info("un enable authentication parameter crypto");
         }
     }
+
 
     @AllArgsConstructor
     @Getter

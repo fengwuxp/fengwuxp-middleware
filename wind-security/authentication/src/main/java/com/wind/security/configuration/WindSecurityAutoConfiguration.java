@@ -61,7 +61,7 @@ public class WindSecurityAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = AUTHENTICATION_PREFIX, value = ENABLED_NAME)
+//    @ConditionalOnProperty(prefix = AUTHENTICATION_PREFIX, name = ENABLED_NAME, havingValue = TRUE)
     @ConfigurationProperties(prefix = AUTHENTICATION_PREFIX)
     public WindAuthenticationProperties windAuthenticationProperties() {
         return new WindAuthenticationProperties();
