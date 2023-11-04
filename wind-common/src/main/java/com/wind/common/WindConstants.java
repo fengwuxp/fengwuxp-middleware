@@ -197,7 +197,7 @@ public final class WindConstants {
     /**
      * 应用共享配置分组
      */
-    public static final String APP_SHARED_CONFIG_GROUP = "APP_SHARED";
+    public static final String APP_SHARE_CONFIG_GROUP = "APP_SHARE";
 
     /**
      * traceId

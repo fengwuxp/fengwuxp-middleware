@@ -22,7 +22,7 @@ public class WindConfigCenterProperties {
 
     /**
      * APP 分组的共享配置名称
-     * {@link com.wind.common.WindConstants#APP_SHARED_CONFIG_GROUP}
+     * {@link com.wind.common.WindConstants#APP_SHARE_CONFIG_GROUP}
      */
     private List<String> appSharedConfigs = Collections.emptyList();
 

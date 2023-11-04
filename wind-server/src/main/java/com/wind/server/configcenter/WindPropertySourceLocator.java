@@ -75,7 +75,7 @@ public class WindPropertySourceLocator implements PropertySourceLocator {
         loadConfigs(buildDescriptor(applicationName, WindConstants.APP_CONFIG_GROUP), result);
         if (!ObjectUtils.isEmpty(properties.getAppSharedConfigs())) {
             // 加载应用间的共享配置
-            properties.getAppSharedConfigs().forEach(name -> loadConfigs(buildDescriptor(name, WindConstants.APP_SHARED_CONFIG_GROUP), result));
+            properties.getAppSharedConfigs().forEach(name -> loadConfigs(buildDescriptor(name, WindConstants.APP_SHARE_CONFIG_GROUP), result));
         }
         if (!ObjectUtils.isEmpty(properties.getExtensionConfigs())) {
             // 加载额外的自定义配置
