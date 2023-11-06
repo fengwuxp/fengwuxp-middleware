@@ -10,7 +10,6 @@ import lombok.Getter;
  * @date 2023-10-30 07:41
  **/
 @Getter
-@AllArgsConstructor
 public final class MessagePlaceholder {
 
     /**
@@ -23,7 +22,12 @@ public final class MessagePlaceholder {
      */
     private final Object[] args;
 
+    private MessagePlaceholder(String pattern, Object[] args) {
+        this.pattern = pattern;
+        this.args = args;
+    }
+
     public static MessagePlaceholder of(String pattern, Object... args) {
-        return new MessagePlaceholder(pattern, args);
+        return new MessagePlaceholder(pattern, args == null ? new Object[0] : args);
     }
 }
