@@ -24,7 +24,7 @@ public class WindConfigCenterProperties {
      * APP 分组的共享配置名称
      * {@link com.wind.common.WindConstants#APP_SHARE_CONFIG_GROUP}
      */
-    private List<String> appSharedConfigs = Collections.emptyList();
+    private List<String> appShareConfigs = Collections.emptyList();
 
     /**
      * 额外加载的扩展配置
