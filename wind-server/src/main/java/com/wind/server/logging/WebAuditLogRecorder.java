@@ -2,6 +2,7 @@ package com.wind.server.logging;
 
 import com.wind.script.auditlog.AuditLogRecorder;
 import com.wind.script.auditlog.ScriptAuditLogRecorder;
+import com.wind.server.web.supports.ApiResp;
 import com.wind.web.utils.HttpServletRequestUtils;
 import org.springframework.http.HttpHeaders;
 
@@ -21,6 +22,14 @@ public class WebAuditLogRecorder extends ScriptAuditLogRecorder {
 
     public WebAuditLogRecorder(AuditLogRecorder recorder) {
         super(recorder, WebAuditLogRecorder::getRequestVariables);
+    }
+
+    @Override
+    protected Object resolveMethodReturnValue(Object methodReturnValue) {
+        if (methodReturnValue instanceof ApiResp) {
+            return ((ApiResp<?>) methodReturnValue).getData();
+        }
+        return super.resolveMethodReturnValue(methodReturnValue);
     }
 
     private static Map<String, Object> getRequestVariables() {

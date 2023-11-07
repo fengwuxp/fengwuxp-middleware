@@ -31,6 +31,9 @@ import java.util.function.Supplier;
 @Slf4j
 public class ScriptAuditLogRecorder {
 
+    /**
+     * 日志备注属性名称
+     */
     public static final String AUDIT_LOG_REMARK_ATTRIBUTE_NAME = "AUDIT_LOG_REMARK";
 
     /**
@@ -38,11 +41,15 @@ public class ScriptAuditLogRecorder {
      */
     private static final String ARGS_VARIABLE_NAME = "args";
 
-
     /**
-     * 方法执行结果响应变量
+     * 方法执行结果响应变量（原始值）
      */
     private static final String RESULT_VARIABLE_NAME = "result";
+
+    /**
+     * 方法执行结果响应变量（解析值）
+     */
+    private static final String RESULT_RESOLVE_VARIABLE_NAME = "resolveResult";
 
     /**
      * spring 的方法参数发现者
@@ -137,8 +144,13 @@ public class ScriptAuditLogRecorder {
         // 填充方法执行结果
         if (methodReturnValue != null) {
             result.put(RESULT_VARIABLE_NAME, methodReturnValue);
+            result.put(RESULT_RESOLVE_VARIABLE_NAME, resolveMethodReturnValue(methodReturnValue));
         }
         return result;
+    }
+
+    protected Object resolveMethodReturnValue(Object methodReturnValue) {
+        return methodReturnValue;
     }
 
     /**
