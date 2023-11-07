@@ -149,6 +149,12 @@ public class ScriptAuditLogRecorder {
         return result;
     }
 
+    /**
+     * 在控制层有统一响应对象时，可以重载改方法返回真正需要的返回值
+     *
+     * @param methodReturnValue 方法返回值
+     * @return 解析后的方法返回值
+     */
     protected Object resolveMethodReturnValue(Object methodReturnValue) {
         return methodReturnValue;
     }
