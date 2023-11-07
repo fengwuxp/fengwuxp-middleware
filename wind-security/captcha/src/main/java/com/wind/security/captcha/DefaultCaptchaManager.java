@@ -62,6 +62,8 @@ public class DefaultCaptchaManager {
                 .verificationCount(0)
                 .allowVerificationTimes(delegate.getMaxAllowVerificationTimes())
                 .build();
+        // 先移除之前的验证码，在保存
+        captchaStorage.remove(type, useScene, owner);
         captchaStorage.store(result);
         return result;
     }
