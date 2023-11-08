@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  *
  * @author wuxp
  * @version SpringExpressionConditionalJoiner.java, v 0.1 2022年08月16日 18:08 wuxp
- * @doc https://docs.spring.io/spring-framework/docs/3.0.x/reference/expressions.html
+ * @doc https://docs.spring.io/spring-framework/reference/core/expressions.html
  * @see ConditionalExpressionJoiner
  */
 public class SpringExpressionConditionalExpressionJoiner implements ConditionalExpressionJoiner<Operand> {

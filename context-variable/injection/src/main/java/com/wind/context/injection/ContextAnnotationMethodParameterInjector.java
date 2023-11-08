@@ -4,7 +4,7 @@ import com.wind.common.WindConstants;
 import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.BaseException;
 import com.wind.context.variable.annotations.ContextVariable;
-import com.wind.script.spring.SpringExpressionExecutor;
+import com.wind.script.spring.SpringExpressionEvaluator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -221,7 +221,7 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
                 return contextVariables.get(variableName);
             }
             if (StringUtils.hasLength(expression)) {
-                return SpringExpressionExecutor.eval(expression, contextVariables);
+                return SpringExpressionEvaluator.DEFAULT.eval(expression, contextVariables);
             }
             throw BaseException.common("invalid annotation tag, name and expression attribute is empty");
         }

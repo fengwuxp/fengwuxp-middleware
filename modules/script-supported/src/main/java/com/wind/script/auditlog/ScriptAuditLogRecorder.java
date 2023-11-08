@@ -1,7 +1,8 @@
 package com.wind.script.auditlog;
 
+import com.wind.common.WindConstants;
 import com.wind.common.annotations.VisibleForTesting;
-import com.wind.script.spring.SpringExpressionExecutor;
+import com.wind.script.spring.SpringExpressionEvaluator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -107,7 +108,7 @@ public class ScriptAuditLogRecorder {
                 .group(auditLog.group())
                 .type(auditLog.resourceType())
                 .operation(auditLog.operation())
-                .resourceId(SpringExpressionExecutor.evalIfErrorOfNullable(auditLog.resourceId(), evaluationContext))
+                .resourceId(evalResourceId(auditLog.resourceId(), evaluationContext))
                 .contextVariables(Collections.unmodifiableMap(variables))
                 .throwable(throwable)
                 .build();
@@ -115,10 +116,27 @@ public class ScriptAuditLogRecorder {
 
     protected String evalLog(String expression, EvaluationContext context, Throwable throwable) {
         if (throwable == null) {
-            return SpringExpressionExecutor.eval(expression, context);
+            try {
+                return SpringExpressionEvaluator.TEMPLATE.eval(expression, context);
+            } catch (Exception exception) {
+                log.error("eval audit log error, expression = {}", expression, exception);
+                return WindConstants.EMPTY;
+            }
         }
         String message = throwable.getMessage();
         return StringUtils.hasLength(message) ? message : "Unknown Error";
+    }
+
+    @Nullable
+    private Object evalResourceId(String expression, EvaluationContext evaluationContext) {
+        if (StringUtils.hasLength(expression)) {
+            try {
+                return SpringExpressionEvaluator.DEFAULT.eval(expression, evaluationContext);
+            } catch (Exception exception) {
+                log.error("eval resource id error, expression = {}", expression, exception);
+            }
+        }
+        return null;
     }
 
     /**

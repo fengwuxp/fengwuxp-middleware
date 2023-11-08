@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 /**
  * spring expression 表达式生成器
- * 官方文档： https://docs.spring.io/spring-framework/docs/3.0.x/reference/expressions.html
+ * 官方文档： https://docs.spring.io/spring-framework/reference/core/expressions.html
  * 参考文档： https://blueblue233.github.io/blog/84ca0064/
  *
  * @author wuxp
