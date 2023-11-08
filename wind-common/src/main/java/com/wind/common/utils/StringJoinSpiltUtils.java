@@ -37,6 +37,16 @@ public final class StringJoinSpiltUtils {
     }
 
     @Nullable
+    public static String joinEnums(Collection<? extends Enum<?>> enums) {
+        return join(enums.stream().map(Enum::name).collect(Collectors.toList()));
+    }
+
+    @Nullable
+    public static String joinEnums(Enum<?>... enums) {
+        return join(Arrays.asList(enums));
+    }
+
+    @Nullable
     public static String join(Object... objects) {
         return join(Arrays.asList(objects));
     }
