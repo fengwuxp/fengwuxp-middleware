@@ -42,9 +42,7 @@ public class ApplicationContextUtils implements ApplicationListener<ApplicationC
 
     @Override
     public void onApplicationEvent(@Nonnull ApplicationContextEvent event) {
-        if (ApplicationContextUtils.APPLICATION_CONTEXT.get() == null) {
-            log.info("application context event ");
-            setApplicationContext(event.getApplicationContext());
-        }
+        log.info("refresh application context event ");
+        setApplicationContext(event.getApplicationContext());
     }
 }
