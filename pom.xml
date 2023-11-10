@@ -27,7 +27,7 @@
         <module>context-variable</module>
         <module>logback-kafka-appender</module>
         <module>modules/payment</module>
-        <module>modules/script-supported</module>
+        <module>modules/script</module>
         <module>modules/sequence-generate</module>
         <module>tools/mybatis-plus-annotation-processor</module>
         <module>tools/mybatis-flex-processor</module>
@@ -154,7 +154,7 @@
             </dependency>
             <dependency>
                 <groupId>com.wind.script</groupId>
-                <artifactId>script-supported</artifactId>
+                <artifactId>wind-script</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

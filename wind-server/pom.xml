@@ -19,7 +19,7 @@
        </dependency>
        <dependency>
            <groupId>com.wind.script</groupId>
-           <artifactId>script-supported</artifactId>
+            <artifactId>wind-script</artifactId>
        </dependency>
        <dependency>
            <groupId>com.wind.configcenter</groupId>
