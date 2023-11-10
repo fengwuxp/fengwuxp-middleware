@@ -1,9 +1,11 @@
 package com.wind.common.spring;
 
 import com.wind.common.exception.AssertUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ApplicationContextEvent;
 import org.springframework.lang.NonNull;
 
 import javax.annotation.Nonnull;
@@ -15,13 +17,10 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author wuxp
  * @date 2023-09-26 11:32
  **/
-public class ApplicationContextUtils implements ApplicationContextAware {
+@Slf4j
+public class ApplicationContextUtils implements ApplicationListener<ApplicationContextEvent> {
 
     private static final AtomicReference<ApplicationContext> APPLICATION_CONTEXT = new AtomicReference<>();
-
-    public ApplicationContextUtils(ApplicationContext context) {
-        APPLICATION_CONTEXT.set(context);
-    }
 
     public static <T> T getBean(Class<T> classType) {
         return getContext().getBean(classType);
@@ -37,8 +36,15 @@ public class ApplicationContextUtils implements ApplicationContextAware {
         return APPLICATION_CONTEXT.get();
     }
 
-    @Override
-    public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
+    private static void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
         ApplicationContextUtils.APPLICATION_CONTEXT.set(applicationContext);
+    }
+
+    @Override
+    public void onApplicationEvent(@Nonnull ApplicationContextEvent event) {
+        if (ApplicationContextUtils.APPLICATION_CONTEXT.get() == null) {
+            log.info("application context event ");
+            setApplicationContext(event.getApplicationContext());
+        }
     }
 }
