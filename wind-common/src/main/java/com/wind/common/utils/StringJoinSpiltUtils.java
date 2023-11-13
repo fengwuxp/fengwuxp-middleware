@@ -7,7 +7,9 @@ import org.springframework.util.StringUtils;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +34,16 @@ public final class StringJoinSpiltUtils {
     public static Set<Long> spiltAsLong(String text) {
         if (StringUtils.hasText(text)) {
             return Arrays.stream(text.split(WindConstants.COMMA)).map(Long::parseLong).collect(Collectors.toSet());
+        }
+        return new HashSet<>();
+    }
+
+    public static <T extends Enum<?>> Set<T> spiltAsEnums(String text, Class<? extends T> enumClazz) {
+        if (StringUtils.hasText(text)) {
+            Map<String, ? extends T> maps = Arrays.stream(enumClazz.getEnumConstants()).collect(Collectors.toMap(Enum::name, Function.identity()));
+            return Arrays.stream(text.split(WindConstants.COMMA))
+                    .map(maps::get)
+                    .collect(Collectors.toSet());
         }
         return new HashSet<>();
     }

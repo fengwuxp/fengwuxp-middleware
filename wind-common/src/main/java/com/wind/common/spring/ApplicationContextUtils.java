@@ -1,14 +1,17 @@
 package com.wind.common.spring;
 
+import com.wind.common.annotations.VisibleForTesting;
 import com.wind.common.exception.AssertUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ApplicationContextEvent;
+import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.lang.NonNull;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -21,6 +24,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ApplicationContextUtils implements ApplicationListener<ApplicationContextEvent> {
 
     private static final AtomicReference<ApplicationContext> APPLICATION_CONTEXT = new AtomicReference<>();
+
+    private static final AtomicBoolean READY = new AtomicBoolean(false);
 
     public static <T> T getBean(Class<T> classType) {
         return getContext().getBean(classType);
@@ -36,12 +41,19 @@ public class ApplicationContextUtils implements ApplicationListener<ApplicationC
         return APPLICATION_CONTEXT.get();
     }
 
-    private static void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
+    @VisibleForTesting
+    public static void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
         ApplicationContextUtils.APPLICATION_CONTEXT.set(applicationContext);
     }
 
     @Override
     public void onApplicationEvent(@Nonnull ApplicationContextEvent event) {
+        if (READY.get()) {
+            return;
+        }
+        if (event instanceof ContextStartedEvent) {
+            READY.set(true);
+        }
         log.info("refresh application context event ");
         setApplicationContext(event.getApplicationContext());
     }
