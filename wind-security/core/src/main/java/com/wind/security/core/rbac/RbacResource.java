@@ -2,6 +2,7 @@ package com.wind.security.core.rbac;
 
 import com.google.common.collect.ImmutableSet;
 import com.wind.common.WindConstants;
+import com.wind.common.utils.StringJoinSplitUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.util.StringUtils;
@@ -54,7 +55,7 @@ public interface RbacResource<I extends Serializable> extends Serializable {
          * @return 权限
          */
         static Permission immutable(String id, String name, String type, String value) {
-            Set<String> attributes = StringUtils.hasLength(value) ? Collections.emptySet() : ImmutableSet.copyOf(value.split(WindConstants.COMMA));
+            Set<String> attributes = StringUtils.hasLength(value) ? StringJoinSplitUtils.split(value) : Collections.emptySet();
             return immutable(id, name, type, attributes);
         }
 
@@ -124,7 +125,7 @@ public interface RbacResource<I extends Serializable> extends Serializable {
 
         public ImmutablePermission() {
             // 为了给序列化框架使用
-            this("", "","", Collections.emptySet());
+            this("", "", "", Collections.emptySet());
         }
 
     }
