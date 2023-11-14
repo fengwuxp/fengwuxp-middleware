@@ -18,27 +18,27 @@ import java.util.stream.Collectors;
  * @author wuxp
  * @date 2023-10-23 11:05
  **/
-public final class StringJoinSpiltUtils {
+public final class StringJoinSplitUtils {
 
-    private StringJoinSpiltUtils() {
+    private StringJoinSplitUtils() {
         throw new AssertionError();
     }
 
-    public static Set<String> spilt(String text) {
+    public static Set<String> split(String text) {
         if (StringUtils.hasText(text)) {
             return new HashSet<>(Arrays.asList(text.split(WindConstants.COMMA)));
         }
         return new HashSet<>();
     }
 
-    public static Set<Long> spiltAsLong(String text) {
+    public static Set<Long> splitAsLong(String text) {
         if (StringUtils.hasText(text)) {
             return Arrays.stream(text.split(WindConstants.COMMA)).map(Long::parseLong).collect(Collectors.toSet());
         }
         return new HashSet<>();
     }
 
-    public static <T extends Enum<?>> Set<T> spiltAsEnums(String text, Class<? extends T> enumClazz) {
+    public static <T extends Enum<?>> Set<T> splitAsEnums(String text, Class<? extends T> enumClazz) {
         if (StringUtils.hasText(text)) {
             Map<String, ? extends T> maps = Arrays.stream(enumClazz.getEnumConstants()).collect(Collectors.toMap(Enum::name, Function.identity()));
             return Arrays.stream(text.split(WindConstants.COMMA))

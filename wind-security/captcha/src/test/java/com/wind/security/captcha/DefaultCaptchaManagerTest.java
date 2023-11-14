@@ -34,10 +34,11 @@ class DefaultCaptchaManagerTest {
 
     private DefaultCaptchaManager captchaManager;
 
-    private final CaptchaProperties properties = new CaptchaProperties();
+    private CaptchaProperties properties;
 
     @BeforeEach
     void setup() {
+        properties = new CaptchaProperties();
         CaptchaGenerateChecker checker = new SimpleCaptchaGenerateChecker(new ConcurrentMapCacheManager(), properties);
         captchaManager = new DefaultCaptchaManager(getProviders(), getCaptchaStorage(), checker);
     }
@@ -97,10 +98,11 @@ class DefaultCaptchaManagerTest {
     @Test
     void testMobileCaptchaCurrentGenerate() throws Exception {
         properties.getMobilePhone().getFlowControl().setSpeed(100);
+        properties.getMobilePhone().setMxAllowGenerateTimesOfUserWithDay(100);
         String owner = RandomStringUtils.randomAlphanumeric(11);
         ExecutorService executorService = Executors.newFixedThreadPool(5);
         List<Future<?>> futures = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             Future<?> future = executorService.submit((Callable<Object>) () -> captchaManager.generate(SimpleCaptchaType.MOBILE_PHONE, SimpleUseScene.REGISTER, owner));
             futures.add(future);
         }

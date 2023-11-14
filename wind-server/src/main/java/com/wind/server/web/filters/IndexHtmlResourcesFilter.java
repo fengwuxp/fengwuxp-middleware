@@ -4,7 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.ImmutableSet;
 import com.wind.common.exception.AssertUtils;
-import com.wind.common.utils.StringJoinSpiltUtils;
+import com.wind.common.utils.StringJoinSplitUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -142,7 +142,7 @@ public class IndexHtmlResourcesFilter extends OncePerRequestFilter {
     }
 
     private boolean matchesMediaType(String mediaType) {
-        return StringJoinSpiltUtils.spilt(mediaType).stream().map(MediaType::parseMediaType).anyMatch(media -> media.includes(MediaType.TEXT_HTML));
+        return StringJoinSplitUtils.split(mediaType).stream().map(MediaType::parseMediaType).anyMatch(media -> media.includes(MediaType.TEXT_HTML));
     }
 
 
