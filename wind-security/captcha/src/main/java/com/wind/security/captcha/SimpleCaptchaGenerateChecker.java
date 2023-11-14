@@ -1,15 +1,19 @@
 package com.wind.security.captcha;
 
-import com.wind.common.WindConstants;
+import com.google.common.collect.ImmutableSet;
 import com.wind.common.exception.AssertUtils;
+import com.wind.security.captcha.configuration.CaptchaProperties;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.lang.NonNull;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.function.Function;
+import java.util.List;
+import java.util.Set;
 
+import static com.wind.security.captcha.CaptchaI18nMessageKeys.CAPTCHA_SEND_MAX_LIMIT_OF_USER_BY_DAY;
 import static org.apache.commons.lang3.time.DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT;
 
 /**
@@ -18,6 +22,8 @@ import static org.apache.commons.lang3.time.DateFormatUtils.ISO_8601_EXTENDED_DA
  **/
 @AllArgsConstructor
 public class SimpleCaptchaGenerateChecker implements CaptchaGenerateChecker {
+
+    private static final Set<Captcha.CaptchaType> IGNORES = ImmutableSet.of(SimpleCaptchaType.PICTURE, SimpleCaptchaType.QR_CODE);
 
     /**
      * 缓存管理器
@@ -32,24 +38,42 @@ public class SimpleCaptchaGenerateChecker implements CaptchaGenerateChecker {
     /**
      * 每个用户每天允许发送验证码的最大次数
      */
-    private final Function<Captcha.CaptchaType, Integer> mxAllowGenerateTimesOfUserWithDaySupplier;
+    private CaptchaProperties properties;
 
-    public SimpleCaptchaGenerateChecker(CacheManager cacheManager) {
-        this(cacheManager, WindConstants.DEFAULT_TEXT.toUpperCase(), (type) -> 15);
+    public SimpleCaptchaGenerateChecker(CacheManager cacheManager, CaptchaProperties properties) {
+        this(cacheManager, properties.getGroup(), properties);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void preCheck(String owner, Captcha.CaptchaType type) {
+        if (IGNORES.contains(type)) {
+            return;
+        }
         String key = String.format("%s_%s", owner, ISO_8601_EXTENDED_DATE_FORMAT.format(new Date()));
         Cache cache = requiredCache(type);
-        Integer total = cache.get(key, Integer.class);
-        if (total == null) {
-            total = 0;
-        } else {
-            total += 1;
+        List<Long> times = (List<Long>) cache.get(key, List.class);
+        if (times == null) {
+            times = new ArrayList<>();
         }
-        AssertUtils.isTrue(total < mxAllowGenerateTimesOfUserWithDaySupplier.apply(type), "已超过每天允许发送的最大次数");
-        cache.put(key, total);
+        checkFlowControl(times, type);
+        AssertUtils.isTrue(times.size() < properties.getMaxAllowGenerateTimesOfUserByDay(type), CAPTCHA_SEND_MAX_LIMIT_OF_USER_BY_DAY);
+        times.add(System.currentTimeMillis());
+        cache.put(key, times);
+    }
+
+    private void checkFlowControl(List<Long> times, Captcha.CaptchaType type) {
+        Captcha.CaptchaFlowControl control = properties.getFlowControl(type);
+        if (control == null) {
+            // 不需要流控
+            return;
+        }
+        long currentTimeMillis = System.currentTimeMillis();
+        long millis = control.getWindow().toMillis();
+        // 统计在流控窗口内发送的验证码次数
+        int count = (int) times.stream().filter(time -> (currentTimeMillis - time) <= millis).count();
+        AssertUtils.isTrue(count < control.getSpeed(), CaptchaI18nMessageKeys.CAPTCHA_FLOW_CONTROL);
+
     }
 
     @NonNull

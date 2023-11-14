@@ -1,6 +1,7 @@
 package com.wind.security.captcha;
 
 import com.wind.common.enums.DescriptiveEnum;
+import lombok.Data;
 
 import java.beans.Transient;
 import java.time.Duration;
@@ -30,7 +31,6 @@ public interface Captcha extends CaptchaValue {
      * @return 验证码使用场景
      */
     CaptchaUseScene getUseScene();
-
 
     /**
      * @return 已验证次数
@@ -107,5 +107,21 @@ public interface Captcha extends CaptchaValue {
 
     }
 
+    /**
+     * 验证码发送流控配置
+     */
+    @Data
+    class CaptchaFlowControl {
+
+        /**
+         * 流控统计窗口
+         */
+        private Duration window = Duration.ofHours(1);
+
+        /**
+         * 在流控统计间隔时间内允许发送的次数
+         */
+        private int speed = 3;
+    }
 
 }

@@ -10,6 +10,7 @@ import com.wind.security.captcha.qrcode.QrCodeCaptchaProperties;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**
@@ -60,7 +61,13 @@ public class CaptchaProperties {
      */
     private QrCodeCaptchaProperties qrCode = new QrCodeCaptchaProperties();
 
-    public int getMxAllowGenerateTimesOfUserWithDay(Captcha.CaptchaType type) {
+    /**
+     * 一个用户每天允许发送的验证码的最大次数
+     *
+     * @param type 验证码类型
+     * @return 发送次数
+     */
+    public int getMaxAllowGenerateTimesOfUserByDay(Captcha.CaptchaType type) {
         if (Objects.equals(SimpleCaptchaType.MOBILE_PHONE, type)) {
             return mobilePhone.getMxAllowGenerateTimesOfUserWithDay();
         }
@@ -69,5 +76,23 @@ public class CaptchaProperties {
             return email.getMxAllowGenerateTimesOfUserWithDay();
         }
         return Integer.MAX_VALUE;
+    }
+
+    /**
+     * 获取验证码发送的流控配置
+     *
+     * @param type 验证码类型
+     * @return 流控配置，null 表示不限制
+     */
+    @Nullable
+    public Captcha.CaptchaFlowControl getFlowControl(Captcha.CaptchaType type) {
+        if (Objects.equals(SimpleCaptchaType.MOBILE_PHONE, type)) {
+            return mobilePhone.getFlowControl();
+        }
+
+        if (Objects.equals(SimpleCaptchaType.EMAIL, type)) {
+            return email.getFlowControl();
+        }
+        return null;
     }
 }
