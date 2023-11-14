@@ -16,10 +16,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-import static com.wind.security.captcha.CaptchaI18nMessageKeys.CAPTCHA_SEND_MAX_LIMIT_OF_USER_BY_DAY;
+import static com.wind.security.captcha.CaptchaI18nMessageKeys.CAPTCHA_GENERATE_MAX_LIMIT_OF_USER_BY_DAY;
+import static com.wind.security.captcha.CaptchaI18nMessageKeys.CAPTCHA_VERITY_FAILURE;
 
 class DefaultCaptchaManagerTest {
 
@@ -29,8 +38,7 @@ class DefaultCaptchaManagerTest {
 
     @BeforeEach
     void setup() {
-
-        CaptchaGenerateChecker checker = new SimpleCaptchaGenerateChecker(new ConcurrentMapCacheManager(), "test", properties);
+        CaptchaGenerateChecker checker = new SimpleCaptchaGenerateChecker(new ConcurrentMapCacheManager(), properties);
         captchaManager = new DefaultCaptchaManager(getProviders(), getCaptchaStorage(), checker);
     }
 
@@ -78,12 +86,30 @@ class DefaultCaptchaManagerTest {
     @Test
     void testMobileCaptchaGenerateFlowControl() {
         String owner = RandomStringUtils.randomAlphanumeric(11);
-        for (int i = 0; i < properties.getMobilePhone().getFlowControl().getSpeed() ; i++) {
+        for (int i = 0; i < properties.getMobilePhone().getFlowControl().getSpeed(); i++) {
             Captcha captcha = captchaManager.generate(SimpleCaptchaType.MOBILE_PHONE, SimpleUseScene.LOGIN, owner);
             Assertions.assertNotNull(captcha);
         }
         BaseException exception = Assertions.assertThrows(BaseException.class, () -> captchaManager.generate(SimpleCaptchaType.MOBILE_PHONE, SimpleUseScene.REGISTER, owner));
         Assertions.assertEquals(CaptchaI18nMessageKeys.CAPTCHA_FLOW_CONTROL, exception.getMessage());
+    }
+
+    @Test
+    void testMobileCaptchaCurrentGenerate() throws Exception {
+        properties.getMobilePhone().getFlowControl().setSpeed(100);
+        String owner = RandomStringUtils.randomAlphanumeric(11);
+        ExecutorService executorService = Executors.newFixedThreadPool(5);
+        List<Future<?>> futures = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            Future<?> future = executorService.submit((Callable<Object>) () -> captchaManager.generate(SimpleCaptchaType.MOBILE_PHONE, SimpleUseScene.REGISTER, owner));
+            futures.add(future);
+        }
+        ExecutionException exception = Assertions.assertThrows(ExecutionException.class, () -> {
+            for (Future<?> future : futures) {
+                future.get();
+            }
+        });
+        Assertions.assertEquals(CaptchaI18nMessageKeys.CAPTCHA_CONCURRENT_GENERATE, exception.getCause().getMessage());
     }
 
     @Test
@@ -96,7 +122,7 @@ class DefaultCaptchaManagerTest {
             Assertions.assertNotNull(captcha);
         }
         BaseException exception = Assertions.assertThrows(BaseException.class, () -> captchaManager.generate(SimpleCaptchaType.MOBILE_PHONE, SimpleUseScene.REGISTER, owner));
-        Assertions.assertEquals(CAPTCHA_SEND_MAX_LIMIT_OF_USER_BY_DAY, exception.getMessage());
+        Assertions.assertEquals(CAPTCHA_GENERATE_MAX_LIMIT_OF_USER_BY_DAY, exception.getMessage());
     }
 
     private void assertCaptchaError(Captcha.CaptchaType type, int maxAllowVerificationTimes) {
@@ -106,7 +132,7 @@ class DefaultCaptchaManagerTest {
             Assertions.assertNotNull(captcha);
             String expected = RandomStringUtils.randomAlphanumeric(4);
             BaseException exception = Assertions.assertThrows(BaseException.class, () -> captchaManager.verify(expected, type, scene, owner));
-            Assertions.assertEquals("$.captcha.verify.failure", exception.getMessage());
+            Assertions.assertEquals(CAPTCHA_VERITY_FAILURE, exception.getMessage());
             Captcha next = captchaManager.getCaptchaStorage().get(captcha.getType(), captcha.getUseScene(), owner);
             if (maxAllowVerificationTimes <= 1) {
                 Assertions.assertNull(next);

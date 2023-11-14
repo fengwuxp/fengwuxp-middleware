@@ -62,7 +62,7 @@ public class CaptchaProperties {
     private QrCodeCaptchaProperties qrCode = new QrCodeCaptchaProperties();
 
     /**
-     * 一个用户每天允许发送的验证码的最大次数
+     * 一个用户每天允许生成的验证码的最大次数
      *
      * @param type 验证码类型
      * @return 发送次数

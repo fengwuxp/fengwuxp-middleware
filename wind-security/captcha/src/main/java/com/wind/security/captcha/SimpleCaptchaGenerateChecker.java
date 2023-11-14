@@ -2,6 +2,8 @@ package com.wind.security.captcha;
 
 import com.google.common.collect.ImmutableSet;
 import com.wind.common.exception.AssertUtils;
+import com.wind.common.locks.LockFactory;
+import com.wind.common.locks.SimpleLockFactory;
 import com.wind.security.captcha.configuration.CaptchaProperties;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.Cache;
@@ -12,8 +14,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
 
-import static com.wind.security.captcha.CaptchaI18nMessageKeys.CAPTCHA_SEND_MAX_LIMIT_OF_USER_BY_DAY;
+import static com.wind.security.captcha.CaptchaI18nMessageKeys.CAPTCHA_CONCURRENT_GENERATE;
+import static com.wind.security.captcha.CaptchaI18nMessageKeys.CAPTCHA_GENERATE_MAX_LIMIT_OF_USER_BY_DAY;
 import static org.apache.commons.lang3.time.DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT;
 
 /**
@@ -31,17 +35,17 @@ public class SimpleCaptchaGenerateChecker implements CaptchaGenerateChecker {
     private final CacheManager cacheManager;
 
     /**
-     * 业务模块分组
-     */
-    private final String group;
-
-    /**
      * 每个用户每天允许发送验证码的最大次数
      */
     private CaptchaProperties properties;
 
+    /**
+     * 锁工厂
+     */
+    private LockFactory lockFactory;
+
     public SimpleCaptchaGenerateChecker(CacheManager cacheManager, CaptchaProperties properties) {
-        this(cacheManager, properties.getGroup(), properties);
+        this(cacheManager, properties, new SimpleLockFactory());
     }
 
     @Override
@@ -51,15 +55,22 @@ public class SimpleCaptchaGenerateChecker implements CaptchaGenerateChecker {
             return;
         }
         String key = String.format("%s_%s", owner, ISO_8601_EXTENDED_DATE_FORMAT.format(new Date()));
-        Cache cache = requiredCache(type);
-        List<Long> times = (List<Long>) cache.get(key, List.class);
-        if (times == null) {
-            times = new ArrayList<>();
+        Lock lock = lockFactory.apply(key);
+        AssertUtils.isTrue(lock.tryLock(), CAPTCHA_CONCURRENT_GENERATE);
+        try {
+            Cache cache = requiredCache(type);
+            List<Long> times = cache.get(key, List.class);
+            if (times == null) {
+                times = new ArrayList<>();
+            }
+            checkFlowControl(times, type);
+            AssertUtils.isTrue(times.size() < properties.getMaxAllowGenerateTimesOfUserByDay(type), CAPTCHA_GENERATE_MAX_LIMIT_OF_USER_BY_DAY);
+            times.add(System.currentTimeMillis());
+            cache.put(key, times);
+        } finally {
+            lock.unlock();
         }
-        checkFlowControl(times, type);
-        AssertUtils.isTrue(times.size() < properties.getMaxAllowGenerateTimesOfUserByDay(type), CAPTCHA_SEND_MAX_LIMIT_OF_USER_BY_DAY);
-        times.add(System.currentTimeMillis());
-        cache.put(key, times);
+
     }
 
     private void checkFlowControl(List<Long> times, Captcha.CaptchaType type) {
@@ -78,7 +89,7 @@ public class SimpleCaptchaGenerateChecker implements CaptchaGenerateChecker {
 
     @NonNull
     private Cache requiredCache(Captcha.CaptchaType captchaTyp) {
-        String name = CaptchaConstants.getCaptchaAllowGenTimesCacheName(group, captchaTyp);
+        String name = CaptchaConstants.getCaptchaAllowGenTimesCacheName(properties.getGroup(), captchaTyp);
         Cache result = cacheManager.getCache(name);
         AssertUtils.notNull(result, String.format("获取验证码生成次数 Cache 失败，CacheName = %s", name));
         return result;

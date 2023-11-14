@@ -23,9 +23,14 @@ public final class CaptchaI18nMessageKeys {
     public static final String CAPTCHA_FLOW_CONTROL = "$.captcha.flow.control";
 
     /**
-     * 一个用户每天允许发送的验证码的最大次数
+     * 一个用户每天允许生成的验证码的最大次数
      */
-    public static final String CAPTCHA_SEND_MAX_LIMIT_OF_USER_BY_DAY = "$.captcha.send.limit.user-by-day";
+    public static final String CAPTCHA_GENERATE_MAX_LIMIT_OF_USER_BY_DAY = "$.captcha.generate.limit.user-by-day";
+
+    /**
+     * 并发生成验证码
+     */
+    public static final String CAPTCHA_CONCURRENT_GENERATE = "$.captcha.concurrent.generate.error";
 
     /**
      * 验证码已失效
