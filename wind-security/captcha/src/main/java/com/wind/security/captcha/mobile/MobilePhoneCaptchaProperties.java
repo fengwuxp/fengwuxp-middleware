@@ -35,5 +35,5 @@ public class MobilePhoneCaptchaProperties implements Captcha.CaptchaConfiguratio
     /**
      * 每个用户每天允许发送验证码的最大次数
      */
-    private int mxAllowGenerateTimesOfUserWithDay = 5;
+    private int mxAllowGenerateTimesOfUserWithDay = 10;
 }

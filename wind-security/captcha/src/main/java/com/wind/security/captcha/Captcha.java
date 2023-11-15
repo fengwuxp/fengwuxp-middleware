@@ -121,7 +121,7 @@ public interface Captcha extends CaptchaValue {
         /**
          * 在流控统计间隔时间内允许发送的次数
          */
-        private int speed = 3;
+        private int speed = 5;
     }
 
 }
