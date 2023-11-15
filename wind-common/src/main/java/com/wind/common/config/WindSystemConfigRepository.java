@@ -20,8 +20,9 @@ import java.util.stream.Collectors;
  * @author wuxp
  * @date 2023-11-15 09:47
  **/
-
 public class WindSystemConfigRepository implements SystemConfigRepository {
+
+    private static final String MARK_NULL = "_MARK_#_NULL_#_";
 
     private final UnaryOperator<String> supplier;
 
@@ -35,18 +36,19 @@ public class WindSystemConfigRepository implements SystemConfigRepository {
     }
 
     public WindSystemConfigRepository(UnaryOperator<String> supplier, int cacheSeconds) {
-        this.supplier = supplier;
+        this.supplier = wrapper(supplier);
         this.cache = Caffeine.newBuilder()
                 .refreshAfterWrite(cacheSeconds, TimeUnit.SECONDS)
                 .maximumSize(500)
                 .scheduler(Scheduler.forScheduledExecutorService(new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("system-config-refresh"))))
-                .build(supplier::apply);
+                .build(this.supplier::apply);
     }
 
     @Nullable
     @Override
     public String getConfig(String name) {
-        return cache.get(name, this.supplier);
+        String result = cache.get(name, this.supplier);
+        return MARK_NULL.equals(result) ? null : result;
     }
 
     @Nullable
@@ -89,5 +91,13 @@ public class WindSystemConfigRepository implements SystemConfigRepository {
             return null;
         }
         return JSON.parseObject(json, targetType.getType());
+    }
+
+    private UnaryOperator<String> wrapper(UnaryOperator<String> supplier) {
+        return name -> {
+            String result = supplier.apply(name);
+            // 避免返回 null ，缓存击穿
+            return result == null ? MARK_NULL : result;
+        };
     }
 }
