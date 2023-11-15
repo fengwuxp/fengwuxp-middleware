@@ -1,8 +1,11 @@
 # Application Listeners
 org.springframework.context.ApplicationListener=\
 com.wind.server.configcenter.WindGlobalPropertyLoader,\
-com.wind.server.i18n.Spring18nMessageSourceInitializer,\
-com.wind.common.spring.ApplicationContextUtils
+com.wind.server.i18n.Spring18nMessageSourceInitializer
+
+#ApplicationContextInitializer
+org.springframework.context.ApplicationContextInitializer=\
+com.wind.common.spring.WindBeanDefinitionRegistryPostProcessor
 
 # BootstrapConfiguration
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
