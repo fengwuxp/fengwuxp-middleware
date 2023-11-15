@@ -2,13 +2,11 @@ package com.wind.common.spring;
 
 import com.wind.common.exception.AssertUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -18,9 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @date 2023-09-26 11:32
  **/
 @Slf4j
-public class ApplicationContextUtils implements ApplicationContextAware {
-
-    static final String BEAN_NAME = "windApplicationContextUtils";
+public class ApplicationContextUtils implements ApplicationListener<ContextRefreshedEvent> {
 
     private static final AtomicReference<ApplicationContext> APPLICATION_CONTEXT = new AtomicReference<>();
 
@@ -39,8 +35,8 @@ public class ApplicationContextUtils implements ApplicationContextAware {
     }
 
     @Override
-    public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
-        log.info("init ApplicationContextUtils");
-        ApplicationContextUtils.APPLICATION_CONTEXT.set(applicationContext);
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        log.info("refresh ApplicationContextUtils");
+        ApplicationContextUtils.APPLICATION_CONTEXT.set(event.getApplicationContext());
     }
 }

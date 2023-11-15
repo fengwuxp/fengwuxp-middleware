@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.context.ApplicationContextInitializer;
@@ -32,12 +31,6 @@ public class WindBeanDefinitionRegistryPostProcessor implements ApplicationConte
      */
     private static final Map<String, Supplier<BeanDefinition>> BEAN_DEFINITIONS = new ConcurrentHashMap<>();
 
-    static {
-        registerBean(ApplicationContextUtils.BEAN_NAME, () -> BeanDefinitionBuilder
-                .rootBeanDefinition(ApplicationContextUtils.class, ApplicationContextUtils::new)
-                .getBeanDefinition());
-    }
-
     @Override
     public void initialize(ConfigurableApplicationContext context) {
         log.info("add WindBeanDefinitionRegistryPostProcessor");
@@ -63,7 +56,7 @@ public class WindBeanDefinitionRegistryPostProcessor implements ApplicationConte
         });
     }
 
-    public static void registerBean(String bean, Supplier<BeanDefinition> supplier) {
+    static void registerBean(String bean, Supplier<BeanDefinition> supplier) {
         BEAN_DEFINITIONS.put(bean, supplier);
     }
 
