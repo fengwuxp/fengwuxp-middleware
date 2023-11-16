@@ -15,16 +15,18 @@ public enum SimpleUseScene implements Captcha.CaptchaUseScene {
 
     REGISTER("注册"),
 
-    REST_PASSWORD("重置密码"),
+    CHANGE_PASSWORD("修改密码"),
 
-    PAY("支付"),
+    REST_PASSWORD("重置密码"),
 
     BIND_MOBILE_PHONE("绑定手机"),
 
     /**
      * 例如：实名认证等场景
      */
-    IDENTITY_CONFIRMATION("身份确认");
+    IDENTITY_CONFIRMATION("身份确认"),
+
+    PAYMENT("支付");
 
     private final String desc;
 }
