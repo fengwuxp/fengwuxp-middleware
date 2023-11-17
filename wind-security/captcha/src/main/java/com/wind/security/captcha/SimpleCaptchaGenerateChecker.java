@@ -2,6 +2,8 @@ package com.wind.security.captcha;
 
 import com.google.common.collect.ImmutableSet;
 import com.wind.common.exception.AssertUtils;
+import com.wind.common.exception.BaseException;
+import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.common.locks.LockFactory;
 import com.wind.common.locks.SimpleLockFactory;
 import com.wind.security.captcha.configuration.CaptchaProperties;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 import static com.wind.security.captcha.CaptchaI18nMessageKeys.CAPTCHA_CONCURRENT_GENERATE;
@@ -56,7 +59,12 @@ public class SimpleCaptchaGenerateChecker implements CaptchaGenerateChecker {
         }
         String key = String.format("%s_%s", owner, ISO_8601_EXTENDED_DATE_FORMAT.format(new Date()));
         Lock lock = lockFactory.apply(key);
-        AssertUtils.isTrue(lock.tryLock(), CAPTCHA_CONCURRENT_GENERATE);
+        try {
+            AssertUtils.isTrue(lock.tryLock(2500, TimeUnit.MILLISECONDS), CAPTCHA_CONCURRENT_GENERATE);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, CAPTCHA_CONCURRENT_GENERATE, exception);
+        }
         try {
             Cache cache = requiredCache(type);
             List<Long> times = cache.get(key, List.class);
