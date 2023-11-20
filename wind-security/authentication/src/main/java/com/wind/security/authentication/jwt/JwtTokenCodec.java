@@ -9,6 +9,8 @@ import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.wind.common.exception.AssertUtils;
+import com.wind.common.exception.BaseException;
+import com.wind.common.exception.DefaultExceptionCode;
 import org.springframework.lang.Nullable;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
@@ -17,6 +19,7 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.util.StringUtils;
@@ -63,7 +66,7 @@ public final class JwtTokenCodec {
     @Nullable
     public JwtTokenPayload parse(String jwtToken) {
         if (StringUtils.hasLength(jwtToken)) {
-            Jwt jwt = jwtDecoder.decode(jwtToken);
+            Jwt jwt = parseJwt(jwtToken);
             Map<String, Object> claims = jwt.getClaims();
             JwtUser user = JSON.to(properties.getUserType(), claims.get(AUTHENTICATION_VARIABLE_NAME));
             Instant expiresAt = jwt.getExpiresAt();
@@ -71,6 +74,14 @@ public final class JwtTokenCodec {
             return new JwtTokenPayload(jwt.getSubject(), user, expiresAt.toEpochMilli());
         }
         return null;
+    }
+
+    private Jwt parseJwt(String jwtToken) {
+        try {
+            return jwtDecoder.decode(jwtToken);
+        } catch (JwtException exception) {
+            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, "登录令牌已失效，请重新登陆", exception);
+        }
     }
 
     /**
@@ -111,7 +122,7 @@ public final class JwtTokenCodec {
     @Nullable
     public JwtTokenPayload parseRefreshToken(String refreshToken) {
         if (StringUtils.hasLength(refreshToken)) {
-            Jwt jwt = jwtDecoder.decode(refreshToken);
+            Jwt jwt = parseJwt(refreshToken);
             Instant expiresAt = jwt.getExpiresAt();
             AssertUtils.notNull(expiresAt, "jwt token expire must not null");
             return new JwtTokenPayload(jwt.getSubject(), null, expiresAt.toEpochMilli());
