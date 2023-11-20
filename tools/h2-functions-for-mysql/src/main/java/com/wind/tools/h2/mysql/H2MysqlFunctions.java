@@ -17,7 +17,7 @@ public class H2MysqlFunctions {
     private static final Set<H2Function> DEFAULT_FUNCTIONS = new HashSet<>();
 
     static {
-        DEFAULT_FUNCTIONS.add(new H2Function("FIND_IN_SET", "com.wind.tools.h2.mysql.H2Functions.findInSet"));
+        DEFAULT_FUNCTIONS.add(new H2Function("FIND_IN_SET", "com.wind.tools.h2.mysql.H2MysqlFunctions.findInSet"));
     }
 
     /**
