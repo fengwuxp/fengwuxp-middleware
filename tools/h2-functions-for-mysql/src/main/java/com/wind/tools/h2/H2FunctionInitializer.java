@@ -32,9 +32,9 @@ public final class H2FunctionInitializer {
      */
     public static void initialize(DataSource dataSource) {
         try {
-            StringBuilder sBuilder = new StringBuilder();
+            StringBuilder functionSql = new StringBuilder();
             for (H2Function h2Function : H2MysqlFunctions.getFunctions()) {
-                sBuilder.append("CREATE")
+                functionSql.append("CREATE")
                         .append(BLANK_SPACE)
                         .append("ALIAS")
                         .append(BLANK_SPACE)
@@ -43,7 +43,7 @@ public final class H2FunctionInitializer {
                         .append("\"").append(h2Function.getFullClassName()).append("\";");
             }
             Connection conn = dataSource.getConnection();
-            RunScript.execute(conn, IOUtils.getReader(new ByteArrayInputStream(sBuilder.toString().getBytes())));
+            RunScript.execute(conn, IOUtils.getReader(new ByteArrayInputStream(functionSql.toString().getBytes())));
             conn.close();
         } catch (Exception exception) {
             log.error("init h2 functions error", exception);
