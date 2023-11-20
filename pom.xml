@@ -32,6 +32,7 @@
         <module>tools/mybatis-plus-annotation-processor</module>
         <module>tools/mybatis-flex-processor</module>
         <module>modules/office</module>
+        <module>tools/h2-functions-for-mysql</module>
     </modules>
 
     <properties>
@@ -135,6 +136,11 @@
             <dependency>
                 <groupId>com.wind.tools</groupId>
                 <artifactId>wind-mybatis-flex-processor</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.tools.h2</groupId>
+                <artifactId>h2-functions-for-mysql</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

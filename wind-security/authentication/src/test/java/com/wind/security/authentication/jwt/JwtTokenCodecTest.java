@@ -1,5 +1,6 @@
 package com.wind.security.authentication.jwt;
 
+import com.wind.common.exception.BaseException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.jwt.BadJwtException;
@@ -35,8 +36,8 @@ class JwtTokenCodecTest {
         JwtTokenCodec codec = new JwtTokenCodec(jwtProperties(Duration.ofMillis(1)));
         String token = codec.encodingRefreshToken(1L);
         Thread.sleep(100);
-        BadJwtException exception = Assertions.assertThrows(BadJwtException.class, () -> jwtTokenCodec.parseRefreshToken(token));
-        Assertions.assertEquals("An error occurred while attempting to decode the Jwt: Signed JWT rejected: Invalid signature", exception.getMessage());
+        BaseException exception = Assertions.assertThrows(BaseException.class, () -> jwtTokenCodec.parseRefreshToken(token));
+        Assertions.assertEquals("登录令牌已失效，请重新登陆", exception.getMessage());
     }
 
 
