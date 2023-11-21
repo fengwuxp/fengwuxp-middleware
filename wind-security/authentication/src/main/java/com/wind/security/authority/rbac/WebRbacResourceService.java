@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
+import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
@@ -122,13 +123,8 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
         }
 
         if (event.getResourceType() == RbacResource.User.class) {
-            if (event.isDeleted()) {
-                // 用户角色删除
-                getUserRoleCache().removeAll(event.getResourceIds());
-            } else {
-                // 用户角色内容变更
-                event.getResourceIds().forEach(id -> getUserRoleCache().put(id, delegate.findRolesByUserId(id)));
-            }
+            // 用户角色内容变更
+            event.getResourceIds().forEach(userId -> putUserRoleCaches(userId, delegate.findRolesByUserId(userId)));
         }
     }
 
@@ -146,6 +142,8 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
         try {
             delegate.getAllPermissions().forEach(this::putPermissionCaches);
             delegate.getAllRoles().forEach(this::putRoleCaches);
+            // 刷新在线用户角色缓存  TODO 待优化
+            getUserRoleCache().keys().forEach(userId -> putUserRoleCaches(userId, delegate.findRolesByUserId(userId)));
             log.debug("refresh rbac resource end");
         } catch (Exception exception) {
             log.error("refresh rbac resource error, message = {}", exception.getMessage(), exception);
@@ -217,6 +215,14 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     private void putRoleCaches(RbacResource.Role role) {
         if (role != null) {
             getRoleCache().put(role.getId(), role);
+        }
+    }
+
+    private void putUserRoleCaches(String userId, Set<RbacResource.Role> userRoles) {
+        if (ObjectUtils.isEmpty(userRoles)) {
+            getRoleCache().remove(userId);
+        } else {
+            getUserRoleCache().put(userId, userRoles);
         }
     }
 

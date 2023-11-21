@@ -67,6 +67,11 @@ public class CaffeineRbacResourceCacheSupplier implements RbacResourceCacheSuppl
         }
 
         @Override
+        public Collection<K> keys() {
+            return cache.asMap().keySet();
+        }
+
+        @Override
         public Collection<V> values() {
             return cache.asMap().values();
         }
@@ -76,9 +81,9 @@ public class CaffeineRbacResourceCacheSupplier implements RbacResourceCacheSuppl
                     // 设置最后一次写入或访问后经过固定时间过期
                     .expireAfterWrite(cacheEffectiveTime.getSeconds() + 10, TimeUnit.SECONDS)
                     // 初始的缓存空间大小
-                    .initialCapacity(200)
+                    .initialCapacity(1000)
                     // 缓存的最大条数
-                    .maximumSize(2000)
+                    .maximumSize(200000)
                     .build(loader::load);
         }
     }
