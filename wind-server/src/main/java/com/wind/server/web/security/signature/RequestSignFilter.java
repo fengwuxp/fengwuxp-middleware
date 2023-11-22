@@ -19,6 +19,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriUtils;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -115,7 +116,8 @@ public class RequestSignFilter implements Filter, Ordered {
         SignatureRequest.SignatureRequestBuilder result = SignatureRequest.builder()
                 // http 请求 path，不包含查询参数和域名
                 .requestPath(request.getRequestURI())
-                .queryString(request.getQueryString())
+                // decode
+                .queryString(UriUtils.decode(request.getQueryString(), StandardCharsets.UTF_8))
                 .method(request.getMethod().toUpperCase())
                 .nonce(request.getHeader(headerNames.nonce))
                 .timestamp(request.getHeader(headerNames.timestamp))

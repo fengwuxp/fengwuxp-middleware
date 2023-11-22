@@ -41,6 +41,11 @@ import static com.wind.security.WebSecurityConstants.RBAC_USER_ROLE_CACHE_NAME;
 @AllArgsConstructor
 public class WebRbacResourceService implements RbacResourceService, ApplicationListener<RbacResourceChangeEvent>, InitializingBean {
 
+    /**
+     * 默认 10 分钟刷新一次
+     */
+    private static final int REFRESH_USER_ROLES_SECONDS = 600;
+
     private final RbacResourceCacheSupplier cacheSupplier;
 
     private final RbacResourceService delegate;
@@ -131,10 +136,11 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     @Override
     public void afterPropertiesSet() {
         refreshRefresh();
+        schedule.execute(this::refreshUserRoles);
     }
 
-    private void scheduleRefresh(long delay) {
-        schedule.schedule(this::refreshRefresh, delay, TimeUnit.SECONDS);
+    private void scheduleRefresh() {
+        schedule.schedule(this::refreshRefresh, cacheRefreshInterval.getSeconds(), TimeUnit.SECONDS);
     }
 
     private void refreshRefresh() {
@@ -142,13 +148,26 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
         try {
             delegate.getAllPermissions().forEach(this::putPermissionCaches);
             delegate.getAllRoles().forEach(this::putRoleCaches);
-            // 刷新在线用户角色缓存  TODO 待优化
-            getUserRoleCache().keys().forEach(userId -> putUserRoleCaches(userId, delegate.findRolesByUserId(userId)));
             log.debug("refresh rbac resource end");
         } catch (Exception exception) {
             log.error("refresh rbac resource error, message = {}", exception.getMessage(), exception);
         } finally {
-            scheduleRefresh(cacheRefreshInterval.getSeconds());
+            scheduleRefresh();
+        }
+    }
+
+    private void scheduleRefreshUserRoles() {
+        schedule.schedule(this::refreshUserRoles, REFRESH_USER_ROLES_SECONDS, TimeUnit.SECONDS);
+    }
+
+    private void refreshUserRoles() {
+        try {
+            // 刷新在线用户角色缓存  TODO 待优化
+            getUserRoleCache().keys().forEach(userId -> putUserRoleCaches(userId, delegate.findRolesByUserId(userId)));
+        } catch (Exception exception) {
+            log.error("refresh user roles error, message = {}", exception.getMessage(), exception);
+        } finally {
+            scheduleRefreshUserRoles();
         }
     }
 
