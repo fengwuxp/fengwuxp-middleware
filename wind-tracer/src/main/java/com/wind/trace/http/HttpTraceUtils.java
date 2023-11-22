@@ -10,6 +10,7 @@ import com.wind.web.utils.HttpServletRequestUtils;
 import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.wind.common.WindConstants.HTTP_REQUEST_UR_TRACE_NAME;
+import static com.wind.common.WindConstants.LOCAL_HOST_IP_V4;
 import static com.wind.common.WindConstants.TRACE_ID_NAME;
 import static com.wind.common.WindConstants.WIND_TRANCE_ID_HEADER_NAME;
 import static com.wind.common.WindHttpConstants.HTTP_REQUEST_IP_ATTRIBUTE_NAME;
@@ -57,6 +59,7 @@ public final class HttpTraceUtils {
         MDC.put(HTTP_REQUEST_IP_ATTRIBUTE_NAME, (String) request.getAttribute(HTTP_REQUEST_IP_ATTRIBUTE_NAME));
         MDC.put(HTTP_REQUEST_UR_TRACE_NAME, request.getRequestURI());
         MDC.put(HTTP_USER_AGENT_HEADER_NAME, request.getHeader(HttpHeaders.USER_AGENT));
+        MDC.put(LOCAL_HOST_IP_V4, IpAddressUtils.getLocalIpv4());
     }
 
     public static void clearTrace() {
@@ -128,5 +131,10 @@ public final class HttpTraceUtils {
             }
         }
         return request.getRemoteAddr();
+    }
+
+    @Nullable
+    public static String getLocalIpv4() {
+        return MDC.get(LOCAL_HOST_IP_V4);
     }
 }

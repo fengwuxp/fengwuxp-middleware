@@ -1,11 +1,23 @@
 package com.wind.common.utils;
 
 
+import com.wind.common.WindConstants;
+import lombok.extern.slf4j.Slf4j;
+
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
+
 /**
  * 获取 http 请求的 来源 ip ip 地址
  *
  * @author wxup
  */
+@Slf4j
 public final class IpAddressUtils {
 
     private IpAddressUtils() {
@@ -138,6 +150,33 @@ public final class IpAddressUtils {
         }
 
         return true;
+    }
+
+    /**
+     * 直接根据第一个网卡地址作为其内网 ipv4 地址，避免返回 127.0.0.1
+     *
+     * @return 本机 host
+     */
+    public static String getLocalIpv4() {
+        try {
+            for (Enumeration<NetworkInterface> network = NetworkInterface.getNetworkInterfaces(); network.hasMoreElements(); ) {
+                NetworkInterface item = network.nextElement();
+                for (InterfaceAddress address : item.getInterfaceAddresses()) {
+                    if (item.isLoopback() || !item.isUp()) {
+                        continue;
+                    }
+                    if (address.getAddress() instanceof Inet4Address) {
+                        Inet4Address inet4Address = (Inet4Address) address.getAddress();
+                        return inet4Address.getHostAddress();
+                    }
+                }
+            }
+            String result = InetAddress.getLocalHost().getHostAddress();
+            return result == null ? WindConstants.UNKNOWN : result;
+        } catch (SocketException | UnknownHostException exception) {
+            log.warn("获取本机 host 失败", exception);
+            return WindConstants.UNKNOWN;
+        }
     }
 
 }

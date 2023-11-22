@@ -214,4 +214,14 @@ public final class WindConstants {
      */
     public static final String HTTP_REQUEST_UR_TRACE_NAME = "requestUrl";
 
+    /**
+     * 本机 ipv4 地址
+     */
+    public static final String LOCAL_HOST_IP_V4 = "localhostIpv4";
+
+    /**
+     * 本机 ipv6 地址
+     */
+    public static final String LOCAL_HOST_IP_V6 = "localhostIpv6";
+
 }
