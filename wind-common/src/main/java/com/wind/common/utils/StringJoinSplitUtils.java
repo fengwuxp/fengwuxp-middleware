@@ -50,6 +50,9 @@ public final class StringJoinSplitUtils {
 
     @Nullable
     public static String joinEnums(Collection<? extends Enum<?>> enums) {
+        if (enums == null) {
+            return null;
+        }
         return join(enums.stream().map(Enum::name).collect(Collectors.toList()));
     }
 
