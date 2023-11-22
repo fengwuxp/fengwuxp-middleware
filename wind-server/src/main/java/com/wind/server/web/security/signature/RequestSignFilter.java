@@ -117,7 +117,7 @@ public class RequestSignFilter implements Filter, Ordered {
                 // http 请求 path，不包含查询参数和域名
                 .requestPath(request.getRequestURI())
                 // decode
-                .queryString(UriUtils.decode(request.getQueryString(), StandardCharsets.UTF_8))
+                .queryString(request.getQueryString() == null ? null : UriUtils.decode(request.getQueryString(), StandardCharsets.UTF_8))
                 .method(request.getMethod().toUpperCase())
                 .nonce(request.getHeader(headerNames.nonce))
                 .timestamp(request.getHeader(headerNames.timestamp))
