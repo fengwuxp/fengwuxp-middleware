@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Scheduler;
+import com.wind.common.exception.AssertUtils;
 import com.wind.common.spring.ApplicationContextUtils;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.convert.ConversionService;
@@ -13,7 +14,6 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 /**
@@ -24,30 +24,37 @@ public class WindSystemConfigRepository implements SystemConfigRepository {
 
     private static final String MARK_NULL = "_MARK_#_NULL_#_";
 
-    private final UnaryOperator<String> supplier;
+    private final SystemConfigStorage delegate;
 
     /**
      * 配置缓存
      */
     private final Cache<String, String> cache;
 
-    public WindSystemConfigRepository(UnaryOperator<String> supplier) {
-        this(supplier, 90);
+    public WindSystemConfigRepository(SystemConfigStorage delegate) {
+        this(delegate, 90);
     }
 
-    public WindSystemConfigRepository(UnaryOperator<String> supplier, int cacheSeconds) {
-        this.supplier = wrapper(supplier);
+    public WindSystemConfigRepository(SystemConfigStorage delegate, int cacheSeconds) {
+        this.delegate = wrapper(delegate);
         this.cache = Caffeine.newBuilder()
                 .refreshAfterWrite(cacheSeconds, TimeUnit.SECONDS)
                 .maximumSize(500)
                 .scheduler(Scheduler.forScheduledExecutorService(new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("system-config-refresh"))))
-                .build(this.supplier::apply);
+                .build(this.delegate::getConfig);
+    }
+
+    @Override
+    public void saveConfig(String name, String group, String value) {
+        AssertUtils.hasText(name, "argument name must not empty");
+        AssertUtils.hasText(group, "argument group must not empty");
+        delegate.saveConfig(name, group, value);
     }
 
     @Nullable
     @Override
     public String getConfig(String name) {
-        String result = cache.get(name, this.supplier);
+        String result = cache.get(name, this.delegate::getConfig);
         return MARK_NULL.equals(result) ? null : result;
     }
 
@@ -93,11 +100,20 @@ public class WindSystemConfigRepository implements SystemConfigRepository {
         return JSON.parseObject(json, targetType.getType());
     }
 
-    private UnaryOperator<String> wrapper(UnaryOperator<String> supplier) {
-        return name -> {
-            String result = supplier.apply(name);
-            // 避免返回 null ，缓存击穿
-            return result == null ? MARK_NULL : result;
+    private SystemConfigStorage wrapper(SystemConfigStorage storage) {
+        return new SystemConfigStorage() {
+            @Override
+            public void saveConfig(String name, String group, String value) {
+                storage.saveConfig(name, group, value);
+            }
+
+            @Nullable
+            @Override
+            public String getConfig(String name) {
+                String result = storage.getConfig(name);
+                // 避免返回 null ，缓存击穿
+                return result == null ? MARK_NULL : result;
+            }
         };
     }
 }

@@ -1,5 +1,6 @@
 package com.wind.security.configuration;
 
+import com.wind.common.config.SystemConfigRepository;
 import com.wind.security.authentication.WindAuthenticationProperties;
 import com.wind.security.authentication.jwt.JwtProperties;
 import com.wind.security.authentication.jwt.JwtTokenCodec;
@@ -80,10 +81,12 @@ public class WindSecurityAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean({WindSecurityRbacProperties.class, RbacResourceCacheSupplier.class, RbacResourceService.class})
+    @ConditionalOnBean({WindSecurityRbacProperties.class, RbacResourceCacheSupplier.class, RbacResourceService.class, SystemConfigRepository.class})
     @Primary
-    public WebRbacResourceService webRbacResourceService(RbacResourceCacheSupplier cacheSupplier, RbacResourceService delegate, WindSecurityRbacProperties properties) {
-        return new WebRbacResourceService(cacheSupplier, delegate, properties.getCacheEffectiveTime());
+    public WebRbacResourceService webRbacResourceService(RbacResourceCacheSupplier cacheSupplier, RbacResourceService delegate,
+                                                         WindSecurityRbacProperties properties,
+                                                         SystemConfigRepository repository) {
+        return new WebRbacResourceService(cacheSupplier, delegate, properties.getCacheEffectiveTime(), repository);
     }
 
     @Bean

@@ -7,7 +7,6 @@ import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.lang.reflect.ParameterizedType;
 import java.util.Set;
 
 /**
@@ -16,16 +15,8 @@ import java.util.Set;
  * @author wuxp
  * @date 2023-11-15 09:36
  **/
-public interface SystemConfigRepository {
+public interface SystemConfigRepository extends SystemConfigStorage {
 
-    /**
-     * 获取配置
-     *
-     * @param name 配置名称
-     * @return 配置值
-     */
-    @Nullable
-    String getConfig(String name);
 
     /**
      * 获取配置，如果配置为 null 抛出异常

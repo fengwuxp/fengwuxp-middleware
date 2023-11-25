@@ -1,5 +1,6 @@
 package com.wind.security.authority.rbac;
 
+import com.wind.common.config.SystemConfigRepository;
 import com.wind.common.exception.AssertUtils;
 import com.wind.security.core.rbac.RbacResource;
 import com.wind.security.core.rbac.RbacResourceCache;
@@ -8,6 +9,7 @@ import com.wind.security.core.rbac.RbacResourceChangeEvent;
 import com.wind.security.core.rbac.RbacResourceService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.lang.NonNull;
@@ -41,6 +43,12 @@ import static com.wind.security.WebSecurityConstants.RBAC_USER_ROLE_CACHE_NAME;
 @AllArgsConstructor
 public class WebRbacResourceService implements RbacResourceService, ApplicationListener<RbacResourceChangeEvent>, InitializingBean {
 
+    private static final String REFRESH_RBAC_CACHE_LOCK_KEY = "REFRESH_RBAC_CACHE_LOCK";
+
+    private static final String REFRESH_USER_ROLE_CACHE_LOCK_KEY = "REFRESH_USER_ROLE_CACHE_LOCk";
+
+    private static final String RBAC_CACHE_GROUP = "RBAC_CACHE";
+
     /**
      * 默认 10 分钟刷新一次
      */
@@ -55,10 +63,15 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
      */
     private final Duration cacheRefreshInterval;
 
+    /**
+     * 刷新缓存的时的锁
+     */
+    private final SystemConfigRepository repository;
+
     private final ScheduledExecutorService schedule = new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("web-rbac-resource-refresher"));
 
-    public WebRbacResourceService(RbacResourceCacheSupplier cacheSupplier, RbacResourceService delegate) {
-        this(cacheSupplier, delegate, Duration.ofMinutes(3));
+    public WebRbacResourceService(RbacResourceCacheSupplier cacheSupplier, RbacResourceService delegate, SystemConfigRepository repository) {
+        this(cacheSupplier, delegate, Duration.ofMinutes(3), repository);
     }
 
     @Override
@@ -140,14 +153,22 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     }
 
     private void scheduleRefresh() {
-        schedule.schedule(this::refreshRefresh, cacheRefreshInterval.getSeconds(), TimeUnit.SECONDS);
+        schedule.schedule(this::refreshRefresh, randomDelay(cacheRefreshInterval.getSeconds()), TimeUnit.MILLISECONDS);
+    }
+
+    private long randomDelay(long delaySeconds) {
+        // 随机打散，返回毫秒数
+        return RandomUtils.nextLong(1000, 7500) + delaySeconds * 1000;
     }
 
     private void refreshRefresh() {
         log.debug("begin refresh rbac resource");
         try {
-            delegate.getAllPermissions().forEach(this::putPermissionCaches);
-            delegate.getAllRoles().forEach(this::putRoleCaches);
+            if (canRefreshRoleCaches(REFRESH_RBAC_CACHE_LOCK_KEY)) {
+                storeLastRefreshTime(REFRESH_RBAC_CACHE_LOCK_KEY);
+                delegate.getAllPermissions().forEach(this::putPermissionCaches);
+                delegate.getAllRoles().forEach(this::putRoleCaches);
+            }
             log.debug("refresh rbac resource end");
         } catch (Exception exception) {
             log.error("refresh rbac resource error, message = {}", exception.getMessage(), exception);
@@ -157,18 +178,34 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     }
 
     private void scheduleRefreshUserRoles() {
-        schedule.schedule(this::refreshUserRoles, REFRESH_USER_ROLES_SECONDS, TimeUnit.SECONDS);
+        schedule.schedule(this::refreshUserRoles, randomDelay(REFRESH_USER_ROLES_SECONDS), TimeUnit.MILLISECONDS);
     }
 
     private void refreshUserRoles() {
         try {
-            // 刷新在线用户角色缓存  TODO 待优化
-            getUserRoleCache().keys().forEach(userId -> putUserRoleCaches(userId, delegate.findRolesByUserId(userId)));
+            if (canRefreshRoleCaches(REFRESH_USER_ROLE_CACHE_LOCK_KEY)) {
+                storeLastRefreshTime(REFRESH_USER_ROLE_CACHE_LOCK_KEY);
+                // 刷新在线用户角色缓存  TODO 待优化
+                getUserRoleCache().keys().forEach(userId -> putUserRoleCaches(userId, delegate.findRolesByUserId(userId)));
+            }
         } catch (Exception exception) {
             log.error("refresh user roles error, message = {}", exception.getMessage(), exception);
         } finally {
             scheduleRefreshUserRoles();
         }
+    }
+
+    private boolean canRefreshRoleCaches(String key) {
+        Long lastRefreshTimes = repository.getConfig(key, Long.TYPE);
+        if (lastRefreshTimes == null) {
+            return true;
+        }
+        // 最后一次刷新时间大于 90% 缓存刷新间隔时间
+        return (System.currentTimeMillis() - lastRefreshTimes) >= (cacheRefreshInterval.toMillis() * 0.9);
+    }
+
+    private void storeLastRefreshTime(String key) {
+        repository.saveConfig(key, RBAC_CACHE_GROUP, String.valueOf(System.currentTimeMillis()));
     }
 
     @NonNull
