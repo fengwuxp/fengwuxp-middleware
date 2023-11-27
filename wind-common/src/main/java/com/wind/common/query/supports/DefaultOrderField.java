@@ -21,7 +21,12 @@ public enum DefaultOrderField implements QueryOrderField {
     /**
      * 编辑日期
      */
-    GMT_MODIFIED("gmt_modified");
+    GMT_MODIFIED("gmt_modified"),
+
+    /**
+     * 排序
+     */
+    ORDER_INDEX("order_index");
 
     /**
      * 排序字段
