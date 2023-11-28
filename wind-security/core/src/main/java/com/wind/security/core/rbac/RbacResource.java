@@ -121,8 +121,10 @@ public interface RbacResource<I extends Serializable> extends Serializable {
          */
         private final Set<String> attributes;
 
-        public ImmutablePermission() {
-            // 为了给序列化框架使用
+        /**
+         * 为了给序列化框架使用，提供一个空构造
+         */
+        ImmutablePermission() {
             this("", "", "", Collections.emptySet());
         }
 
@@ -149,8 +151,10 @@ public interface RbacResource<I extends Serializable> extends Serializable {
          */
         private final Set<String> permissions;
 
-        public ImmutableRole() {
-            // 为了给序列化框架使用
+        /**
+         * 为了给序列化框架使用，提供一个空构造
+         */
+        ImmutableRole() {
             this("", "", Collections.emptySet());
         }
     }
