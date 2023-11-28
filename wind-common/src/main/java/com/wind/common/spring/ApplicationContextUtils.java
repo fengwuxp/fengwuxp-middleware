@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * spring 上下文 utils ，非常规用法，为了简化编码
+ * 请谨慎使用
  *
  * @author wuxp
  * @date 2023-09-26 11:32

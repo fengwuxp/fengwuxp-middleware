@@ -5,9 +5,9 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Scheduler;
 import com.wind.common.exception.AssertUtils;
-import com.wind.common.spring.ApplicationContextUtils;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
@@ -26,17 +26,20 @@ public class WindSystemConfigRepository implements SystemConfigRepository {
 
     private final SystemConfigStorage delegate;
 
+    private final ConversionService conversionService;
+
     /**
      * 配置缓存
      */
     private final Cache<String, String> cache;
 
     public WindSystemConfigRepository(SystemConfigStorage delegate) {
-        this(delegate, 90);
+        this(delegate, 90, new DefaultConversionService());
     }
 
-    public WindSystemConfigRepository(SystemConfigStorage delegate, int cacheSeconds) {
+    public WindSystemConfigRepository(SystemConfigStorage delegate, int cacheSeconds, ConversionService conversionService) {
         this.delegate = wrapper(delegate);
+        this.conversionService = conversionService;
         this.cache = Caffeine.newBuilder()
                 .refreshAfterWrite(cacheSeconds, TimeUnit.SECONDS)
                 .maximumSize(500)
@@ -76,8 +79,7 @@ public class WindSystemConfigRepository implements SystemConfigRepository {
 
     @Nullable
     private <T> T convert(String val, Class<T> targetType) {
-        ConversionService service = ApplicationContextUtils.getBean(ConversionService.class);
-        return service.convert(val, targetType);
+        return conversionService.convert(val, targetType);
     }
 
     @Nullable
