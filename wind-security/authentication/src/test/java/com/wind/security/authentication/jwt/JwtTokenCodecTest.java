@@ -3,7 +3,6 @@ package com.wind.security.authentication.jwt;
 import com.wind.common.exception.BaseException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.util.Base64Utils;
 
 import java.security.KeyPair;
@@ -19,24 +18,24 @@ class JwtTokenCodecTest {
     @Test
     void testCodecUserToken() {
         JwtUser user = new JwtUser(1L, "", Collections.emptyMap());
-        String token = jwtTokenCodec.encoding(user);
-        JwtUser result = jwtTokenCodec.parse(token).getUser();
+        JwtToken token = jwtTokenCodec.encoding(user);
+        JwtUser result = jwtTokenCodec.parse(token.getTokenValue()).getUser();
         Assertions.assertEquals(user, result);
     }
 
     @Test
     void testCodecRefreshToken() {
-        String token = jwtTokenCodec.encodingRefreshToken(1L);
-        JwtTokenPayload payload = jwtTokenCodec.parseRefreshToken(token);
-        Assertions.assertEquals(1L, payload.getUserId());
+        JwtToken token = jwtTokenCodec.encodingRefreshToken(1L);
+        Assertions.assertEquals(1L, token.getUserId());
     }
 
     @Test
     void testTokenExpire() throws Exception {
         JwtTokenCodec codec = new JwtTokenCodec(jwtProperties(Duration.ofMillis(1)));
-        String token = codec.encodingRefreshToken(1L);
+        JwtToken token = codec.encodingRefreshToken(1L);
         Thread.sleep(100);
-        BaseException exception = Assertions.assertThrows(BaseException.class, () -> jwtTokenCodec.parseRefreshToken(token));
+        String tokenValue = token.getTokenValue();
+        BaseException exception = Assertions.assertThrows(BaseException.class, () -> jwtTokenCodec.parseRefreshToken(tokenValue));
         Assertions.assertEquals("登录令牌已失效，请重新登陆", exception.getMessage());
     }
 
