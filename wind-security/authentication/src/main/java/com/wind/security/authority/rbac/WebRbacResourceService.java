@@ -148,6 +148,11 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
 
     @Override
     public void afterPropertiesSet() {
+        // init caches
+        getPermissionCache();
+        getUserRoleCache();
+        getUserRoleCache();
+
         refreshRefresh();
         schedule.execute(this::refreshUserRoles);
     }
