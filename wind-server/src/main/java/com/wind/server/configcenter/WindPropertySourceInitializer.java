@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
-import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.ApplicationListener;
@@ -18,11 +17,10 @@ import static com.wind.common.WindConstants.WIND_SERVER_CONFIG_CENTER_PROPERTIES
 
 /**
  * 从配置中心加载配置入口
- * 该 {ApplicationListener} 要在，{@link LoggingApplicationListener} 之前
  *
  * @author wuxp
  * @date 2023-10-18 12:55
- * @see LoggingApplicationListener
+ * @see org.springframework.boot.context.logging.LoggingApplicationListener
  **/
 @Slf4j
 @AllArgsConstructor
@@ -54,6 +52,6 @@ public class WindPropertySourceInitializer implements ApplicationListener<Applic
 
     @Override
     public int getOrder() {
-        return LoggingApplicationListener.DEFAULT_ORDER - 10;
+        return Ordered.HIGHEST_PRECEDENCE + 50;
     }
 }
