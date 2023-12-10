@@ -84,6 +84,13 @@ public interface RbacResourceCache<K, V> {
     void remove(K key);
 
     /**
+     * 获取所有的缓存 keys
+     *
+     * @return 缓存key
+     */
+    Collection<K> keys();
+
+    /**
      * 获取所有的缓存内容
      *
      * @return 缓存内容
@@ -91,7 +98,7 @@ public interface RbacResourceCache<K, V> {
     Collection<V> values();
 
 
-     interface CacheLoader<K, V> {
+    interface CacheLoader<K, V> {
 
         /**
          * Loads map value by key.

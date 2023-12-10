@@ -12,7 +12,7 @@ public interface SecurityAccessOperations {
     /**
      * 超级管理员角色名称
      */
-    String SUPPER_ADMIN_ROLE_NAME = "SUPPER_ADMIN";
+    String SUPER_ADMIN_ROLE_NAME = "SUPER_ADMIN";
 
     /**
      * 是否有 {@param authority}权限
@@ -54,7 +54,7 @@ public interface SecurityAccessOperations {
      * @return 是否为超级管理员
      */
     default boolean isSupperAdmin() {
-        return hasAnyRole(SUPPER_ADMIN_ROLE_NAME);
+        return hasAnyRole(SUPER_ADMIN_ROLE_NAME);
     }
 
 }

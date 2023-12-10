@@ -157,7 +157,6 @@ public final class WindConstants {
     /**
      * http status 同步设置 advice
      */
-
     public static final String WIND_SERVER_HTTP_RESPONSE_STATUS_ADVICE = "wind.server.http.status-advice";
 
     /**
@@ -198,7 +197,7 @@ public final class WindConstants {
     /**
      * 应用共享配置分组
      */
-    public static final String APP_SHARED_CONFIG_GROUP = "APP_SHARED";
+    public static final String APP_SHARE_CONFIG_GROUP = "APP_SHARE";
 
     /**
      * traceId
@@ -214,5 +213,15 @@ public final class WindConstants {
      * http 请求 url 变量
      */
     public static final String HTTP_REQUEST_UR_TRACE_NAME = "requestUrl";
+
+    /**
+     * 本机 ipv4 地址
+     */
+    public static final String LOCAL_HOST_IP_V4 = "localhostIpv4";
+
+    /**
+     * 本机 ipv6 地址
+     */
+    public static final String LOCAL_HOST_IP_V6 = "localhostIpv6";
 
 }

@@ -82,7 +82,8 @@ public class WindI18nMessageSource extends AbstractResourceBasedMessageSource {
         if (resolver == null) {
             return code;
         }
-        return resolver.getProperty(code);
+        // 如果获取失败，默认返回 code
+        return resolver.getProperty(code, code);
     }
 
     /**

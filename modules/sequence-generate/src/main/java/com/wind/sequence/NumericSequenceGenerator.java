@@ -30,6 +30,7 @@ public class NumericSequenceGenerator implements SequenceGenerator {
     public String next() {
         long seq = counter.incrementAndGet();
         AssertUtils.isTrue(String.valueOf(seq).length() <= length, "sequence exceeds maximum length");
-        return String.format("%0" + length + "d", seq);
+        String format = "%0" + length + "d";
+        return String.format(format, seq);
     }
 }

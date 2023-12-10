@@ -32,6 +32,7 @@ import java.util.LinkedList;
 
 /**
  * 配置刷新记录
+ *
  * @author wuxp
  */
 @Slf4j

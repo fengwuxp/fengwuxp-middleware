@@ -1,6 +1,7 @@
 package com.wind.security.captcha.configuration;
 
-import com.wind.common.WindConstants;
+import com.wind.common.locks.LockFactory;
+import com.wind.common.locks.SimpleLockFactory;
 import com.wind.security.captcha.CaptchaContentProvider;
 import com.wind.security.captcha.CaptchaGenerateChecker;
 import com.wind.security.captcha.CaptchaStorage;
@@ -77,9 +78,16 @@ public class CaptchaAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(CaptchaGenerateChecker.class)
-    public SimpleCaptchaGenerateChecker simpleCaptchaGenerateChecker(CacheManager cacheManager, CaptchaProperties properties) {
-        return new SimpleCaptchaGenerateChecker(cacheManager, WindConstants.DEFAULT_TEXT.toUpperCase(), properties::getMxAllowGenerateTimesOfUserWithDay);
+    @ConditionalOnMissingBean(LockFactory.class)
+    public LockFactory simpleLockFactory() {
+        return new SimpleLockFactory();
+    }
+
+    @Bean
+    @ConditionalOnBean(LockFactory.class)
+    @ConditionalOnMissingBean({CaptchaGenerateChecker.class})
+    public SimpleCaptchaGenerateChecker simpleCaptchaGenerateChecker(CacheManager cacheManager, CaptchaProperties properties, LockFactory lockFactory) {
+        return new SimpleCaptchaGenerateChecker(cacheManager, properties, lockFactory);
     }
 
     @Bean

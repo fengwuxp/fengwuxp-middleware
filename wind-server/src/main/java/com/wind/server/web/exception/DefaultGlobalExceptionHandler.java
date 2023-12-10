@@ -6,6 +6,8 @@ import com.wind.server.web.restful.RestfulApiRespFactory;
 import com.wind.server.web.supports.ApiResp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -88,6 +90,25 @@ public class DefaultGlobalExceptionHandler {
         return RestfulApiRespFactory.notFound(exception.getMessage());
     }
 
+    /**
+     * 数据库唯一键冲突异常
+     */
+    @ExceptionHandler(DuplicateKeyException.class)
+    @ResponseBody
+    public ApiResp<Void> duplicateKeyException(Exception exception) {
+        log.error("唯一键冲突异常", exception);
+        return RestfulApiRespFactory.error("数据已存在");
+    }
+
+    /**
+     * 数据操作异常
+     */
+    @ExceptionHandler(DataAccessException.class)
+    @ResponseBody
+    public ApiResp<Void> dataAccessException(Exception exception) {
+        log.error("数据操作异常", exception);
+        return RestfulApiRespFactory.error("数据操作失败");
+    }
 
     /**
      * 处理业务异常

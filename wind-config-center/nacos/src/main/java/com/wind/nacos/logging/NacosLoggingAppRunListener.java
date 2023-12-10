@@ -31,23 +31,23 @@ import org.springframework.core.env.ConfigurableEnvironment;
  */
 public class NacosLoggingAppRunListener implements SpringApplicationRunListener, Ordered {
 
-	public NacosLoggingAppRunListener(SpringApplication application, String[] args) {
+    public NacosLoggingAppRunListener(SpringApplication application, String[] args) {
 
-	}
+    }
 
-	@Override
-	public void environmentPrepared(ConfigurableBootstrapContext bootstrapContext, ConfigurableEnvironment environment) {
-		NacosLogging.getInstance().loadConfiguration();
-	}
+    @Override
+    public void environmentPrepared(ConfigurableBootstrapContext bootstrapContext, ConfigurableEnvironment environment) {
+        NacosLogging.getInstance().loadConfiguration();
+    }
 
-	@Override
-	public void contextPrepared(ConfigurableApplicationContext context) {
-		NacosLogging.getInstance().loadConfiguration();
-	}
+    @Override
+    public void contextPrepared(ConfigurableApplicationContext context) {
+        NacosLogging.getInstance().loadConfiguration();
+    }
 
-	@Override
-	public int getOrder() {
-		return 1;
-	}
+    @Override
+    public int getOrder() {
+        return 1;
+    }
 
 }

@@ -6,6 +6,7 @@ import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.common.exception.ExceptionCode;
 import com.wind.common.query.supports.Pagination;
 import com.wind.server.web.supports.ApiResp;
+import com.wind.trace.http.HttpTraceUtils;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
@@ -154,6 +155,9 @@ public final class RestfulApiRespFactory {
         @Getter
         private final String errorMessage;
 
+        @Getter
+        private final String traceId;
+
         ImmutableApiResp(HttpStatus httpStatus, T data, ExceptionCode errorCode, String errorMessage) {
             AssertUtils.notNull(httpStatus, "argument httpStatus must not null");
             AssertUtils.notNull(errorCode, "argument errorCode must not null");
@@ -161,6 +165,7 @@ public final class RestfulApiRespFactory {
             this.data = data;
             this.errorCode = errorCode;
             this.errorMessage = errorMessage;
+            this.traceId = HttpTraceUtils.getTraceContext().getTraceId();
         }
 
         @Override

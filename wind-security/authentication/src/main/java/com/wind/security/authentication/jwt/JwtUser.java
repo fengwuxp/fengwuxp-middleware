@@ -1,5 +1,6 @@
 package com.wind.security.authentication.jwt;
 
+import com.wind.common.exception.AssertUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -45,5 +46,17 @@ public class JwtUser implements Serializable {
     @SuppressWarnings("unchecked")
     public <T> T getAttribute(String key) {
         return (T) attributes.get(key);
+    }
+
+    /**
+     * 获取属性并判断空
+     *
+     * @param key 属性名称
+     * @return 属性值
+     */
+    public <T> T requiredAttribute(String key) {
+        T result = getAttribute(key);
+        AssertUtils.notNull(result, () -> String.format("attribute name = %s must not null", key));
+        return result;
     }
 }

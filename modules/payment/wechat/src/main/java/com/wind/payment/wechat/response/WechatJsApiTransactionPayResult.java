@@ -5,6 +5,7 @@ import lombok.experimental.Accessors;
 
 /**
  * 微信支付 JSAPI 响应
+ *
  * @author wuxp
  * @date 2023-10-03 18:28
  **/

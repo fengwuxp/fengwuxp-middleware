@@ -15,7 +15,7 @@ import java.util.Date;
  * @date 2023-09-24 10:13
  **/
 @AllArgsConstructor
-public class DefaultCaptchaManager {
+public class DefaultCaptchaManager implements CaptchaManager {
 
     private final Collection<CaptchaContentProvider> delegates;
 
@@ -47,6 +47,7 @@ public class DefaultCaptchaManager {
      * @param owner    验证码所有者
      * @return 验证码
      */
+    @Override
     public Captcha generate(Captcha.CaptchaType type, Captcha.CaptchaUseScene useScene, String owner) {
         // 检查是否允许生成验证码
         generateChecker.preCheck(owner, type);
@@ -62,6 +63,8 @@ public class DefaultCaptchaManager {
                 .verificationCount(0)
                 .allowVerificationTimes(delegate.getMaxAllowVerificationTimes())
                 .build();
+        // 先移除之前的验证码，在保存
+        captchaStorage.remove(type, useScene, owner);
         captchaStorage.store(result);
         return result;
     }
@@ -74,6 +77,7 @@ public class DefaultCaptchaManager {
      * @param useScene 验证码使用场景
      * @param owner    验证码所有者
      */
+    @Override
     public void verify(String expected, Captcha.CaptchaType type, Captcha.CaptchaUseScene useScene, String owner) {
         Captcha captcha = captchaStorage.get(type, useScene, owner);
         AssertUtils.notNull(captcha, CaptchaI18nMessageKeys.CAPTCHA_NOT_EXIST);

@@ -1,6 +1,7 @@
 package com.wind.security.captcha;
 
 import com.wind.common.exception.BaseException;
+import com.wind.security.captcha.configuration.CaptchaProperties;
 import com.wind.security.captcha.mobile.MobilePhoneCaptchaContentProvider;
 import com.wind.security.captcha.mobile.MobilePhoneCaptchaProperties;
 import com.wind.security.captcha.picture.PictureCaptchaContentProvider;
@@ -18,15 +19,19 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static com.wind.security.captcha.CaptchaI18nMessageKeys.CAPTCHA_GENERATE_MAX_LIMIT_OF_USER_BY_DAY;
+import static com.wind.security.captcha.CaptchaI18nMessageKeys.CAPTCHA_VERITY_FAILURE;
+
 class DefaultCaptchaManagerTest {
 
     private DefaultCaptchaManager captchaManager;
 
-    private final static int TEST_MX_ALLOW_GENERATE_TIMES_OF_USER_WITH_DAY = 15;
+    private CaptchaProperties properties;
 
     @BeforeEach
     void setup() {
-        CaptchaGenerateChecker checker = new SimpleCaptchaGenerateChecker(new ConcurrentMapCacheManager(), "test", type -> TEST_MX_ALLOW_GENERATE_TIMES_OF_USER_WITH_DAY);
+        properties = new CaptchaProperties();
+        CaptchaGenerateChecker checker = new SimpleCaptchaGenerateChecker(new ConcurrentMapCacheManager(), properties);
         captchaManager = new DefaultCaptchaManager(getProviders(), getCaptchaStorage(), checker);
     }
 
@@ -72,14 +77,27 @@ class DefaultCaptchaManagerTest {
     }
 
     @Test
-    void testMobileCaptchaGenerateLimit() {
+    void testMobileCaptchaGenerateFlowControl() {
         String owner = RandomStringUtils.randomAlphanumeric(11);
-        for (int i = 0; i < TEST_MX_ALLOW_GENERATE_TIMES_OF_USER_WITH_DAY; i++) {
+        for (int i = 0; i < properties.getMobilePhone().getFlowControl().getSpeed(); i++) {
             Captcha captcha = captchaManager.generate(SimpleCaptchaType.MOBILE_PHONE, SimpleUseScene.LOGIN, owner);
             Assertions.assertNotNull(captcha);
         }
         BaseException exception = Assertions.assertThrows(BaseException.class, () -> captchaManager.generate(SimpleCaptchaType.MOBILE_PHONE, SimpleUseScene.REGISTER, owner));
-        Assertions.assertEquals("已超过每天允许发送的最大次数", exception.getMessage());
+        Assertions.assertEquals(CaptchaI18nMessageKeys.CAPTCHA_FLOW_CONTROL, exception.getMessage());
+    }
+
+    @Test
+    void testMobileCaptchaGenerateLimit() {
+        properties.getMobilePhone().getFlowControl().setSpeed(100);
+        String owner = RandomStringUtils.randomAlphanumeric(11);
+        int maxAllowGenerateTimesOfUserByDay = properties.getMaxAllowGenerateTimesOfUserByDay(SimpleCaptchaType.MOBILE_PHONE);
+        for (int i = 0; i < maxAllowGenerateTimesOfUserByDay; i++) {
+            Captcha captcha = captchaManager.generate(SimpleCaptchaType.MOBILE_PHONE, SimpleUseScene.LOGIN, owner);
+            Assertions.assertNotNull(captcha);
+        }
+        BaseException exception = Assertions.assertThrows(BaseException.class, () -> captchaManager.generate(SimpleCaptchaType.MOBILE_PHONE, SimpleUseScene.REGISTER, owner));
+        Assertions.assertEquals(CAPTCHA_GENERATE_MAX_LIMIT_OF_USER_BY_DAY, exception.getMessage());
     }
 
     private void assertCaptchaError(Captcha.CaptchaType type, int maxAllowVerificationTimes) {
@@ -89,7 +107,7 @@ class DefaultCaptchaManagerTest {
             Assertions.assertNotNull(captcha);
             String expected = RandomStringUtils.randomAlphanumeric(4);
             BaseException exception = Assertions.assertThrows(BaseException.class, () -> captchaManager.verify(expected, type, scene, owner));
-            Assertions.assertEquals("$.captcha.verify.failure", exception.getMessage());
+            Assertions.assertEquals(CAPTCHA_VERITY_FAILURE, exception.getMessage());
             Captcha next = captchaManager.getCaptchaStorage().get(captcha.getType(), captcha.getUseScene(), owner);
             if (maxAllowVerificationTimes <= 1) {
                 Assertions.assertNull(next);

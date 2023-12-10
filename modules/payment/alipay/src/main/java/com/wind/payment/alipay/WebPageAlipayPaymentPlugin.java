@@ -43,7 +43,7 @@ public class WebPageAlipayPaymentPlugin extends AbstractAlipayPaymentPlugin {
         model.setProductCode(ALI_WEB_PAGE_PAY_PRODUCT_CODE);
         model.setOutTradeNo(request.getTransactionNo());
         model.setBody(normalizationBody(request.getDescription()));
-        model.setTimeoutExpress(getExpireTimeOrUseDefault( request.getExpireTime()));
+        model.setTimeoutExpress(getExpireTimeOrUseDefault(request.getExpireTime()));
         model.setSubject(request.getSubject());
         model.setTotalAmount(PaymentTransactionUtils.feeToYun(request.getOrderAmount()).toString());
         req.setBizModel(model);
@@ -77,7 +77,7 @@ public class WebPageAlipayPaymentPlugin extends AbstractAlipayPaymentPlugin {
                         ERROR_PATTERN, request.getTransactionNo(), response.getCode(), response.getMsg()));
             }
         } catch (AlipayApiException exception) {
-            throw new PaymentTransactionException(DefaultExceptionCode.COMMON_ERROR,  String.format("支付宝电脑网站支付交易异常，transactionNo = %s。", request.getTransactionNo()), exception);
+            throw new PaymentTransactionException(DefaultExceptionCode.COMMON_ERROR, String.format("支付宝电脑网站支付交易异常，transactionNo = %s。", request.getTransactionNo()), exception);
         }
 
         return result;

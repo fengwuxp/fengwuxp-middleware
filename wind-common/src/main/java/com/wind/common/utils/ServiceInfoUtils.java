@@ -3,6 +3,8 @@ package com.wind.common.utils;
 import com.google.common.collect.ImmutableSet;
 import com.wind.common.WindConstants;
 import com.wind.common.spring.ApplicationContextUtils;
+import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 import java.util.Set;
 
@@ -31,11 +33,23 @@ public final class ServiceInfoUtils {
      * @return 获取应用名称
      */
     public static String getApplicationName() {
-       return ApplicationContextUtils.getProperty(WindConstants.SPRING_APPLICATION_NAME);
+        return getProperty(WindConstants.SPRING_APPLICATION_NAME);
     }
 
+    /**
+     * @return 当前启动环境
+     */
     public static String getSpringProfilesActive() {
-        return ApplicationContextUtils.getProperty(WindConstants.SPRING_PROFILES_ACTIVE);
+        return getProperty(WindConstants.SPRING_PROFILES_ACTIVE);
+    }
+
+    @Nullable
+    private static String getProperty(String key) {
+        String result = System.getProperty(key, System.getenv(key));
+        if (StringUtils.hasText(result)) {
+            return result;
+        }
+        return ApplicationContextUtils.getProperty(key);
     }
 
 }

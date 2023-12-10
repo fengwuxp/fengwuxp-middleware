@@ -1,6 +1,7 @@
 package com.wind.server.web.supports;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 
 import java.beans.Transient;
 import java.io.Serializable;
@@ -46,5 +47,14 @@ public interface ApiResp<T> extends Serializable {
      *
      * @return 业务处理失败时返回的消息描述
      */
+    @Nullable
     String getErrorMessage();
+
+    /**
+     * 请求 traceId
+     *
+     * @return traceId
+     */
+    @Nullable
+    String getTraceId();
 }

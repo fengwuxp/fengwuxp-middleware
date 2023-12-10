@@ -1,19 +1,11 @@
 package com.wind.security.authentication.jwt;
 
-import com.wind.common.exception.BaseException;
-import com.wind.common.exception.DefaultExceptionCode;
+import com.wind.security.AbstractRsaProperties;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.springframework.http.HttpHeaders;
-import org.springframework.util.Base64Utils;
 
-import java.beans.Transient;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.time.Duration;
 
 
@@ -22,7 +14,9 @@ import java.time.Duration;
  * <a href="https://llbetter.com/JWT-default-claims/">JWT(Json Web Token)中默认的声明含义</a>
  */
 @Data
-public class JwtProperties {
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class JwtProperties extends AbstractRsaProperties {
 
     /**
      * jwt issuer
@@ -62,28 +56,5 @@ public class JwtProperties {
     private String rsaPrivateKey;
 
     private Class<? extends JwtUser> userType = JwtUser.class;
-
-    @Transient
-    KeyPair getKeyPair() {
-        try {
-            return new KeyPair(getPublicKey(), getPrivateKey());
-        } catch (Exception exception) {
-            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, "生成 Rsa 秘钥对失败", exception);
-        }
-    }
-
-    private PublicKey getPublicKey() throws Exception {
-        byte[] bytes = Base64Utils.decodeFromString(getRsaPublicKey());
-        return getRsaFactory().generatePublic(new X509EncodedKeySpec(bytes));
-    }
-
-    private PrivateKey getPrivateKey() throws Exception {
-        byte[] bytes = Base64Utils.decodeFromString(getRsaPrivateKey());
-        return getRsaFactory().generatePrivate(new PKCS8EncodedKeySpec(bytes));
-    }
-
-    private static KeyFactory getRsaFactory() throws NoSuchAlgorithmException {
-        return KeyFactory.getInstance("RSA");
-    }
 
 }

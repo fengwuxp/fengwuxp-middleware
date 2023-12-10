@@ -20,6 +20,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertyResolver;
+import org.springframework.core.env.PropertySourcesPropertyResolver;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
 
 import javax.annotation.Nonnull;
@@ -80,22 +82,25 @@ public class NacosBootstrapListener implements ApplicationListener<ApplicationEn
 
     @Nonnull
     private Map<String, Object> getNacosConfigs(ConfigurableEnvironment environment) {
-        MutablePropertySources sources = environment.getPropertySources();
-        sources.addLast(new MapPropertySource(SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, environment.getSystemProperties()));
-        sources.addLast(new SystemEnvironmentPropertySource(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, environment.getSystemEnvironment()));
+        // 复制一份
+        MutablePropertySources sources = new MutablePropertySources(environment.getPropertySources());
+        if (!sources.contains(SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)) {
+            // 如果不存在系统配置，手动加载
+            sources.addLast(new MapPropertySource(SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, environment.getSystemProperties()));
+            sources.addLast(new SystemEnvironmentPropertySource(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, environment.getSystemEnvironment()));
+        }
         Map<String, Object> properties = new HashMap<>(environment.getSystemProperties());
         Map<String, Object> result = new HashMap<>();
         properties.putAll(environment.getSystemEnvironment());
+        PropertyResolver resolver = new PropertySourcesPropertyResolver(sources);
         properties.forEach((key, val) -> {
             if (key != null && key.startsWith(NacosConfigProperties.PREFIX)) {
                 String name = key.substring(NacosConfigProperties.PREFIX.length() + 1);
                 // 中划线转驼峰
                 name = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, name.replace(WindConstants.DASHED, WindConstants.UNDERLINE));
-                result.put(name, environment.getProperty(key, String.class));
+                result.put(name, resolver.getProperty(key, String.class));
             }
         });
-        sources.remove(SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME);
-        sources.remove(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME);
         return result;
     }
 

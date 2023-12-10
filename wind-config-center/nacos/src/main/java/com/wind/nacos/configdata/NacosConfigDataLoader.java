@@ -55,113 +55,110 @@ import static org.springframework.boot.context.config.ConfigData.Option.PROFILE_
  */
 public class NacosConfigDataLoader implements ConfigDataLoader<NacosConfigDataResource> {
 
-	private final Log log;
+    private final Log log;
 
-	public NacosConfigDataLoader(DeferredLogFactory logFactory) {
-		this.log = logFactory.getLog(getClass());
-	}
+    public NacosConfigDataLoader(DeferredLogFactory logFactory) {
+        this.log = logFactory.getLog(getClass());
+    }
 
-	@Override
-	public ConfigData load(ConfigDataLoaderContext context,
-			NacosConfigDataResource resource) {
-		return doLoad(context, resource);
-	}
+    @Override
+    public ConfigData load(ConfigDataLoaderContext context,
+                           NacosConfigDataResource resource) {
+        return doLoad(context, resource);
+    }
 
-	public ConfigData doLoad(ConfigDataLoaderContext context,
-			NacosConfigDataResource resource) {
-		try {
-			ConfigService configService = getBean(context, ConfigService.class);
-			NacosConfigProperties properties = getBean(context,
-					NacosConfigProperties.class);
+    public ConfigData doLoad(ConfigDataLoaderContext context,
+                             NacosConfigDataResource resource) {
+        try {
+            ConfigService configService = getBean(context, ConfigService.class);
+            NacosConfigProperties properties = getBean(context,
+                    NacosConfigProperties.class);
 
-			NacosConfigDataResource.NacosItemConfig config = resource.getConfig();
-			// pull config from nacos
-			List<PropertySource<?>> propertySources = pullConfig(configService,
-					config.getGroup(), config.getDataId(), config.getSuffix(),
-					properties.getTimeout());
+            NacosConfigDataResource.NacosItemConfig config = resource.getConfig();
+            // pull config from nacos
+            List<PropertySource<?>> propertySources = pullConfig(configService,
+                    config.getGroup(), config.getDataId(), config.getSuffix(),
+                    properties.getTimeout());
 
-			NacosPropertySource propertySource = new NacosPropertySource(propertySources,
-					config.getGroup(), config.getDataId(), new Date(),
-					config.isRefreshEnabled());
+            NacosPropertySource propertySource = new NacosPropertySource(propertySources,
+                    config.getGroup(), config.getDataId(), new Date(),
+                    config.isRefreshEnabled());
 
-			NacosPropertySourceRepository.collectNacosPropertySource(propertySource);
+            NacosPropertySourceRepository.collectNacosPropertySource(propertySource);
 
-			return new ConfigData(propertySources, getOptions(context, resource));
-		}
-		catch (Exception e) {
-			log.error("Error getting properties from nacos: " + resource, e);
-			if (!resource.isOptional()) {
-				throw new ConfigDataResourceNotFoundException(resource, e);
-			}
-		}
-		return null;
-	}
+            return new ConfigData(propertySources, getOptions(context, resource));
+        } catch (Exception e) {
+            log.error("Error getting properties from nacos: " + resource, e);
+            if (!resource.isOptional()) {
+                throw new ConfigDataResourceNotFoundException(resource, e);
+            }
+        }
+        return null;
+    }
 
-	private Option[] getOptions(ConfigDataLoaderContext context,
-			NacosConfigDataResource resource) {
-		List<Option> options = new ArrayList<>();
-		options.add(IGNORE_IMPORTS);
-		options.add(IGNORE_PROFILES);
-		if (getPreference(context, resource) == REMOTE) {
-			// mark it as 'PROFILE_SPECIFIC' config, it has higher priority,
-			// will override the none profile specific config.
-			// fixed https://github.com/alibaba/spring-cloud-alibaba/issues/2455
-			options.add(PROFILE_SPECIFIC);
-		}
-		return options.toArray(new Option[0]);
-	}
+    private Option[] getOptions(ConfigDataLoaderContext context,
+                                NacosConfigDataResource resource) {
+        List<Option> options = new ArrayList<>();
+        options.add(IGNORE_IMPORTS);
+        options.add(IGNORE_PROFILES);
+        if (getPreference(context, resource) == REMOTE) {
+            // mark it as 'PROFILE_SPECIFIC' config, it has higher priority,
+            // will override the none profile specific config.
+            // fixed https://github.com/alibaba/spring-cloud-alibaba/issues/2455
+            options.add(PROFILE_SPECIFIC);
+        }
+        return options.toArray(new Option[0]);
+    }
 
-	private ConfigPreference getPreference(ConfigDataLoaderContext context,
-			NacosConfigDataResource resource) {
-		Binder binder = context.getBootstrapContext().get(Binder.class);
-		ConfigPreference preference = binder
-				.bind("spring.cloud.nacos.config.preference", ConfigPreference.class)
-				.orElse(LOCAL);
-		String specificPreference = resource.getConfig().getPreference();
-		if (specificPreference != null) {
-			try {
-				preference = ConfigPreference.valueOf(specificPreference.toUpperCase());
-			}
-			catch (IllegalArgumentException ignore) {
-				// illegal preference value, just ignore.
-				log.error(String.format(
-						"illegal preference value: %s, using default preference: %s",
-						specificPreference, preference));
-			}
-		}
-		return preference;
-	}
+    private ConfigPreference getPreference(ConfigDataLoaderContext context,
+                                           NacosConfigDataResource resource) {
+        Binder binder = context.getBootstrapContext().get(Binder.class);
+        ConfigPreference preference = binder
+                .bind("spring.cloud.nacos.config.preference", ConfigPreference.class)
+                .orElse(LOCAL);
+        String specificPreference = resource.getConfig().getPreference();
+        if (specificPreference != null) {
+            try {
+                preference = ConfigPreference.valueOf(specificPreference.toUpperCase());
+            } catch (IllegalArgumentException ignore) {
+                // illegal preference value, just ignore.
+                log.error(String.format(
+                        "illegal preference value: %s, using default preference: %s",
+                        specificPreference, preference));
+            }
+        }
+        return preference;
+    }
 
-	private List<PropertySource<?>> pullConfig(ConfigService configService, String group,
-			String dataId, String suffix, long timeout)
-			throws NacosException, IOException {
-		String config = configService.getConfig(dataId, group, timeout);
-		logLoadInfo(group, dataId, config);
-		// fixed issue: https://github.com/alibaba/spring-cloud-alibaba/issues/2906 .
-		String configName = group + "@" + dataId;
-		return NacosDataParserHandler.getInstance().parseNacosData(configName, config, suffix);
-	}
+    private List<PropertySource<?>> pullConfig(ConfigService configService, String group,
+                                               String dataId, String suffix, long timeout)
+            throws NacosException, IOException {
+        String config = configService.getConfig(dataId, group, timeout);
+        logLoadInfo(group, dataId, config);
+        // fixed issue: https://github.com/alibaba/spring-cloud-alibaba/issues/2906 .
+        String configName = group + "@" + dataId;
+        return NacosDataParserHandler.getInstance().parseNacosData(configName, config, suffix);
+    }
 
-	private void logLoadInfo(String group, String dataId, String config) {
-		if (config != null) {
-			log.info(String.format(
-					"[Nacos Config] Load config[dataId=%s, group=%s] success", dataId,
-					group));
-		}
-		else {
-			log.warn(String.format("[Nacos Config] config[dataId=%s, group=%s] is empty",
-					dataId, group));
-		}
-		if (log.isDebugEnabled()) {
-			log.debug(String.format("[Nacos Config] config[dataId=%s, group=%s] content: \n%s", dataId, group, config));
-		}
-	}
+    private void logLoadInfo(String group, String dataId, String config) {
+        if (config != null) {
+            log.info(String.format(
+                    "[Nacos Config] Load config[dataId=%s, group=%s] success", dataId,
+                    group));
+        } else {
+            log.warn(String.format("[Nacos Config] config[dataId=%s, group=%s] is empty",
+                    dataId, group));
+        }
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("[Nacos Config] config[dataId=%s, group=%s] content: \n%s", dataId, group, config));
+        }
+    }
 
-	protected <T> T getBean(ConfigDataLoaderContext context, Class<T> type) {
-		if (context.getBootstrapContext().isRegistered(type)) {
-			return context.getBootstrapContext().get(type);
-		}
-		return null;
-	}
+    protected <T> T getBean(ConfigDataLoaderContext context, Class<T> type) {
+        if (context.getBootstrapContext().isRegistered(type)) {
+            return context.getBootstrapContext().get(type);
+        }
+        return null;
+    }
 
 }

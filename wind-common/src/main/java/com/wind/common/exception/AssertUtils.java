@@ -44,6 +44,10 @@ public final class AssertUtils {
         }
     }
 
+    public static void isTrue(boolean expression, MessagePlaceholder placeholder) {
+        isTrue(expression, placeholder.getPattern(), placeholder.getArgs());
+    }
+
     /**
      * Assert a boolean expression, throwing an {@code BaseException}
      * if the expression evaluates to {@code false}.
@@ -75,6 +79,10 @@ public final class AssertUtils {
         state(expression, () -> BaseException.common(nullSafeGet(messageSupplier)));
     }
 
+    public static void isFalse(boolean expression, MessagePlaceholder placeholder) {
+        isFalse(expression, placeholder.getPattern(), placeholder.getArgs());
+    }
+
     public static void isFalse(boolean expression, String message, Object... args) {
         isTrue(!expression, message, args);
     }
@@ -89,7 +97,7 @@ public final class AssertUtils {
      *
      * @param object  the object to check
      * @param message the exception message to use if the assertion fails
-     * @param args       message placeholder arguments
+     * @param args    message placeholder arguments
      * @throws BaseException if the object is not {@code null}
      */
     public static void isNull(@Nullable Object object, String message, Object... args) {
@@ -110,6 +118,10 @@ public final class AssertUtils {
      */
     public static void isNull(@Nullable Object object, Supplier<String> messageSupplier) {
         isTrue(object == null, messageSupplier);
+    }
+
+    public static void notNull(Object object, MessagePlaceholder placeholder) {
+        notNull(object, placeholder.getPattern(), placeholder.getArgs());
     }
 
     /**
@@ -139,6 +151,10 @@ public final class AssertUtils {
      */
     public static void notNull(@Nullable Object object, Supplier<String> messageSupplier) {
         isTrue(object != null, messageSupplier);
+    }
+
+    public static void hasLength(String text, MessagePlaceholder placeholder) {
+        hasLength(text, placeholder.getPattern(), placeholder.getArgs());
     }
 
     /**
@@ -240,6 +256,9 @@ public final class AssertUtils {
                 textToSearch.contains(substring), messageSupplier);
     }
 
+    public static void notEmpty(@Nullable Object[] array, MessagePlaceholder placeholder) {
+        notEmpty(array, placeholder.getPattern(), placeholder.getArgs());
+    }
 
     /**
      * Assert that an array contains elements; that is, it must not be
@@ -313,6 +332,9 @@ public final class AssertUtils {
         }
     }
 
+    public static void notEmpty(@Nullable Collection<?> collection, MessagePlaceholder placeholder) {
+        notEmpty(collection, placeholder.getPattern(), placeholder.getArgs());
+    }
 
     /**
      * Assert that a collection contains elements; that is, it must not be
@@ -387,6 +409,10 @@ public final class AssertUtils {
                 }
             }
         }
+    }
+
+    public static void notEmpty(@Nullable Map<?, ?> map, MessagePlaceholder placeholder) {
+        notEmpty(map, placeholder.getPattern(), placeholder.getArgs());
     }
 
     /**

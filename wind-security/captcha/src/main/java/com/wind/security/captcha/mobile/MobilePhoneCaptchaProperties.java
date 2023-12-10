@@ -25,10 +25,15 @@ public class MobilePhoneCaptchaProperties implements Captcha.CaptchaConfiguratio
     /**
      * 最大可验证失败的次数
      */
-    private int maxAllowVerificationTimes = 5;
+    private int maxAllowVerificationTimes = 3;
+
+    /**
+     * 发送流控
+     */
+    private Captcha.CaptchaFlowControl flowControl = new Captcha.CaptchaFlowControl();
 
     /**
      * 每个用户每天允许发送验证码的最大次数
      */
-    private int mxAllowGenerateTimesOfUserWithDay = 5;
+    private int mxAllowGenerateTimesOfUserWithDay = 10;
 }

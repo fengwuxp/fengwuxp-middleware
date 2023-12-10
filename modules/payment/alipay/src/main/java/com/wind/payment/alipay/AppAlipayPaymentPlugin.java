@@ -42,7 +42,7 @@ public class AppAlipayPaymentPlugin extends AbstractAlipayPaymentPlugin {
         model.setProductCode(ALI_APP_PAY_PRODUCT_CODE);
         model.setOutTradeNo(request.getTransactionNo());
         model.setBody(normalizationBody(request.getDescription()));
-        model.setTimeoutExpress(getExpireTimeOrUseDefault( request.getExpireTime()));
+        model.setTimeoutExpress(getExpireTimeOrUseDefault(request.getExpireTime()));
         model.setSubject(request.getSubject());
         model.setTotalAmount(PaymentTransactionUtils.feeToYun(request.getOrderAmount()).toString());
         req.setBizModel(model);

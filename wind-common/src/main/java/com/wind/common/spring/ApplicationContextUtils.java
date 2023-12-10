@@ -1,27 +1,25 @@
 package com.wind.common.spring;
 
 import com.wind.common.exception.AssertUtils;
-import org.springframework.beans.BeansException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * spring 上下文 utils ，非常规用法，为了简化编码
+ * 请谨慎使用
  *
  * @author wuxp
  * @date 2023-09-26 11:32
  **/
-public class ApplicationContextUtils implements ApplicationContextAware {
+@Slf4j
+public class ApplicationContextUtils implements ApplicationListener<ContextRefreshedEvent> {
 
     private static final AtomicReference<ApplicationContext> APPLICATION_CONTEXT = new AtomicReference<>();
-
-    public ApplicationContextUtils(ApplicationContext context) {
-        APPLICATION_CONTEXT.set(context);
-    }
 
     public static <T> T getBean(Class<T> classType) {
         return getContext().getBean(classType);
@@ -38,7 +36,8 @@ public class ApplicationContextUtils implements ApplicationContextAware {
     }
 
     @Override
-    public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
-        ApplicationContextUtils.APPLICATION_CONTEXT.set(applicationContext);
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        log.info("refresh ApplicationContextUtils");
+        ApplicationContextUtils.APPLICATION_CONTEXT.set(event.getApplicationContext());
     }
 }

@@ -6,7 +6,7 @@ import com.wind.office.core.OfficeTaskState;
 import com.wind.office.core.formatter.MapFormatter;
 import com.wind.office.excel.ExcelDocumentDescriptor;
 import com.wind.office.excel.ExportExcelDataFetcher;
-import com.wind.script.spring.SpringExpressionExecutor;
+import com.wind.script.spring.SpringExpressionEvaluator;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.format.Formatter;
@@ -93,7 +93,7 @@ public class ExportExcelHandleTask extends AbstractOfficeHandleTask {
         List<String> result = new ArrayList<>();
         EvaluationContext context = new StandardEvaluationContext(o);
         descriptor.getHeaders().forEach(cell -> {
-            Object val = SpringExpressionExecutor.eval(cell.getExpression(), context);
+            Object val = SpringExpressionEvaluator.DEFAULT.eval(cell.getExpression(), context);
             if (val != null) {
 
             }

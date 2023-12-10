@@ -38,7 +38,7 @@ class AssertUtilsTest {
         AssertUtils.isInstanceOf(Map.class, ImmutableMap.of("1", "2"), "isInstanceOf error");
         AssertUtils.noNullElements(ImmutableSet.of("1", "2"), "noNullElements error");
         BaseException exception = Assertions.assertThrows(BaseException.class, () -> AssertUtils.state(false, () -> BaseException.unAuthorized("stateException")));
-        Assertions.assertEquals( "stateException",exception.getMessage());
+        Assertions.assertEquals("stateException", exception.getMessage());
     }
 
     @Test

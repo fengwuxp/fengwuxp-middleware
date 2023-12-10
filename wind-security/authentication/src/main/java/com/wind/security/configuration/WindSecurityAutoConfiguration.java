@@ -1,5 +1,7 @@
 package com.wind.security.configuration;
 
+import com.wind.common.config.SystemConfigRepository;
+import com.wind.security.authentication.WindAuthenticationProperties;
 import com.wind.security.authentication.jwt.JwtProperties;
 import com.wind.security.authentication.jwt.JwtTokenCodec;
 import com.wind.security.authority.rbac.CaffeineRbacResourceCacheSupplier;
@@ -41,6 +43,12 @@ public class WindSecurityAutoConfiguration {
      */
     public static final String RBAC_PREFIX = WindSecurityProperties.PREFIX + ".rbac";
 
+
+    /**
+     * Authentication 配置 prefix
+     */
+    public static final String AUTHENTICATION_PREFIX = WindSecurityProperties.PREFIX + ".authentication.crypto";
+
     @Bean
     @ConfigurationProperties(prefix = JWT_PREFIX)
     public JwtProperties jwtProperties() {
@@ -51,6 +59,13 @@ public class WindSecurityAutoConfiguration {
     @ConfigurationProperties(prefix = RBAC_PREFIX)
     public WindSecurityRbacProperties windSecurityRbacProperties() {
         return new WindSecurityRbacProperties();
+    }
+
+    @Bean
+//    @ConditionalOnProperty(prefix = AUTHENTICATION_PREFIX, name = ENABLED_NAME, havingValue = TRUE)
+    @ConfigurationProperties(prefix = AUTHENTICATION_PREFIX)
+    public WindAuthenticationProperties windAuthenticationProperties() {
+        return new WindAuthenticationProperties();
     }
 
     @Bean
@@ -66,10 +81,12 @@ public class WindSecurityAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean({WindSecurityRbacProperties.class, RbacResourceCacheSupplier.class, RbacResourceService.class})
+    @ConditionalOnBean({WindSecurityRbacProperties.class, RbacResourceCacheSupplier.class, RbacResourceService.class, SystemConfigRepository.class})
     @Primary
-    public WebRbacResourceService webRbacResourceService(RbacResourceCacheSupplier cacheSupplier, RbacResourceService delegate, WindSecurityRbacProperties properties) {
-        return new WebRbacResourceService(cacheSupplier, delegate, properties.getCacheEffectiveTime());
+    public WebRbacResourceService webRbacResourceService(RbacResourceCacheSupplier cacheSupplier, RbacResourceService delegate,
+                                                         WindSecurityRbacProperties properties,
+                                                         SystemConfigRepository repository) {
+        return new WebRbacResourceService(cacheSupplier, delegate, properties.getCacheEffectiveTime(), repository);
     }
 
     @Bean

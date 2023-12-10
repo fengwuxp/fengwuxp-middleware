@@ -30,12 +30,12 @@ package com.wind.nacos.configdata;
  * @since 2021.0.4.0
  */
 public enum ConfigPreference {
-	/**
-	 * Prefer local configuration.
-	 */
-	LOCAL,
-	/**
-	 * Prefer remote configuration.
-	 */
-	REMOTE
+    /**
+     * Prefer local configuration.
+     */
+    LOCAL,
+    /**
+     * Prefer remote configuration.
+     */
+    REMOTE
 }

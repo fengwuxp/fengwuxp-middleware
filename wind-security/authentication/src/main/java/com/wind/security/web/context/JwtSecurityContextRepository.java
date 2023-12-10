@@ -1,8 +1,8 @@
 package com.wind.security.web.context;
 
 import com.wind.common.exception.BaseException;
+import com.wind.security.authentication.jwt.JwtToken;
 import com.wind.security.authentication.jwt.JwtTokenCodec;
-import com.wind.security.authentication.jwt.JwtTokenPayload;
 import com.wind.security.authentication.jwt.JwtUser;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -74,7 +74,7 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
     @Nonnull
     private SecurityContext getSecurityContext(HttpServletRequest request) {
         String jwtToken = request.getHeader(headerName);
-        JwtTokenPayload payload;
+        JwtToken payload;
         try {
             payload = jwtTokenCodec.parse(jwtToken);
         } catch (Exception e) {

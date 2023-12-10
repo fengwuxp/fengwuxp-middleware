@@ -10,7 +10,7 @@ import lombok.Getter;
  **/
 @AllArgsConstructor
 @Getter
-enum SequenceTimeScopeType implements DescriptiveEnum {
+public enum SequenceTimeScopeType implements DescriptiveEnum {
 
 
     /**

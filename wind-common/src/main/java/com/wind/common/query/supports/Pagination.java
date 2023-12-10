@@ -83,10 +83,16 @@ public interface Pagination<T> extends Serializable {
 
         private final QueryType queryType;
 
+        /**
+         * 为了给序列化框架使用，提供一个空构造
+         */
+        ImmutablePagination() {
+            this(0, Collections.emptyList(), 0, 0, QueryType.QUERY_BOTH);
+        }
     }
 
     static <E> Pagination<E> empty() {
-        return new ImmutablePagination<>(0, Collections.emptyList(), 0, 0, QueryType.QUERY_BOTH);
+        return new ImmutablePagination<>();
     }
 
     static <E> Pagination<E> of(List<E> records, AbstractPageQuery<?> query) {

@@ -1,3 +1,6 @@
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 com.wind.security.configuration.WindSecurityAutoConfiguration
+# Application Listeners
+org.springframework.context.ApplicationListener=\
+com.wind.security.crypto.AuthenticationParameterEncryptor
