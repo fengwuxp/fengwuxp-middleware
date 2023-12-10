@@ -2,7 +2,6 @@ package com.wind.context.injection;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.wind.common.exception.BaseException;
 import com.wind.context.variable.annotations.ContextRequestIp;
 import com.wind.context.variable.annotations.ContextTenantId;
 import com.wind.context.variable.annotations.ContextUserId;

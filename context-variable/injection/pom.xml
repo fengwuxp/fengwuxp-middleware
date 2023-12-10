@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>com.wind.script</groupId>
-             <artifactId>wind-script</artifactId>
+            <artifactId>wind-script</artifactId>
         </dependency>
     </dependencies>
 

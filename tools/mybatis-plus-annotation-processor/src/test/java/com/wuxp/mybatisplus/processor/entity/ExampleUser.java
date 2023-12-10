@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @TableName("t_user")
-public class ExampleUser extends AbstractEntity{
+public class ExampleUser extends AbstractEntity {
 
     private String userName;
 

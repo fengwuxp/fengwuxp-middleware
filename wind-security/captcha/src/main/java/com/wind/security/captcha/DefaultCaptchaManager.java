@@ -15,7 +15,7 @@ import java.util.Date;
  * @date 2023-09-24 10:13
  **/
 @AllArgsConstructor
-public class DefaultCaptchaManager implements CaptchaManager{
+public class DefaultCaptchaManager implements CaptchaManager {
 
     private final Collection<CaptchaContentProvider> delegates;
 

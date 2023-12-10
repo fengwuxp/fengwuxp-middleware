@@ -33,7 +33,7 @@ class SpringExpressionConditionalExpressionJoinerTest {
     }
 
     @Test()
-     void testCallSpringBeanError() {
+    void testCallSpringBeanError() {
         BaseException exception = Assertions.assertThrows(BaseException.class, () -> joiner.join(createContextVariable("user.name"), createContextVariable("@example.getUserName(#user))", OperandSource.SCRIPT), Op.EQ));
         Assertions.assertEquals("不允许使用 @ 开头，访问 spring context bean 对象", exception.getMessage());
     }

@@ -60,7 +60,7 @@ public class MybatisFlexConfig {
             List<File> aptConfigFiles = new ArrayList<>();
 
             while (projectRootPath != null && classPathFile != null
-                && projectRootPath.length() <= classPathFile.getAbsolutePath().length()) {
+                    && projectRootPath.length() <= classPathFile.getAbsolutePath().length()) {
                 File aptConfig = new File(classPathFile, APT_FILE_NAME);
                 if (aptConfig.exists()) {
                     aptConfigFiles.add(aptConfig);
@@ -82,7 +82,7 @@ public class MybatisFlexConfig {
                             properties.put(key, config.getProperty((String) key));
                         }
                         if ("processor.stopBubbling".equalsIgnoreCase((String) key)
-                            && "true".equalsIgnoreCase(String.valueOf(config.getProperty((String) key)))) {
+                                && "true".equalsIgnoreCase(String.valueOf(config.getProperty((String) key)))) {
                             stopBubbling = true;
                         }
                     }

@@ -14,7 +14,7 @@ import org.springframework.core.env.StandardEnvironment;
  * @author wuxp
  * @date 2023-10-08 07:23
  **/
-public class ReorderSystemEnvironmentPostProcessor implements EnvironmentPostProcessor , Ordered {
+public class ReorderSystemEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {

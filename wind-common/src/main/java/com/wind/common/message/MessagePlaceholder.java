@@ -1,6 +1,5 @@
 package com.wind.common.message;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**

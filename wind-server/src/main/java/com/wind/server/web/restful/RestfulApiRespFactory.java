@@ -6,7 +6,6 @@ import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.common.exception.ExceptionCode;
 import com.wind.common.query.supports.Pagination;
 import com.wind.server.web.supports.ApiResp;
-import com.wind.trace.WindTraceContext;
 import com.wind.trace.http.HttpTraceUtils;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

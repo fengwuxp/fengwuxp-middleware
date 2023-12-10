@@ -14,7 +14,7 @@ import com.wind.payment.core.response.TransactionOrderRefundResponse;
  * @author wuxp
  * @date 2023-09-30 19:06
  **/
-public interface PaymentTransactionPlugin extends PaymentTransactionWebHooker{
+public interface PaymentTransactionPlugin extends PaymentTransactionWebHooker {
 
     /**
      * 预下(支付)单

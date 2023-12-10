@@ -32,18 +32,18 @@ import static com.wind.nacos.refresh.RefreshBehavior.ALL_BEANS;
  */
 public class NonDefaultBehaviorCondition extends SpringBootCondition {
 
-	private static final RefreshBehavior DEFAULT_REFRESH_BEHAVIOR = ALL_BEANS;
+    private static final RefreshBehavior DEFAULT_REFRESH_BEHAVIOR = ALL_BEANS;
 
-	@Override
-	public ConditionOutcome getMatchOutcome(ConditionContext context,
-			AnnotatedTypeMetadata metadata) {
-		RefreshBehavior behavior = context.getEnvironment().getProperty(
-				"spring.cloud.nacos.config.refresh-behavior", RefreshBehavior.class,
-				DEFAULT_REFRESH_BEHAVIOR);
-		if (DEFAULT_REFRESH_BEHAVIOR == behavior) {
-			return ConditionOutcome.noMatch("no matched");
-		}
-		return ConditionOutcome.match("matched");
-	}
+    @Override
+    public ConditionOutcome getMatchOutcome(ConditionContext context,
+                                            AnnotatedTypeMetadata metadata) {
+        RefreshBehavior behavior = context.getEnvironment().getProperty(
+                "spring.cloud.nacos.config.refresh-behavior", RefreshBehavior.class,
+                DEFAULT_REFRESH_BEHAVIOR);
+        if (DEFAULT_REFRESH_BEHAVIOR == behavior) {
+            return ConditionOutcome.noMatch("no matched");
+        }
+        return ConditionOutcome.match("matched");
+    }
 
 }

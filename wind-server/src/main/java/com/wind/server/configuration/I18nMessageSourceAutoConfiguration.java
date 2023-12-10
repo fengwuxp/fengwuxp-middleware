@@ -3,7 +3,6 @@ package com.wind.server.configuration;
 import com.wind.common.WindConstants;
 import com.wind.common.i18n.Spring18nMessageUtils;
 import com.wind.configcenter.core.ConfigRepository;
-import com.wind.server.i18n.Spring18nMessageSourceInitializer;
 import com.wind.server.i18n.WindI18nMessageSource;
 import com.wind.server.i18n.WindMessageSourceProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;

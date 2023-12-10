@@ -98,7 +98,7 @@ public interface RbacResourceCache<K, V> {
     Collection<V> values();
 
 
-     interface CacheLoader<K, V> {
+    interface CacheLoader<K, V> {
 
         /**
          * Loads map value by key.
