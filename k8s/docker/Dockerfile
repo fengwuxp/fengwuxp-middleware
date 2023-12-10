@@ -21,12 +21,13 @@ COPY ./startup.sh /home/admin/run
 ENV SPRING_APPLICATION_NAME=${SPRING_APPLICATION_NAME}
 
 # add font, fix bug for excel font missing
-RUN apk add --no-cache --update ttf-dejavu fontconfig
+RUN apk add --no-cache --update ttf-dejavu fontconfig curl
 
 # 更改时区
-RUN echo ${TIME_ZONE} > /etc/timezone \
-    && ln -sf /usr/share/zoneinfo/${TIME_ZONE} /etc/localtime \
+RUN apk add tzdata && cp /usr/share/zoneinfo/${TIME_ZONE} /etc/localtime \
+    && echo ${TIME_ZONE} > /etc/timezone && apk del tzdata \
     && chmod +x /home/admin/run/startup.sh
+
 
 # 端口暴露
 EXPOSE ${EXPOSE_PORT}

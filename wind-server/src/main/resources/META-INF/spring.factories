@@ -1,16 +1,12 @@
 # Application Listeners
 org.springframework.context.ApplicationListener=\
-com.wind.server.configcenter.WindGlobalPropertyLoader,\
+com.wind.server.configcenter.WindPropertySourceInitializer,\
 com.wind.server.i18n.Spring18nMessageSourceInitializer,\
 com.wind.common.spring.ApplicationContextUtils
 
 #ApplicationContextInitializer
 org.springframework.context.ApplicationContextInitializer=\
 com.wind.common.spring.WindBeanDefinitionRegistryPostProcessor
-
-# BootstrapConfiguration
-org.springframework.cloud.bootstrap.BootstrapConfiguration=\
-com.wind.server.configcenter.ConfigCenterBootstrapAutoConfiguration
 
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\

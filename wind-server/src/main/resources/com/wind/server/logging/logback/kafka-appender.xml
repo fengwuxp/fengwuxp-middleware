@@ -13,16 +13,17 @@ Default logback configuration provided for import
                 <pattern>
                     <pattern>
                         {
+                        "date": "%d{yyyy-MM-dd HH:mm:ss.SSS}",
+                        "A-TraceId": "%X{traceId:-}",
                         "appName": "${APP_NAME}",
                         "env": "${SPRING_PROFILES_ACTIVE}",
-                        "traceId": "%X{traceId:-}",
                         "requestUrl": "%X{requestUrl:-}",
                         "requestSourceIp": "%X{requestSourceIp:-}",
-                        "userAgent": "%X{userAgent:-}",
+                        "userAgent": "%X{User-Agent:-}",
+                        "podIp": "%X{localhostIpv4:-}",
                         "thread": "%thread",
                         "logger": "%logger",
                         "message": "%msg",
-                        "date": "%d{yyyy-MM-dd HH:mm:ss.SSS}",
                         "level": "%level",
                         "stack_trace": "%exception"
                         }

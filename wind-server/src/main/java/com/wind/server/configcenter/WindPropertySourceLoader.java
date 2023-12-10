@@ -10,8 +10,8 @@ import com.wind.configcenter.core.ConfigRepository;
 import com.wind.configcenter.core.ConfigRepository.ConfigDescriptor;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.core.env.CompositePropertySource;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
@@ -19,7 +19,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +30,10 @@ import static com.wind.common.WindConstants.SPRING_REDISSON_CONFIG_NAME;
 import static com.wind.common.WindConstants.WIND_MIDDLEWARE_SHARE_NAME;
 import static com.wind.common.WindConstants.WIND_REDISSON_PROPERTY_SOURCE_NAME;
 import static com.wind.common.WindConstants.WIND_SERVER_USED_MIDDLEWARE;
+import static org.springframework.cloud.bootstrap.BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
 /**
+ * 配置中心配置加载器
  * 配置相关参见：https://www.yuque.com/suiyuerufeng-akjad/wind/lb2kacr9ch1l70td
  *
  * @author wuxp
@@ -40,7 +41,7 @@ import static com.wind.common.WindConstants.WIND_SERVER_USED_MIDDLEWARE;
  **/
 @AllArgsConstructor
 @Slf4j
-public class WindPropertySourceLocator implements PropertySourceLocator {
+public class WindPropertySourceLoader {
 
     private static final String REDISSON_CLIENT_CLASS_NAME = "org.redisson.api.RedissonClient";
 
@@ -53,11 +54,41 @@ public class WindPropertySourceLocator implements PropertySourceLocator {
 
     private final WindConfigCenterProperties properties;
 
-    @Override
-    public PropertySource<?> locate(Environment environment) {
+    /**
+     * 加载全局配置
+     *
+     * @param environment spring environment
+     */
+    public void loadGlobalConfigs(ConfigurableEnvironment environment) {
+        // 在 bootstrap 阶段加载全局配置
+        if (environment.getPropertySources().contains(WindConstants.GLOBAL_CONFIG_NAME)) {
+            return;
+        }
+        log.info("load global config");
+        CompositePropertySource globalProperties = new CompositePropertySource(WindConstants.GLOBAL_CONFIG_NAME);
+        ConfigDescriptor descriptor = ConfigDescriptor.immutable(WindConstants.GLOBAL_CONFIG_NAME, WindConstants.GLOBAL_CONFIG_GROUP);
+        List<PropertySource<?>> configs = repository.getConfigs(descriptor);
+        configs.forEach(globalProperties::addFirstPropertySource);
+        environment.getPropertySources().addLast(globalProperties);
+    }
+
+    /**
+     * 加载应用、中间件配置
+     *
+     * @param environment spring environment
+     */
+    public void loadConfigs(ConfigurableEnvironment environment) {
+        // don't listen to events in a bootstrap context
+        if (environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
+            return;
+        }
+        environment.getPropertySources().addLast(locateConfigs(environment));
+    }
+
+    private PropertySource<?> locateConfigs(Environment environment) {
         CompositePropertySource result = new CompositePropertySource(repository.getConfigSourceName());
         String applicationName = environment.getProperty(SPRING_APPLICATION_NAME);
-        AssertUtils.notNull(applicationName, SPRING_APPLICATION_NAME + " must not empty");
+        AssertUtils.hasText(applicationName, () -> SPRING_APPLICATION_NAME + " must not empty");
         // 中间件配置共享模式下的名称
         String middlewareShareName = environment.getProperty(WIND_MIDDLEWARE_SHARE_NAME, applicationName);
         // 加载中间件配置
@@ -90,11 +121,6 @@ public class WindPropertySourceLocator implements PropertySourceLocator {
             return Arrays.stream(config.split(WindConstants.COMMA)).map(WindMiddlewareType::valueOf).collect(Collectors.toList());
         }
         return Collections.emptyList();
-    }
-
-    @Override
-    public Collection<PropertySource<?>> locateCollection(Environment environment) {
-        return PropertySourceLocator.super.locateCollection(environment);
     }
 
     private SimpleConfigDescriptor buildDescriptor(String name, String group) {
