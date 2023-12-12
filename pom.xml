@@ -487,6 +487,46 @@
                         <artifactId>maven-dependency-plugin</artifactId>
                         <inherited>true</inherited>
                     </plugin>
+                    <plugin>
+                        <groupId>pl.project13.maven</groupId>
+                        <artifactId>git-commit-id-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>get-the-git-infos</id>
+                                <!-- 默认绑定阶段initialize -->
+                                <phase>initialize</phase>
+                                <goals>
+                                    <!-- 目标：revision -->
+                                    <goal>revision</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <!-- 检查的仓库根目录，${project.basedir}：项目根目录，即包含pom.xml文件的目录 -->
+                            <!-- 定义插件中所有时间格式，默认值：yyyy-MM-dd’T’HH:mm:ssZ -->
+                            <dateFormat>yyyy-MM-dd HH:mm:ss</dateFormat>
+                            <!-- 生成git属性文件，默认false：不生成 -->
+                            <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                            <!-- 生成git属性文件路径及文件名，默认${project.build.outputDirectory}/git.properties -->
+                            <generateGitPropertiesFilename>${project.build.outputDirectory}/META-INF/git-infos.json</generateGitPropertiesFilename>
+                            <!-- 生成git属性文件格式，默认值properties -->
+                            <format>json</format>
+                            <includeOnlyProperties>
+                                <property>git.branch</property>
+                                <property>git.build.time</property>
+                                <property>git.build.version</property>
+                                <property>git.commit.id</property>
+                                <property>git.commit.id.abbrev</property>
+                                <property>git.commit.time</property>
+                            </includeOnlyProperties>
+                            <!-- 配置git-describe命令 -->
+                            <gitDescribe>
+                                <skip>false</skip>
+                                <always>false</always>
+                                <dirty>-dirty</dirty>
+                            </gitDescribe>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
