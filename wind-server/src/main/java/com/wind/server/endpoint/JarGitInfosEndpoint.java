@@ -15,7 +15,7 @@ import java.util.Properties;
  * @date 2023-12-13 14:04
  **/
 @Component
-@Endpoint(id = "gitinfos")
+@Endpoint(id = "windversions")
 public class JarGitInfosEndpoint {
 
     private static final String GIT_INFOS_RESOURCE_LOCATION = "META-INF/git-infos.properties";
