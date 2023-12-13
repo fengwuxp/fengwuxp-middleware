@@ -508,9 +508,7 @@
                             <!-- 生成git属性文件，默认false：不生成 -->
                             <generateGitPropertiesFile>true</generateGitPropertiesFile>
                             <!-- 生成git属性文件路径及文件名，默认${project.build.outputDirectory}/git.properties -->
-                            <generateGitPropertiesFilename>${project.build.outputDirectory}/META-INF/git-infos.json</generateGitPropertiesFilename>
-                            <!-- 生成git属性文件格式，默认值properties -->
-                            <format>json</format>
+                            <generateGitPropertiesFilename>${project.build.outputDirectory}/META-INF/git-infos.properties</generateGitPropertiesFilename>
                             <includeOnlyProperties>
                                 <property>git.branch</property>
                                 <property>git.build.time</property>

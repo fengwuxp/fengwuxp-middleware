@@ -50,7 +50,7 @@ public class NacosConfigRepository implements ConfigRepository {
     @Override
     public void onChange(ConfigDescriptor descriptor, ConfigListener listener) {
         if (descriptor.isRefreshable()) {
-            log.warn("config unsupported refresh = {}", descriptor);
+            log.warn("config unsupported refresh, dataId = {}，group = {}", descriptor.getConfigId(), descriptor.getGroup());
             return;
         }
         try {
