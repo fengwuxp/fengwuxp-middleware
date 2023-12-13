@@ -33,6 +33,7 @@
         <module>tools/mybatis-flex-processor</module>
         <module>modules/office</module>
         <module>tools/h2-functions-for-mysql</module>
+        <module>wind-elasticjob</module>
     </modules>
 
     <properties>
@@ -158,6 +159,11 @@
             <dependency>
                 <groupId>com.wind.configcenter</groupId>
                 <artifactId>wind-nacos-spring-cloud-config-starter</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.elasticjob</groupId>
+                <artifactId>wind-elasticjob</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
