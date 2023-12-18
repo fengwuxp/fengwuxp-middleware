@@ -19,6 +19,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriUtils;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -90,6 +91,12 @@ public class RequestSignFilter implements Filter, Ordered {
                 // 线下环境返回服务端的签名，用于 debug
                 response.addHeader(headerNames.debugSign, Signer.SHA256.sign(signatureRequest));
                 response.addHeader(headerNames.debugSignContent, signatureRequest.getSignText());
+                if (signatureRequest.getQueryString() != null) {
+                    response.addHeader("X-Sign-QueryString", signatureRequest.getQueryString());
+                }
+                if (signatureRequest.getRequestBody() != null) {
+                    response.addHeader("X-Sign-RequestBody", signatureRequest.getRequestBody());
+                }
             }
             badRequest(response, "sign verify error");
         }
@@ -115,7 +122,7 @@ public class RequestSignFilter implements Filter, Ordered {
         SignatureRequest.SignatureRequestBuilder result = SignatureRequest.builder()
                 // http 请求 path，不包含查询参数和域名
                 .requestPath(request.getRequestURI())
-                .queryString(request.getQueryString())
+                .queryString(fixQueryString(request.getQueryString()))
                 .method(request.getMethod().toUpperCase())
                 .nonce(request.getHeader(headerNames.nonce))
                 .timestamp(request.getHeader(headerNames.timestamp))
@@ -129,6 +136,11 @@ public class RequestSignFilter implements Filter, Ordered {
     @Override
     public int getOrder() {
         return WindWebFilterOrdered.REQUEST_SIGN_FILTER.getOrder();
+    }
+
+    private String fixQueryString(String queryString) {
+        // @see https://juejin.cn/post/6844904034453864462#heading-2
+        return queryString == null ? null : UriUtils.decode(queryString.replace("+", "%20"), StandardCharsets.UTF_8);
     }
 
     private static class RequestSignMatcher {
