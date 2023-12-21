@@ -8,6 +8,7 @@ import org.h2.util.IOUtils;
 import javax.sql.DataSource;
 import java.io.ByteArrayInputStream;
 import java.sql.Connection;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * h2 函数初始化器
@@ -18,6 +19,8 @@ import java.sql.Connection;
  **/
 @Slf4j
 public final class H2FunctionInitializer {
+
+    private static final AtomicBoolean INITIALIZED = new AtomicBoolean(false);
 
     private static final String BLANK_SPACE = " ";
 
@@ -31,6 +34,10 @@ public final class H2FunctionInitializer {
      * @param dataSource 数据源
      */
     public static void initialize(DataSource dataSource) {
+        if (INITIALIZED.get()) {
+            return;
+        }
+        INITIALIZED.set(true);
         try {
             StringBuilder functionSql = new StringBuilder();
             for (H2Function h2Function : H2MysqlFunctions.getFunctions()) {
@@ -47,6 +54,7 @@ public final class H2FunctionInitializer {
             conn.close();
         } catch (Exception exception) {
             log.error("init h2 functions error", exception);
+            INITIALIZED.set(false);
         }
     }
 }
