@@ -78,6 +78,7 @@
         <alipay-sdk.version>4.38.90.ALL</alipay-sdk.version>
         <weixin-java-pay.version>4.5.0</weixin-java-pay.version>
         <easyexcel.version>3.3.2</easyexcel.version>
+        <podam.version>8.0.0.RELEASE</podam.version>
     </properties>
 
     <dependencies>
@@ -363,6 +364,12 @@
                 <artifactId>dynamic-tp-spring-cloud-starter-nacos</artifactId>
                 <version>${dynamic-tp.version}</version>
             </dependency>
+            <dependency>
+                <groupId>uk.co.jemos.podam</groupId>
+                <artifactId>podam</artifactId>
+                <version>${podam.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -391,7 +398,6 @@
             </plugins>
         </pluginManagement>
     </build>
-
 
     <profiles>
         <profile>
@@ -535,7 +541,6 @@
             </build>
         </profile>
     </profiles>
-
 
     <organization>
         <name>wupxp</name>
