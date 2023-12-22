@@ -2,7 +2,7 @@ package com.wind.common.utils;
 
 import com.google.common.collect.ImmutableSet;
 import com.wind.common.WindConstants;
-import com.wind.common.spring.ApplicationContextUtils;
+import com.wind.common.spring.SpringApplicationContextUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
@@ -49,7 +49,7 @@ public final class ServiceInfoUtils {
         if (StringUtils.hasText(result)) {
             return result;
         }
-        return ApplicationContextUtils.getProperty(key);
+        return SpringApplicationContextUtils.getProperty(key);
     }
 
 }

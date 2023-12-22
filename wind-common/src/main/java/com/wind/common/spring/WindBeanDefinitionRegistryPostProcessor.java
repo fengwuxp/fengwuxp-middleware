@@ -7,6 +7,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -31,15 +32,19 @@ public class WindBeanDefinitionRegistryPostProcessor implements ApplicationConte
      */
     private static final Map<String, Supplier<BeanDefinition>> BEAN_DEFINITIONS = new ConcurrentHashMap<>();
 
+    static {
+        WindBeanDefinitionRegistryPostProcessor.registerBean(SpringApplicationContextUtils.class.getName(), () -> new RootBeanDefinition(SpringApplicationContextUtils.class));
+    }
+
     @Override
     public void initialize(ConfigurableApplicationContext context) {
-        log.info("add WindBeanDefinitionRegistryPostProcessor");
+        log.info("Add WindBeanDefinitionRegistryPostProcessor");
         context.addBeanFactoryPostProcessor(this);
     }
 
     @Override
     public void postProcessBeanDefinitionRegistry(@Nonnull BeanDefinitionRegistry registry) throws BeansException {
-        log.info("register wind BeanDefinition");
+        log.info("Register Wind BeanDefinition");
         register(registry);
     }
 
