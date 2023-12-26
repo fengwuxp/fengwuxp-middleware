@@ -4,6 +4,7 @@ import com.wind.common.WindConstants;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import static com.wind.common.WindConstants.WIND_DYNAMIC_TP;
 import static com.wind.common.WindConstants.WIND_ELASTIC_JOB_NAME;
 import static com.wind.common.WindConstants.WIND_MYSQL_NAME;
 import static com.wind.common.WindConstants.WIND_OSS_NAME;
@@ -58,9 +59,21 @@ public enum WindMiddlewareType implements DescriptiveEnum {
      */
     OSS(WIND_OSS_NAME, "对象存储服务"),
 
+    /**
+     * 线程池
+     * https://github.com/dromara/dynamic-tp
+     */
+    DYNAMIC_TP(WIND_DYNAMIC_TP, "动态线程池"),
+
     ;
 
+    /**
+     * 配置在配置文件中的 key 名称
+     */
     private final String configName;
 
+    /**
+     * 描述
+     */
     private final String desc;
 }

@@ -99,7 +99,12 @@ public class WindPropertySourceLoader {
                 // redisson 配置支持
                 loadRedissonConfig(name, result);
             } else {
-                loadConfigs(buildDescriptor(name + WindConstants.DASHED + type.name().toLowerCase(), type.name()), result);
+                SimpleConfigDescriptor descriptor = buildDescriptor(name + WindConstants.DASHED + type.name().toLowerCase(), type.name());
+                if (Objects.equals(type, WindMiddlewareType.DYNAMIC_TP)) {
+                    // dynamic-tp 使用 yaml
+                    descriptor.setFileType(ConfigFileType.YAML);
+                }
+                loadConfigs(descriptor, result);
             }
         }
         // 加载应用配置
@@ -124,10 +129,12 @@ public class WindPropertySourceLoader {
     }
 
     private SimpleConfigDescriptor buildDescriptor(String name, String group) {
+        return buildDescriptor(name, group, properties.getConfigFileType());
+    }
+
+    private SimpleConfigDescriptor buildDescriptor(String name, String group, ConfigFileType fileType) {
         SimpleConfigDescriptor result = SimpleConfigDescriptor.of(name, group);
-        if (result.getFileType() == null) {
-            result.setFileType(properties.getConfigFileType());
-        }
+        result.setFileType(fileType);
         // 开启 RefreshScope 支持
         result.setRefreshable(true);
         return result;
@@ -143,7 +150,7 @@ public class WindPropertySourceLoader {
 
     private void loadRedissonConfig(String redissonName, CompositePropertySource result) {
         if (StringUtils.hasLength(redissonName)) {
-            String name = String.format("%s%s%s", redissonName, WindConstants.DASHED, "redisson");
+            String name = String.format("%s%s%s", redissonName, WindConstants.DASHED, WindConstants.REDISSON_NAME);
             ConfigDescriptor descriptor = ConfigDescriptor.immutable(name, WindMiddlewareType.REDIS.name(), ConfigFileType.YAML);
             Map<String, Object> source = ImmutableMap.of(SPRING_REDISSON_CONFIG_NAME, repository.getTextConfig(descriptor));
             result.addFirstPropertySource(new MapPropertySource(WIND_REDISSON_PROPERTY_SOURCE_NAME, source));
