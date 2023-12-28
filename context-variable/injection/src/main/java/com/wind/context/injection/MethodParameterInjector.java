@@ -27,6 +27,6 @@ public interface MethodParameterInjector {
      * @return 合并后的参数注入器
      */
     static MethodParameterInjector composite(Collection<MethodParameterInjector> delegates) {
-        return (method, arguments) -> delegates.forEach(deldgate -> deldgate.inject(method, arguments));
+        return (method, arguments) -> delegates.forEach(delegate -> delegate.inject(method, arguments));
     }
 }

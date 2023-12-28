@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.Collections;
 
 import static com.wind.common.WindConstants.CONTROLLER_METHOD_ASPECT_NAME;
 import static com.wind.common.WindConstants.ENABLED_NAME;
@@ -58,13 +58,14 @@ public class WindServerAutoConfiguration {
     @ConditionalOnProperty(prefix = CONTROLLER_METHOD_ASPECT_NAME, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
     public WindControllerMethodInterceptor windControllerMethodInterceptor(ApplicationContext context) {
         ScriptAuditLogRecorder recorder = null;
+        Collection<MethodParameterInjector> injectors = Collections.emptyList();
         try {
             recorder = context.getBean(ScriptAuditLogRecorder.class);
+            injectors = context.getBeansOfType(MethodParameterInjector.class).values();
         } catch (BeansException exception) {
-            log.debug("un enable audit log");
+            log.error("un enable audit log or method parameter", exception);
         }
-        Map<String, MethodParameterInjector> injectors = context.getBeansOfType(MethodParameterInjector.class);
-        return new WindControllerMethodInterceptor(recorder, MethodParameterInjector.composite(injectors.values()));
+        return new WindControllerMethodInterceptor(recorder, MethodParameterInjector.composite(injectors));
     }
 
     @Bean
