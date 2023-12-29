@@ -1,12 +1,9 @@
 package com.wind.trace;
 
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import javax.validation.constraints.NotBlank;
 import java.util.Map;
-
-import static com.wind.common.WindHttpConstants.HTTP_REQUEST_IP_ATTRIBUTE_NAME;
-import static com.wind.common.WindHttpConstants.HTTP_USER_AGENT_HEADER_NAME;
 
 /**
  * trace context
@@ -21,7 +18,7 @@ public interface WindTraceContext {
      *
      * @return traceId
      */
-    @NonNull
+    @NotBlank
     String getTraceId();
 
     /**
@@ -29,7 +26,7 @@ public interface WindTraceContext {
      *
      * @return 不可变的 Map 对象
      */
-    Map<String, String> asContextVariables();
+    Map<String, Object> asContextVariables();
 
     /**
      * 获取上下文变量
@@ -38,25 +35,5 @@ public interface WindTraceContext {
      * @return 上下文变量值
      */
     @Nullable
-    String getContextVariable(String variableName);
-
-    /**
-     * 获取访问来源 ip
-     *
-     * @return ip
-     */
-    @Nullable
-    default String getRequestSourceIp() {
-        return getContextVariable(HTTP_REQUEST_IP_ATTRIBUTE_NAME);
-    }
-
-    /**
-     * 获取访问的用户代理
-     *
-     * @return User-Agent
-     */
-    @Nullable
-    default String getUserAgent() {
-        return getContextVariable(HTTP_USER_AGENT_HEADER_NAME);
-    }
+    <T> T getContextVariable(String variableName);
 }

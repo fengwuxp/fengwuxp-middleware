@@ -6,7 +6,7 @@ import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.common.exception.ExceptionCode;
 import com.wind.common.query.supports.Pagination;
 import com.wind.server.web.supports.ApiResp;
-import com.wind.trace.http.HttpTraceUtils;
+import com.wind.trace.WindTracer;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
@@ -165,7 +165,7 @@ public final class RestfulApiRespFactory {
             this.data = data;
             this.errorCode = errorCode;
             this.errorMessage = errorMessage;
-            this.traceId = HttpTraceUtils.getTraceContext().getTraceId();
+            this.traceId = WindTracer.TRACER.getTraceId();
         }
 
         @Override
