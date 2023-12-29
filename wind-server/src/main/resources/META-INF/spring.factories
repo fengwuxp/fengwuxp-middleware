@@ -1,8 +1,8 @@
 # Application Listeners
 org.springframework.context.ApplicationListener=\
+com.wind.server.configcenter.WindGlobalPropertySourceInitializer,\
 com.wind.server.configcenter.WindPropertySourceInitializer,\
 com.wind.server.i18n.Spring18nMessageSourceInitializer
-
 #ApplicationContextInitializer
 org.springframework.context.ApplicationContextInitializer=\
 com.wind.common.spring.WindBeanDefinitionRegistryPostProcessor

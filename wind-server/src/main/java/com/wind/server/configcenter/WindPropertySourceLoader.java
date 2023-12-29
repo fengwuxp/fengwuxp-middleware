@@ -60,11 +60,6 @@ public class WindPropertySourceLoader {
      * @param environment spring environment
      */
     public void loadGlobalConfigs(ConfigurableEnvironment environment) {
-        // 在 bootstrap 阶段加载全局配置
-        if (environment.getPropertySources().contains(WindConstants.GLOBAL_CONFIG_NAME)) {
-            return;
-        }
-        log.info("load global config");
         CompositePropertySource globalProperties = new CompositePropertySource(WindConstants.GLOBAL_CONFIG_NAME);
         ConfigDescriptor descriptor = ConfigDescriptor.immutable(WindConstants.GLOBAL_CONFIG_NAME, WindConstants.GLOBAL_CONFIG_GROUP);
         List<PropertySource<?>> configs = repository.getConfigs(descriptor);
@@ -78,10 +73,6 @@ public class WindPropertySourceLoader {
      * @param environment spring environment
      */
     public void loadConfigs(ConfigurableEnvironment environment) {
-        // don't listen to events in a bootstrap context
-        if (environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
-            return;
-        }
         environment.getPropertySources().addLast(locateConfigs(environment));
     }
 
