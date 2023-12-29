@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ${K8S_NAMESPACE}
+  labels:
+    application: ${SPRING_APPLICATION_NAME}-svc
+    env: ${SPRING_PROFILE_ACTIVE}
+  name: ${SPRING_APPLICATION_NAME}-svc
+spec:
+  internalTrafficPolicy: Cluster
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    application: ${SPRING_APPLICATION_NAME}
+    env: ${SPRING_PROFILE_ACTIVE}
+  sessionAffinity: None
+  type: ClusterIP

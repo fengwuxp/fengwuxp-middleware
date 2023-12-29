@@ -1,36 +1,19 @@
-FROM openjdk:8-alpine
-LABEL authors="wuxp"
+FROM registry.us-east-1.aliyuncs.com/nobe/openjdk:8-alpine
 
-# 构建参数
-## 应用名
-ARG SPRING_APPLICATION_NAME=""
-##  时区
-ARG TIME_ZONE="Asia/Shanghai"
-ARG TIME_ZONE_GMT="GMT+08"
-## 暴露的端口
-ARG EXPOSE_PORT=8080
+ENV TIME_ZONE="Asia/Shanghai"
 
-# 设置工作目录
 WORKDIR /home/admin/run
-# 拷贝 boot jar 到设置工作目录
-COPY ./bootstrap.jar /home/admin/run
-# 拷贝启动
 COPY ./startup.sh /home/admin/run
+COPY pre-stop.sh /home/admin/run
 
-# 环境变量
-ENV SPRING_APPLICATION_NAME=${SPRING_APPLICATION_NAME}
-
-# add font, fix bug for excel font missing
-RUN apk add --no-cache --update ttf-dejavu fontconfig curl
-
-# 更改时区
-RUN apk add tzdata && cp /usr/share/zoneinfo/${TIME_ZONE} /etc/localtime \
-    && echo ${TIME_ZONE} > /etc/timezone && apk del tzdata \
-    && chmod +x /home/admin/run/startup.sh
-
-
-# 端口暴露
-EXPOSE ${EXPOSE_PORT}
-
-# 启动命令
-ENTRYPOINT ["sh","-c","/home/admin/run/startup.sh"]
+RUN set -ex \
+    && sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories \
+    && apk update && apk add --no-cache ttf-dejavu fontconfig curl tzdata wget bash-completion busybox \
+	&& ln -s /bin/busybox /usr/local/bin/ip \
+	&& ln -s /bin/busybox /usr/local/bin/telnet \
+	&& ln -s /bin/busybox /usr/local/bin/ping \
+	&& ln -s /bin/busybox /usr/local/bin/nslookup \
+	&& cp /usr/share/zoneinfo/${TIME_ZONE} /etc/localtime && echo ${TIME_ZONE} > /etc/timezone \
+	&& wget https://capte-nobe-v2-sit.oss-us-east-1.aliyuncs.com/binaries/openjdk/arthas-bin.zip -O /opt/arthas-bin.zip \
+	&& mkdir /opt/arthas && unzip /opt/arthas-bin.zip -d /opt/arthas && rm -rf /opt/arthas-bin.zip \
+    && mkdir /home/admin/nas && chmod +x /home/admin/run/startup.sh && chmod +x /home/admin/run/pre-stop.sh
