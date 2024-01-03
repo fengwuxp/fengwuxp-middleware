@@ -79,7 +79,6 @@ public abstract class AbstractDelegateDocumentTask implements OfficeDocumentTask
             doTask();
             updateState(OfficeTaskState.COMPLETED);
         } catch (Throwable throwable) {
-            throwable.printStackTrace();
             log.error("office document task exec error", throwable);
             updateState(OfficeTaskState.FAILED);
         }
