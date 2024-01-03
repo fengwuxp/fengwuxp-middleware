@@ -20,13 +20,13 @@ public class MapFormatter implements Formatter<String> {
 
     private final Map<String, String> dataSource;
 
-    public MapFormatter(Map<String, String> map) {
-        this.dataSource = map;
+    public MapFormatter(Map<String, String> source) {
+        this.dataSource = source;
     }
 
     @Nonnull
     @Override
-    public String parse(@Nullable String text, @Nullable Locale locale) throws ParseException {
+    public String parse(@Nullable String text, @Nullable Locale locale) {
         if (text != null) {
             for (Map.Entry<String, String> entry : this.dataSource.entrySet()) {
                 if (entry.getValue().equals(text)) {

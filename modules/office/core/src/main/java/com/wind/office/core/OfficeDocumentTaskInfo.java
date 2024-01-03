@@ -5,12 +5,12 @@ import org.springframework.lang.Nullable;
 import java.time.LocalDateTime;
 
 /**
- * 办公文档处理任务
+ * 办公文档任务处理信息
  *
  * @author wuxp
- * @date 2023-10-26 17:05
+ * @date 2024-01-02 18:31
  **/
-public interface OfficeHandleTask {
+public interface OfficeDocumentTaskInfo {
 
     /**
      * @return 任务 ID
@@ -30,6 +30,7 @@ public interface OfficeHandleTask {
     /**
      * @return 任务开始时间
      */
+    @Nullable
     LocalDateTime getBeginTime();
 
     /**
@@ -39,6 +40,16 @@ public interface OfficeHandleTask {
     LocalDateTime getEndTime();
 
     /**
+     * @return 获取处理成功的总条数
+     */
+    int getRowSize();
+
+    /**
+     * @return 获取处理失败的总条数
+     */
+    int getFailedRowSize();
+
+    /**
      * @return 任务是否结束
      */
     default boolean isEnd() {
@@ -46,7 +57,23 @@ public interface OfficeHandleTask {
     }
 
     /**
-     * 处理任务
+     * 更新任务状态
+     *
+     * @param newState 任务状态
      */
-    void handle();
+    void updateState(OfficeTaskState newState);
+
+    /**
+     * 添加处理成功的行
+     *
+     * @param row 数据
+     */
+    void addRow(Object row);
+
+    /**
+     * 添加处理失败的行
+     *
+     * @param row 数据
+     */
+    void addFailedRow(Object row);
 }
