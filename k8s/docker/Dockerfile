@@ -1,4 +1,4 @@
-FROM registry.us-east-1.aliyuncs.com/nobe/openjdk:8-alpine
+FROM openjdk:8-jdk-alpine
 
 ENV TIME_ZONE="Asia/Shanghai"
 
