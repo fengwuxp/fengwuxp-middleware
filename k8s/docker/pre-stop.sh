@@ -6,4 +6,4 @@ echo "exec graceful shutdown"
 # springboot 优雅停机
 curl -X POST 127.0.0.1:8899/actuator/shutdown
 [ $? -eq 0 ] && echo "springboot 优雅关闭"
-sleep 5
+sleep 10
