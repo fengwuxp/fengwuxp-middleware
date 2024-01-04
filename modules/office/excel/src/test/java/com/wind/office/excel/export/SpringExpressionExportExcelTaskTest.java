@@ -17,26 +17,22 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 class SpringExpressionExportExcelTaskTest {
 
-
     private SpringExpressionExportExcelTask task;
-
 
     @BeforeEach
     void setup() throws Exception {
-        List<ExportExcelTaskInfo.ExcelHead> heads = Arrays.asList(
+        List<ExcelWriteHead> heads = Arrays.asList(
                 mockExcelHead("name"),
                 mockExcelHead("age"),
                 mockExcelHead("sex")
         );
         Path filepath = Paths.get(Objects.requireNonNull(SpringExpressionExportExcelTaskTest.class.getResource("/")).getPath(), "test.xlsx");
         Files.deleteIfExists(filepath);
-        ExcelDocumentWriter writer = new DefaultEasyExcelDocumentWriter(Files.newOutputStream(filepath),
-                heads.stream().map(ExportExcelTaskInfo.ExcelHead::getTitle).collect(Collectors.toList()));
-        task = new SpringExpressionExportExcelTask(ExportExcelTaskInfo.of("test", heads, writer), mockExcelDataFetcher());
+        ExcelDocumentWriter writer = DefaultEasyExcelDocumentWriter.simple(Files.newOutputStream(filepath), heads);
+        task = new SpringExpressionExportExcelTask(ExportExcelTaskInfo.of("test", writer), mockExcelDataFetcher());
     }
 
     @Test
@@ -63,8 +59,8 @@ class SpringExpressionExportExcelTaskTest {
                 "age", RandomStringUtils.randomNumeric(2));
     }
 
-    private ExportExcelTaskInfo.ExcelHead mockExcelHead(String name) {
-        return new ExportExcelTaskInfo.ExcelHead(name, String.format("['%s']", name), null);
+    private ExcelWriteHead mockExcelHead(String name) {
+        return new ExcelWriteHead(name, String.format("['%s']", name), null);
     }
 
 }

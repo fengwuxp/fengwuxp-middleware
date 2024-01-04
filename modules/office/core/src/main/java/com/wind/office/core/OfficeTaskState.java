@@ -22,7 +22,7 @@ public enum OfficeTaskState implements DescriptiveEnum {
 
     FAILED("执行失败"),
 
-    INTERRUPT("执行被中断");
+    INTERRUPT("执行中断");
 
     private final String desc;
 

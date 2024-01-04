@@ -3,11 +3,9 @@ package com.wind.office.excel.export;
 import com.wind.office.core.OfficeDocumentTaskInfo;
 import com.wind.office.core.OfficeTaskState;
 import com.wind.office.excel.ExcelDocumentWriter;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.format.Formatter;
 
 import java.beans.Transient;
 import java.time.LocalDateTime;
@@ -17,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * excel 文档任务 Info
+ * excel 导出文档任务 Info
  *
  * @author wuxp
  * @date 2023-10-27 18:31
@@ -41,21 +39,12 @@ public class ExportExcelTaskInfo implements OfficeDocumentTaskInfo {
     private final AtomicInteger failedRowSize = new AtomicInteger(0);
 
     /**
-     * 导出 excel 列头配置
-     */
-    private final List<ExcelHead> heads;
-
-    /**
      * 一次抓取数据的大小
      */
     private final int fetchSize;
 
     private final ExcelDocumentWriter writer;
 
-    @Transient
-    public List<ExcelHead> getHeads() {
-        return heads;
-    }
 
     @Transient
     public ExcelDocumentWriter getWriter() {
@@ -113,29 +102,7 @@ public class ExportExcelTaskInfo implements OfficeDocumentTaskInfo {
         this.state.set(newState);
     }
 
-    @AllArgsConstructor
-    @Getter
-    public static class ExcelHead {
-
-        /**
-         * 列标题
-         */
-        private final String title;
-
-        /**
-         * 取值表达式
-         * 默认使用 spring expression 表达式
-         * {@link org.springframework.expression.spel.standard.SpelExpressionParser}
-         */
-        private final String expression;
-
-        /**
-         * 列转换器
-         */
-        private final Formatter<?> formatter;
-    }
-
-    public static ExportExcelTaskInfo of(String name, List<ExcelHead> heads, ExcelDocumentWriter writer) {
+    public static ExportExcelTaskInfo of(String name, ExcelDocumentWriter writer) {
         return ExportExcelTaskInfo.builder()
                 .id(RandomStringUtils.randomAlphanumeric(32))
                 .name(name)
@@ -143,7 +110,6 @@ public class ExportExcelTaskInfo implements OfficeDocumentTaskInfo {
                 .endTime(new AtomicReference<>())
                 .state(new AtomicReference<>(OfficeTaskState.WAIT))
                 .fetchSize(500)
-                .heads(heads)
                 .writer(writer)
                 .build();
     }

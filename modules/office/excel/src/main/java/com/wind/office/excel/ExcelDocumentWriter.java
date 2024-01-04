@@ -21,5 +21,8 @@ public interface ExcelDocumentWriter {
         rows.forEach(this::write);
     }
 
+    /**
+     * 写入完成
+     */
     void finish();
 }
