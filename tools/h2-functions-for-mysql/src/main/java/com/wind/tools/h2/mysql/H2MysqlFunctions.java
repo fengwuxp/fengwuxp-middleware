@@ -12,13 +12,16 @@ import java.util.Set;
  * @author wuxp
  * @date 2023-11-20 13:43
  **/
-public class H2MysqlFunctions {
+public final class H2MysqlFunctions {
 
     private static final Set<H2Function> DEFAULT_FUNCTIONS = new HashSet<>();
 
     static {
         DEFAULT_FUNCTIONS.add(new H2Function("FIND_IN_SET", "com.wind.tools.h2.mysql.H2MysqlFunctions.findInSet"));
-        DEFAULT_FUNCTIONS.add(new H2Function("RIGHT", "com.wind.tools.h2.mysql.H2MysqlFunctions.right"));
+    }
+
+    private H2MysqlFunctions() {
+        throw new AssertionError();
     }
 
     /**
@@ -38,26 +41,8 @@ public class H2MysqlFunctions {
         return Arrays.asList(strSet.split(",")).indexOf(keyWord) + 1;
     }
 
-    /**
-     * RIGHT 支持
-     *
-     * @param text 查找字符串
-     * @param len  长度
-     * @return 截取的字符串
-     */
-    public static String right(String text, int len) {
-        if (text == null) {
-            return null;
-        }
-        if (text.isEmpty()) {
-            return "";
-        }
-        return text.substring(text.length() - len);
-    }
-
     public static Set<H2Function> getFunctions() {
         return DEFAULT_FUNCTIONS;
     }
-
 
 }
