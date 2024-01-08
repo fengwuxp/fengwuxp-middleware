@@ -82,7 +82,6 @@
         <weixin-java-pay.version>4.5.0</weixin-java-pay.version>
         <easyexcel.version>3.3.2</easyexcel.version>
         <podam.version>8.0.0.RELEASE</podam.version>
-        <junit-platform-surefire-provider.version>1.3.2</junit-platform-surefire-provider.version>
     </properties>
 
     <dependencies>
@@ -379,12 +378,6 @@
                 <version>${podam.version}</version>
                 <scope>test</scope>
             </dependency>
-            <dependency>
-                <groupId>org.junit.platform</groupId>
-                <artifactId>junit-platform-surefire-provider</artifactId>
-                <version>${junit-platform-surefire-provider.version}</version>
-                <scope>test</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -446,13 +439,6 @@
                         </property>
                     </systemPropertyVariables>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.junit.platform</groupId>
-                        <artifactId>junit-platform-surefire-provider</artifactId>
-                        <version>${junit-platform-surefire-provider.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
