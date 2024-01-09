@@ -9,6 +9,7 @@ import org.apache.commons.lang3.time.DateUtils;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @author wuxp
@@ -63,8 +64,6 @@ public class DefaultCaptchaManager implements CaptchaManager {
                 .verificationCount(0)
                 .allowVerificationTimes(delegate.getMaxAllowVerificationTimes())
                 .build();
-        // 先移除之前的验证码，在保存
-        captchaStorage.remove(type, useScene, owner);
         captchaStorage.store(result);
         return result;
     }
@@ -79,28 +78,31 @@ public class DefaultCaptchaManager implements CaptchaManager {
      */
     @Override
     public void verify(String expected, Captcha.CaptchaType type, Captcha.CaptchaUseScene useScene, String owner) {
-        Captcha captcha = captchaStorage.get(type, useScene, owner);
-        AssertUtils.notNull(captcha, CaptchaI18nMessageKeys.CAPTCHA_NOT_EXIST);
-        if (!captcha.isEffective()) {
-            // 验证码已失效，移除
-            captchaStorage.remove(type, useScene, owner);
-            throw BaseException.common(CaptchaI18nMessageKeys.CAPTCHA_EXPIRED);
-        }
-        boolean isPass = verificationIgnoreCase ? captcha.getValue().equalsIgnoreCase(expected) : captcha.getValue().equals(expected);
-        if (isPass) {
-            // 移除
-            captchaStorage.remove(type, useScene, owner);
-        } else {
-            Captcha next = captcha.increase();
-            if (next.isEffective()) {
-                // 还可以继续用于验证，更新验证码
-                captchaStorage.store(next);
-            } else {
-                // 验证码已失效，移除
+        Collection<Captcha> captchaes = captchaStorage.get(type, useScene, owner);
+        AssertUtils.notEmpty(captchaes, CaptchaI18nMessageKeys.CAPTCHA_NOT_EXIST_OR_EXPIRED);
+        int invalidCount = 0;
+        for (Captcha captcha : captchaes) {
+            boolean isPass = verificationIgnoreCase ? captcha.getValue().equalsIgnoreCase(expected) : captcha.getValue().equals(expected);
+            if (isPass) {
+                // 验证通过，移除
                 captchaStorage.remove(type, useScene, owner);
+                return;
+            } else {
+                Captcha next = captcha.increase();
+                if (next.isEffective()) {
+                    // 还可以继续用于验证，更新验证码
+                    captchaStorage.store(next);
+                } else {
+                    // 累计已失效的验证码个数
+                    invalidCount++;
+                }
             }
-            throw BaseException.common(CaptchaI18nMessageKeys.CAPTCHA_VERITY_FAILURE);
         }
+        if (Objects.equals(invalidCount, captchaes.size())) {
+            // 所有验证码都已经失效，移除
+            captchaStorage.remove(type, useScene, owner);
+        }
+        throw BaseException.common(CaptchaI18nMessageKeys.CAPTCHA_VERITY_FAILURE);
     }
 
     private CaptchaContentProvider getDelegate(Captcha.CaptchaType type, Captcha.CaptchaUseScene scene) {

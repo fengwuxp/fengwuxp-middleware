@@ -75,6 +75,11 @@ public interface Captcha extends CaptchaValue {
      * @date 2023-09-24 09:41
      **/
     interface CaptchaType extends DescriptiveEnum {
+
+        /**
+         * @return 是否存在多个验证码同时进行验证
+         */
+        boolean isSupportMultiple();
     }
 
 

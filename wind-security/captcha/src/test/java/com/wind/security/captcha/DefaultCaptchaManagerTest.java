@@ -10,6 +10,7 @@ import com.wind.security.captcha.picture.SimplePictureGenerator;
 import com.wind.security.captcha.qrcode.QrCodeCaptchaContentProvider;
 import com.wind.security.captcha.qrcode.QrCodeCaptchaProperties;
 import com.wind.security.captcha.storage.CacheCaptchaStorage;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,8 +57,8 @@ class DefaultCaptchaManagerTest {
             Captcha captcha = captchaManager.generate(type, scene, owner);
             Assertions.assertNotNull(captcha);
             captchaManager.verify(captcha.getValue(), type, scene, captcha.getOwner());
-            Captcha next = captchaManager.getCaptchaStorage().get(captcha.getType(), captcha.getUseScene(), captcha.getOwner());
-            Assertions.assertNull(next);
+            Collection<Captcha> captchas = captchaManager.getCaptchaStorage().get(captcha.getType(), captcha.getUseScene(), captcha.getOwner());
+            Assertions.assertTrue(ObjectUtils.isEmpty(captchas));
         }
     }
 
@@ -100,6 +101,17 @@ class DefaultCaptchaManagerTest {
         Assertions.assertEquals(CAPTCHA_GENERATE_MAX_LIMIT_OF_USER_BY_DAY, exception.getMessage());
     }
 
+    @Test
+    void testMobileCaptchaGenerateRepeatedly() {
+        // 测试多次发送，验证通过
+        String owner = RandomStringUtils.randomAlphanumeric(11);
+        Captcha captcha1 = captchaManager.generate(SimpleCaptchaType.MOBILE_PHONE, SimpleUseScene.LOGIN, owner);
+        captchaManager.generate(SimpleCaptchaType.MOBILE_PHONE, SimpleUseScene.LOGIN, owner);
+        captchaManager.verify(captcha1.getValue(), SimpleCaptchaType.MOBILE_PHONE, SimpleUseScene.LOGIN, owner);
+        Collection<Captcha> captchas = captchaManager.getCaptchaStorage().get(captcha1.getType(), captcha1.getUseScene(), captcha1.getOwner());
+        Assertions.assertTrue(ObjectUtils.isEmpty(captchas));
+    }
+
     private void assertCaptchaError(Captcha.CaptchaType type, int maxAllowVerificationTimes) {
         for (Captcha.CaptchaUseScene scene : SimpleUseScene.values()) {
             String owner = RandomStringUtils.randomAlphanumeric(12);
@@ -108,11 +120,11 @@ class DefaultCaptchaManagerTest {
             String expected = RandomStringUtils.randomAlphanumeric(4);
             BaseException exception = Assertions.assertThrows(BaseException.class, () -> captchaManager.verify(expected, type, scene, owner));
             Assertions.assertEquals(CAPTCHA_VERITY_FAILURE, exception.getMessage());
-            Captcha next = captchaManager.getCaptchaStorage().get(captcha.getType(), captcha.getUseScene(), owner);
+            Collection<Captcha> captchas = captchaManager.getCaptchaStorage().get(captcha.getType(), captcha.getUseScene(), owner);
             if (maxAllowVerificationTimes <= 1) {
-                Assertions.assertNull(next);
+                Assertions.assertTrue(ObjectUtils.isEmpty(captchas));
             } else {
-                Assertions.assertNotNull(next);
+                Assertions.assertFalse(ObjectUtils.isEmpty(captchas));
             }
         }
     }
