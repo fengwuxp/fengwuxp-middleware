@@ -33,23 +33,26 @@ public class Spring18nMessageSourceInitializer implements ApplicationListener<Ap
      */
     private static final AtomicReference<LocaleResolver> LOCALE_RESOLVER = new AtomicReference<>();
 
-    private static Locale getLocalWithRequest() {
-        HttpServletRequest request = HttpServletRequestUtils.getContextRequestOfNullable();
-        if (request == null) {
-            return Locale.SIMPLIFIED_CHINESE;
-        }
-        return LOCALE_RESOLVER.get().resolveLocale(request);
-    }
-
     @Override
     public void onApplicationEvent(@Nonnull ApplicationStartedEvent event) {
         try {
             LOCALE_RESOLVER.set(event.getApplicationContext().getBean(LocaleResolver.class));
             Spring18nMessageUtils.setMessageSource(event.getApplicationContext().getBean(MessageSource.class));
-            Spring18nMessageUtils.setLocaleSupplier(Spring18nMessageSourceInitializer::getLocalWithRequest);
+            Spring18nMessageUtils.setLocaleSupplier(Spring18nMessageSourceInitializer::getWebRequestLocal);
             log.info("enabled i18n supported");
         } catch (Exception ignore) {
             log.info("un enabled i18n supported");
         }
+    }
+
+    /**
+     * @return 获取当前请求的 Locale
+     */
+    private static Locale getWebRequestLocal() {
+        HttpServletRequest request = HttpServletRequestUtils.getContextRequestOfNullable();
+        if (request == null) {
+            return Locale.SIMPLIFIED_CHINESE;
+        }
+        return LOCALE_RESOLVER.get().resolveLocale(request);
     }
 }

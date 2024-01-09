@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.lang.Nullable;
 
+import javax.validation.constraints.NotNull;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
@@ -83,7 +84,8 @@ public final class Spring18nMessageUtils {
         if (locale != null || LOCALE_SUPPLIER.get() == null) {
             return locale;
         }
-        return LOCALE_SUPPLIER.get().get();
+        Locale result = LOCALE_SUPPLIER.get().get();
+        return result == null ? Locale.CHINA : result;
     }
 
     public static void setMessageSource(MessageSource messageSource) {
@@ -92,6 +94,14 @@ public final class Spring18nMessageUtils {
 
     public static void setLocaleSupplier(Supplier<Locale> supplier) {
         LOCALE_SUPPLIER.set(supplier);
+    }
+
+    /**
+     * @return 获取当前上下文的 locale
+     */
+    @NotNull
+    public static Locale requireLocale() {
+        return getLocale(Locale.CHINA);
     }
 
     /**
