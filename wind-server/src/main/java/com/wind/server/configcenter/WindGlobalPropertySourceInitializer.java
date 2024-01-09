@@ -1,11 +1,12 @@
 package com.wind.server.configcenter;
 
-import com.wind.common.WindConstants;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
+
+import static org.springframework.cloud.bootstrap.BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
 /**
  * 从配置中心加载全局配置
@@ -24,13 +25,12 @@ public class WindGlobalPropertySourceInitializer extends WindAbstractPropertySou
 
     @Override
     protected void load(WindPropertySourceLoader loader, ConfigurableEnvironment environment) {
-        // 仅在 bootstrap 阶段加载全局配置且值加载一次
-        if (environment.getPropertySources().contains(WindConstants.GLOBAL_CONFIG_NAME)) {
-            return;
+        // don't listen to events in a bootstrap context
+        if (environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
+            // 由于在 LoggingApplicationListener 之前执行，不会输出日志，使用 jul 输出
+            LOGGER.info("load global config");
+            loader.loadGlobalConfigs(environment);
         }
-        // 由于在 LoggingApplicationListener 之前执行，不会输出日志，使用 jul 输出
-        LOGGER.info("load global config");
-        loader.loadGlobalConfigs(environment);
     }
 
     @Override
