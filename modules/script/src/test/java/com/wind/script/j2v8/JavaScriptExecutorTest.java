@@ -28,7 +28,7 @@ class JavaScriptExecutorTest {
     }
 
     @Test
-    public void testExecuteFunctionSupportJavaUseClosure() {
+    void testExecuteFunctionSupportJavaUseClosure() {
         JsExecJavaMethodInvoker invoker = new JsExecJavaMethodInvoker() {
             @Override
             protected Object execInternal(String execMethodId, String parameter) {
@@ -37,22 +37,22 @@ class JavaScriptExecutorTest {
         };
         String json = JavaScriptExecutor.executeFunctionSupportJavaUseClosure(
                 "function(name,age){return $java.exec('test',JSON.stringify({name:name,age:age}))}", invoker, "张三", 22);
-        Assertions.assertEquals(json, "{\"name\":\"张三\",\"age\":22}");
+        Assertions.assertEquals("{\"name\":\"张三\",\"age\":22}", json);
     }
 
     @Test
-    public void testExecuteFunctionThrowError() {
+    void testExecuteFunctionThrowError() {
         try {
             JavaScriptExecutor.executeFunctionUseClosure("function(name,age){"
                     + " throw new Error('test error')"
                     + "  }", "张三", 22);
         } catch (Exception exception) {
-            Assertions.assertEquals(exception.getMessage(), "test error");
+            Assertions.assertEquals("test error", exception.getMessage());
         }
     }
 
     @Test
-    public void testExecuteFunctionReturnMap() {
+    void testExecuteFunctionReturnMap() {
         String functionCode = "function converter(json,num) {\n"
                 + "    const text = json.text;\n"
                 + "    const name = json.name;\n"
@@ -74,11 +74,11 @@ class JavaScriptExecutorTest {
         Assertions.assertNotNull(result);
         UserDemo userDemo = JavaScriptExecutor.executeFunctionUseClosure(functionCode, UserDemo.class, map, 22);
         Assertions.assertNotNull(userDemo);
-        Assertions.assertEquals(userDemo.name, "测试_张三_22");
+        Assertions.assertEquals("测试_张三_22", userDemo.name);
         userDemo = JavaScriptExecutor.executeFunctionUseClosure(functionCode, new ParameterizedTypeReference<UserDemo>() {
         }, map, 22);
         Assertions.assertNotNull(userDemo);
-        Assertions.assertEquals(userDemo.name, "测试_张三_22");
+        Assertions.assertEquals("测试_张三_22", userDemo.name);
     }
 
     @Data
@@ -90,7 +90,7 @@ class JavaScriptExecutorTest {
     }
 
     @Test
-    public void testExecuteFunctionReturnList() {
+    void testExecuteFunctionReturnList() {
         String functionCode = "function converter(val) {\n"
                 + "   return val; \n"
                 + "}";
@@ -104,54 +104,54 @@ class JavaScriptExecutorTest {
     }
 
     @Test
-    public void testExecuteFunctionReturnSimpleType() {
+    void testExecuteFunctionReturnSimpleType() {
         String functionCode = "function converter(val) {\n"
                 + "   return val; \n"
                 + "}";
         int integer = JavaScriptExecutor.executeFunctionUseClosure(functionCode, 1);
-        Assertions.assertEquals(integer, 1);
+        Assertions.assertEquals(1, integer);
         boolean aBoolean = JavaScriptExecutor.executeFunctionUseClosure(functionCode, false);
         Assertions.assertFalse(aBoolean);
         String text = JavaScriptExecutor.executeFunctionUseClosure(functionCode, "abc");
-        Assertions.assertEquals(text, "abc");
+        Assertions.assertEquals("abc", text);
     }
 
     @Test
-    public void testEsNextFeatures() {
+    void testEsNextFeatures() {
         Assertions.assertTrue(() -> JavaScriptExecutor.executeFunctionUseClosure("function test(){return [1,2].includes(1);}"));
         Assertions.assertTrue(() -> JavaScriptExecutor.executeFunctionUseClosure("function test(){return `${1+2}` ==='3'; }"));
     }
 
     @Test
-    public void testUseMomentJs() {
+    void testUseMomentJs() {
         String functionCode = "function test(){return moment('2022-04-15').format('YYYY-MM-DD')}";
-        Assertions.assertEquals(JavaScriptExecutor.executeFunctionUseClosure(functionCode), "2022-04-15");
+        Assertions.assertEquals("2022-04-15", JavaScriptExecutor.executeFunctionUseClosure(functionCode));
     }
 
     @Test
-    public void testObjectAssign() {
+    void testObjectAssign() {
         Map<String, Object> map = JavaScriptExecutor.executeFunctionUseClosure("function test(){return Object.assign({a:2},{a:1})}");
         Assertions.assertEquals(map.get("a"), 1);
     }
 
     @Test
-    public void teatSubstring() {
+    void teatSubstring() {
         String functionCode = "function test(text){return text.startsWith('0')?text.substring(1):text}";
-        Assertions.assertEquals(JavaScriptExecutor.executeFunctionUseClosure(functionCode, "012345"), "12345");
-        Assertions.assertEquals(JavaScriptExecutor.executeFunctionUseClosure(functionCode, "12345"), "12345");
+        Assertions.assertEquals("12345", JavaScriptExecutor.executeFunctionUseClosure(functionCode, "012345"));
+        Assertions.assertEquals("12345", JavaScriptExecutor.executeFunctionUseClosure(functionCode, "12345"));
     }
 
     @Test
-    public void testPrimitive() {
+    void testPrimitive() {
         String functionCode = "function test(a,b,flag){return flag? a + b:a-b}";
         int total = JavaScriptExecutor.executeFunctionUseClosure(functionCode, 1, 2, true);
-        Assertions.assertEquals(total, 3);
+        Assertions.assertEquals(3, total);
         total = JavaScriptExecutor.executeFunctionUseClosure(functionCode, 1, 2, false);
         Assertions.assertEquals(total, -1);
     }
 
     @Test
-    public void testFixUndefinedToNull() {
+    void testFixUndefinedToNull() {
         Map<String, Object> result = JavaScriptExecutor.executeFunctionUseClosure("function test(){return {a:null,b:undefined,c:NaN}}");
         Assertions.assertNull(result.get("b"));
         Assertions.assertNotNull(JSON.toJSONString(result));
@@ -180,7 +180,7 @@ class JavaScriptExecutorTest {
     }
 
     @Test()
-    public void testConcurrency() throws Exception {
+    void testConcurrency() throws Exception {
         ExecutorService executorService = Executors.newFixedThreadPool(4);
         List<Future<?>> futures = new ArrayList<>();
         int testTotal = 20;
@@ -197,9 +197,9 @@ class JavaScriptExecutorTest {
     }
 
     @Test
-    public void testPrimitive1() {
+    void testPrimitive1() {
         String functionCode = "function test(){return Array.from(new Set([\"1\",'2','2'])).join(\",\")}";
         String result = JavaScriptExecutor.executeFunctionUseClosure(functionCode);
-        Assertions.assertEquals(result, "1,2");
+        Assertions.assertEquals("1,2", result);
     }
 }
