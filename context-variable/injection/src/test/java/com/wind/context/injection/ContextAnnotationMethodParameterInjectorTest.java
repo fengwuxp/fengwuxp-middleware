@@ -72,10 +72,10 @@ class ContextAnnotationMethodParameterInjectorTest {
         @ContextUserId
         private Long id = 100L;
 
-        @ContextTenantId
+        @ContextTenantId(override = false)
         private Long tenantId = 2L;
 
-        @ContextTenantId(override = true)
+        @ContextTenantId()
         private Long tenantId2;
 
         @ContextRequestIp

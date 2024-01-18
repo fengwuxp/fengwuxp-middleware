@@ -7,7 +7,7 @@ import com.wind.context.variable.annotations.ContextVariable;
 import com.wind.script.spring.SpringExpressionEvaluator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -66,6 +66,7 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
      * @param method    方法
      * @param arguments 方法参数
      */
+    @Override
     public void inject(Method method, Object[] arguments) {
         ParameterInjectionDescriptor[] injectionDescriptors = descriptors.computeIfAbsent(method, this::parseParameterInjectionDescriptors);
         if (ObjectUtils.isEmpty(injectionDescriptors)) {
@@ -89,7 +90,7 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
         Class<?>[] parameterTypes = method.getParameterTypes();
         for (int i = 0; i < parameters.length; i++) {
             if (isSimpleType(parameterTypes[i])) {
-                ContextVariable annotation = AnnotationUtils.findAnnotation(parameters[i], ContextVariable.class);
+                ContextVariable annotation = AnnotatedElementUtils.getMergedAnnotation(parameters[i], ContextVariable.class);
                 if (annotation != null) {
                     result.add(new ParameterInjectionDescriptor(annotation, parameterTypes[i], parameters[i], null, i));
                 }
@@ -106,7 +107,7 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
     private List<ParameterInjectionDescriptor> parseParameterInjectionDescriptors(Parameter parameter, Class<?> parameterType, final int index) {
         return getClassFields(parameterType).stream()
                 .map(field -> {
-                    ContextVariable annotation = AnnotationUtils.findAnnotation(field, ContextVariable.class);
+                    ContextVariable annotation = AnnotatedElementUtils.getMergedAnnotation(field, ContextVariable.class);
                     if (annotation == null) {
                         return null;
                     }
