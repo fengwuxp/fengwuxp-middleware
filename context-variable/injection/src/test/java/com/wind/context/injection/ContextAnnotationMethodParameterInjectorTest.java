@@ -40,6 +40,7 @@ class ContextAnnotationMethodParameterInjectorTest {
         Assertions.assertEquals("test", request.example);
         Assertions.assertEquals(23, request.age);
         Assertions.assertEquals(true, request.falg);
+        Assertions.assertEquals("example2", request.example2);
     }
 
     @Test
@@ -92,5 +93,8 @@ class ContextAnnotationMethodParameterInjectorTest {
 
         @ContextVariable(expression = "#age > 22")
         private Boolean falg;
+
+        @ContextVariable(name = "example2")
+        private String example2="example2";
     }
 }

@@ -208,10 +208,15 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
         }
 
         private void injectWithOverride(Consumer<Object> setter, Object value, Supplier<Object> getter) {
+            if (value == null) {
+                return;
+            }
+            // 仅在 value 不为空的时候注入
             if (override) {
                 setter.accept(value);
             } else {
                 if (getter.get() == null) {
+                    // 仅在该字段没有值的时候尝试注入
                     setter.accept(value);
                 }
             }
