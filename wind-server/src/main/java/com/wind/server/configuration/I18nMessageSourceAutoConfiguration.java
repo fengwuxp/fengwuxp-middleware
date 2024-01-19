@@ -1,7 +1,7 @@
 package com.wind.server.configuration;
 
 import com.wind.common.WindConstants;
-import com.wind.common.i18n.Spring18nMessageUtils;
+import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.configcenter.core.ConfigRepository;
 import com.wind.server.i18n.WindI18nMessageSource;
 import com.wind.server.i18n.WindMessageSourceProperties;
@@ -47,9 +47,9 @@ public class I18nMessageSourceAutoConfiguration {
         result.setAlwaysUseMessageFormat(properties.isAlwaysUseMessageFormat());
         result.setUseCodeAsDefaultMessage(properties.isUseCodeAsDefaultMessage());
         if (StringUtils.hasText(properties.getI18nMessageKeyPrefix())) {
-            Spring18nMessageUtils.setI18nKeyMatcher(text -> text.startsWith(properties.getI18nMessageKeyPrefix()));
+            SpringI18nMessageUtils.setI18nKeyMatcher(text -> text.startsWith(properties.getI18nMessageKeyPrefix()));
         } else {
-            Spring18nMessageUtils.setI18nKeyMatcher(text -> true);
+            SpringI18nMessageUtils.setI18nKeyMatcher(text -> true);
         }
         return result;
     }

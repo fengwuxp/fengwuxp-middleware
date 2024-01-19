@@ -20,14 +20,14 @@ import java.util.function.Supplier;
  * @date 2023-11-01 15:05
  **/
 @Slf4j
-public final class Spring18nMessageUtils {
+public final class SpringI18nMessageUtils {
 
-    private Spring18nMessageUtils() {
+    private SpringI18nMessageUtils() {
         throw new AssertionError();
     }
 
     static {
-        BaseException.setI18nMessageFormatter(Spring18nMessageUtils::getMessage);
+        BaseException.setI18nMessageFormatter(SpringI18nMessageUtils::getMessage);
     }
 
     /**
@@ -80,12 +80,13 @@ public final class Spring18nMessageUtils {
         return result;
     }
 
-    private static Locale getLocale(Locale locale) {
-        if (locale != null || LOCALE_SUPPLIER.get() == null) {
-            return locale;
+    private static Locale getLocale(@Nullable Locale defaultLocale) {
+        defaultLocale = defaultLocale == null ? Locale.CHINA : defaultLocale;
+        if (LOCALE_SUPPLIER.get() == null) {
+            return defaultLocale;
         }
         Locale result = LOCALE_SUPPLIER.get().get();
-        return result == null ? Locale.CHINA : result;
+        return result == null ? defaultLocale : result;
     }
 
     public static void setMessageSource(MessageSource messageSource) {

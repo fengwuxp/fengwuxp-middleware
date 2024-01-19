@@ -1,6 +1,6 @@
 package com.wind.server.i18n;
 
-import com.wind.common.i18n.Spring18nMessageUtils;
+import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.web.utils.HttpServletRequestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
@@ -23,10 +23,10 @@ import java.util.concurrent.atomic.AtomicReference;
  * @see org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration
  * @see org.springframework.web.servlet.LocaleResolver
  * @see com.wind.server.configuration.I18nMessageSourceAutoConfiguration
- * @see Spring18nMessageUtils
+ * @see SpringI18nMessageUtils
  **/
 @Slf4j
-public class Spring18nMessageSourceInitializer implements ApplicationListener<ApplicationStartedEvent> {
+public class SpringI18nMessageSourceInitializer implements ApplicationListener<ApplicationStartedEvent> {
 
     /**
      * {@link Locale} 解析器
@@ -37,8 +37,8 @@ public class Spring18nMessageSourceInitializer implements ApplicationListener<Ap
     public void onApplicationEvent(@Nonnull ApplicationStartedEvent event) {
         try {
             LOCALE_RESOLVER.set(event.getApplicationContext().getBean(LocaleResolver.class));
-            Spring18nMessageUtils.setMessageSource(event.getApplicationContext().getBean(MessageSource.class));
-            Spring18nMessageUtils.setLocaleSupplier(Spring18nMessageSourceInitializer::getWebRequestLocal);
+            SpringI18nMessageUtils.setMessageSource(event.getApplicationContext().getBean(MessageSource.class));
+            SpringI18nMessageUtils.setLocaleSupplier(SpringI18nMessageSourceInitializer::getWebRequestLocal);
             log.info("enabled i18n supported");
         } catch (Exception ignore) {
             log.info("un enabled i18n supported");
