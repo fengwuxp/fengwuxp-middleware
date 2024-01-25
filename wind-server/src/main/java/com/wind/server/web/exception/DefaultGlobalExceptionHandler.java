@@ -2,6 +2,7 @@ package com.wind.server.web.exception;
 
 
 import com.wind.common.exception.BaseException;
+import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.server.web.restful.RestfulApiRespFactory;
 import com.wind.server.web.supports.ApiResp;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,16 @@ import static com.wind.common.WindConstants.WIND_SERVER_PROPERTIES_PREFIX;
 @ConditionalOnProperty(prefix = WIND_SERVER_PROPERTIES_PREFIX, name = "enabled-global-exception", havingValue = "true", matchIfMissing = true)
 @RestControllerAdvice()
 public class DefaultGlobalExceptionHandler {
+
+    /**
+     * 数据库唯一键异常消息 i18n key
+     */
+    private static final String DB_DUPLICATE_KEY_I18N_KEY = "$.db.duplicate.key.exception";
+
+    /**
+     * 数据库访问异常消息 i18n key
+     */
+    private static final String DB_ACCESS_DATA_I18N_KEY = "$.db.access.data.exception";
 
     /**
      * 参数校验异常处理
@@ -97,7 +108,7 @@ public class DefaultGlobalExceptionHandler {
     @ResponseBody
     public ApiResp<Void> duplicateKeyException(Exception exception) {
         log.error("唯一键冲突异常", exception);
-        return RestfulApiRespFactory.error("数据已存在");
+        return RestfulApiRespFactory.error(SpringI18nMessageUtils.getMessage(DB_DUPLICATE_KEY_I18N_KEY, "数据已存在"));
     }
 
     /**
@@ -107,7 +118,7 @@ public class DefaultGlobalExceptionHandler {
     @ResponseBody
     public ApiResp<Void> dataAccessException(Exception exception) {
         log.error("数据操作异常", exception);
-        return RestfulApiRespFactory.error("数据操作失败");
+        return RestfulApiRespFactory.error(SpringI18nMessageUtils.getMessage(DB_ACCESS_DATA_I18N_KEY, "数据操作失败"));
     }
 
     /**

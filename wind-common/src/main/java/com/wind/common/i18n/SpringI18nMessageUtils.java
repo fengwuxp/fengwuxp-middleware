@@ -67,10 +67,10 @@ public final class SpringI18nMessageUtils {
 
     public static String getMessage(String message, @Nullable Object[] args, @Nullable String defaultMessage, Locale locale) {
         if (message == null) {
-            return "null";
+            return defaultMessage;
         }
         if (MESSAGE_SOURCE.get() == null || !I18N_KEY_MATCHER.get().test(message)) {
-            return defaultMessage == null ? message : defaultMessage;
+            return message;
         }
         String result = MESSAGE_SOURCE.get().getMessage(message, args, defaultMessage, getLocale(locale));
         // 未获取到消息返回默认消息或原本消息

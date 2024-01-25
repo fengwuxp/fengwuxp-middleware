@@ -6,6 +6,10 @@ Default logback configuration provided for import
 <included>
     <springProperty name="KAFKA_SERVERS" scope="context" source="spring.kafka.log.bootstrap-servers"/>
     <springProperty name="KAFKA_TOPIC" scope="context" source="spring.kafka.log.topic"/>
+    <springProperty name="KAFKA_RETRIES" scope="context" source="spring.kafka.log.retries" defaultValue="1"/>
+    <springProperty name="KAFKA_BATCH_SIZE" scope="context" source="spring.kafka.log.batch-size" defaultValue="16384"/>
+    <springProperty name="KAFKA_BUFFER_MEMORY" scope="context" source="spring.kafka.log.buffer-memory" defaultValue="33554432"/>
+    <springProperty name="KAFKA_MAX_REQUEST_SIZE" scope="context" source="spring.kafka.log.properties.max-request-size" defaultValue="2097152"/>
     <!--  kafka -->
     <appender name="KAFKA" class="com.wind.logging.logback.kafaka.KafkaAppender">
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
@@ -33,10 +37,10 @@ Default logback configuration provided for import
         </encoder>
         <topic>${KAFKA_TOPIC}</topic>
         <producerConfig>bootstrap.servers=${KAFKA_SERVERS}</producerConfig>
-        <producerConfig>retries=1</producerConfig>
-        <producerConfig>batch-size=16384</producerConfig>
-        <producerConfig>buffer-memory=33554432</producerConfig>
-        <producerConfig>properties.max.request.size==2097152</producerConfig>
+        <producerConfig>retries=${KAFKA_RETRIES}</producerConfig>
+        <producerConfig>batch-size=${KAFKA_BATCH_SIZE}</producerConfig>
+        <producerConfig>buffer-memory=${KAFKA_BUFFER_MEMORY}</producerConfig>
+        <producerConfig>properties.max.request.size==${KAFKA_MAX_REQUEST_SIZE}</producerConfig>
     </appender>
     <appender name="KAFKA_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
         <!-- if neverBlock is set to true, the async appender discards messages when its internal queue is full -->
