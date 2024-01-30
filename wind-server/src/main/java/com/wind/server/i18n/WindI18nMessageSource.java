@@ -80,10 +80,9 @@ public class WindI18nMessageSource extends AbstractResourceBasedMessageSource {
     protected String resolveCodeWithoutArguments(@Nonnull String code, @Nonnull Locale locale) {
         PropertyResolver resolver = localPropertyResolvers.get(locale);
         if (resolver == null) {
-            return code;
+            return null;
         }
-        // 如果获取失败，默认返回 code
-        return resolver.getProperty(code, code);
+        return resolver.getProperty(code);
     }
 
     /**
