@@ -89,7 +89,7 @@ public class TraceFilter extends OncePerRequestFilter {
         contextVariables.put(HTTP_USER_AGENT_HEADER_NAME, request.getHeader(HttpHeaders.USER_AGENT));
         contextVariables.put(LOCAL_HOST_IP_V4, IpAddressUtils.getLocalIpv4());
         WindTracer.TRACER.trace(traceId, contextVariables);
-        return traceId;
+        return  WindTracer.TRACER.getTraceId();
     }
 
     /**
