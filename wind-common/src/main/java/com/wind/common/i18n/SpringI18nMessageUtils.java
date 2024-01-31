@@ -5,6 +5,7 @@ import com.wind.common.exception.BaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.NotNull;
 import java.util.Locale;
@@ -66,18 +67,17 @@ public final class SpringI18nMessageUtils {
     }
 
     public static String getMessage(String message, @Nullable Object[] args, @Nullable String defaultMessage, Locale locale) {
-        if (message == null) {
-            return defaultMessage;
+        if (message != null) {
+            if (MESSAGE_SOURCE.get() == null || !I18N_KEY_MATCHER.get().test(message)) {
+                return message;
+            }
+            String result = MESSAGE_SOURCE.get().getMessage(message, args, defaultMessage, getLocale(locale));
+            if (StringUtils.hasText(result)) {
+                return result;
+            }
         }
-        if (MESSAGE_SOURCE.get() == null || !I18N_KEY_MATCHER.get().test(message)) {
-            return message;
-        }
-        String result = MESSAGE_SOURCE.get().getMessage(message, args, defaultMessage, getLocale(locale));
         // 未获取到消息返回默认消息或原本消息
-        if (result == null) {
-            return defaultMessage == null ? message : defaultMessage;
-        }
-        return result;
+        return StringUtils.hasText(defaultMessage) ? defaultMessage : message;
     }
 
     private static Locale getLocale(@Nullable Locale defaultLocale) {
