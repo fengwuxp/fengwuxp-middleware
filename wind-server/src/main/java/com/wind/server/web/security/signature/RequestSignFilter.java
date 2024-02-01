@@ -31,8 +31,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.UnaryOperator;
+
+import static com.wind.server.web.security.signature.SignatureConstants.DEBUG_SIGN_QUERY_HEADER_NAME;
 
 /**
  * 接口请求验签
@@ -91,11 +94,8 @@ public class RequestSignFilter implements Filter, Ordered {
                 // 线下环境返回服务端的签名，用于 debug
                 response.addHeader(headerNames.debugSign, Signer.SHA256.sign(signatureRequest));
                 response.addHeader(headerNames.debugSignContent, signatureRequest.getSignText());
-                if (signatureRequest.getQueryString() != null) {
-                    response.addHeader("X-Sign-QueryString", signatureRequest.getQueryString());
-                }
-                if (signatureRequest.getRequestBody() != null) {
-                    response.addHeader("X-Sign-RequestBody", signatureRequest.getRequestBody());
+                if (signatureRequest.getQueryString() != null || signatureRequest.getQueryParams() != null) {
+                    response.addHeader(DEBUG_SIGN_QUERY_HEADER_NAME, signatureRequest.getCanonicalizedQueryString());
                 }
             }
             badRequest(response, "sign verify error");
@@ -119,10 +119,14 @@ public class RequestSignFilter implements Filter, Ordered {
 
     private SignatureRequest buildSignatureRequest(String accessKey, RequestSignMatcher matcher) throws IOException {
         HttpServletRequest request = matcher.request;
+        // TODO 临时增加签名版本用于切换
+        String version = request.getHeader("Signature-Version");
         SignatureRequest.SignatureRequestBuilder result = SignatureRequest.builder()
                 // http 请求 path，不包含查询参数和域名
                 .requestPath(request.getRequestURI())
-                .queryString(fixQueryString(request.getQueryString()))
+                // 如果是 v2 版本则使用 queryParams
+                .queryString(Objects.equals(version, "v2") ? null : fixQueryString(request.getQueryString()))
+                .queryParams(request.getParameterMap())
                 .method(request.getMethod().toUpperCase())
                 .nonce(request.getHeader(headerNames.nonce))
                 .timestamp(request.getHeader(headerNames.timestamp))

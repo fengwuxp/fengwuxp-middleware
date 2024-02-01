@@ -48,5 +48,11 @@ final class SignatureConstants {
      */
     static final String DEBUG_SIGN_CONTENT_HEADER_NAME = "Debug-Sign-Content";
 
+    /**
+     * 在签名验证失败时返回服务端的查询参数签名串
+     * 仅在线下联调环境下开启
+     */
+    static final String DEBUG_SIGN_QUERY_HEADER_NAME = "Debug-Sign-Query";
+
 
 }
