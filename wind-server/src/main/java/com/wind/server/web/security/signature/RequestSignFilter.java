@@ -125,12 +125,14 @@ public class RequestSignFilter implements Filter, Ordered {
         // TODO 临时增加签名版本用于切换
         String version = request.getHeader("Signature-Version");
         ApiSecretAccount account = apiSecretAccountProvider.apply(accessKey);
+        String queryString = request.getQueryString();
         SignatureRequest.SignatureRequestBuilder result = SignatureRequest.builder()
                 // http 请求 path，不包含查询参数和域名
                 .requestPath(request.getRequestURI())
                 // 如果是 v2 版本则使用 queryParams TODO 待删除
-                .queryString(Objects.equals(version, "v2") ? null : fixQueryString(request.getQueryString()))
-                .queryParams(request.getParameterMap())
+                .queryString(Objects.equals(version, "v2") ? null : fixQueryString(queryString))
+                // 仅在存在查询字符串时才设置，避免获取到表单参数
+                .queryParams(StringUtils.hasLength(queryString) ? request.getParameterMap() : null)
                 .method(request.getMethod().toUpperCase())
                 .nonce(request.getHeader(headerNames.nonce))
                 .timestamp(request.getHeader(headerNames.timestamp))
