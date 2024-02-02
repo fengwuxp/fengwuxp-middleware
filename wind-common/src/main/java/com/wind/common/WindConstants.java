@@ -219,6 +219,7 @@ public final class WindConstants {
      */
     public static final String WIND_TRANCE_ID_HEADER_NAME = "Wind-Trace-Id";
 
+
     /**
      * http 请求 url 变量
      */

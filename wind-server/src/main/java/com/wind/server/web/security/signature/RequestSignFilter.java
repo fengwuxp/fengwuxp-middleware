@@ -2,6 +2,9 @@ package com.wind.server.web.security.signature;
 
 
 import com.google.common.collect.ImmutableSet;
+import com.wind.common.WindHttpConstants;
+import com.wind.common.i18n.SpringI18nMessageUtils;
+import com.wind.common.signature.ApiSecretAccount;
 import com.wind.common.signature.SignatureRequest;
 import com.wind.common.signature.Signer;
 import com.wind.common.utils.ServiceInfoUtils;
@@ -33,7 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.UnaryOperator;
+import java.util.function.Function;
 
 import static com.wind.server.web.security.signature.SignatureConstants.DEBUG_SIGN_QUERY_HEADER_NAME;
 
@@ -54,7 +57,7 @@ public class RequestSignFilter implements Filter, Ordered {
 
     private final SignatureHttpHeaderNames headerNames;
 
-    private final UnaryOperator<String> secretKeyProvider;
+    private final Function<String, ApiSecretAccount> apiSecretAccountProvider;
 
     /**
      * 忽略接口验签的请求匹配器
@@ -66,8 +69,8 @@ public class RequestSignFilter implements Filter, Ordered {
      */
     private final boolean enable;
 
-    public RequestSignFilter(UnaryOperator<String> secretKeyProvider, Collection<RequestMatcher> ignoreRequestMatchers, boolean enable) {
-        this(new SignatureHttpHeaderNames(), secretKeyProvider, ignoreRequestMatchers, enable);
+    public RequestSignFilter(Function<String, ApiSecretAccount> apiSecretAccountProvider, Collection<RequestMatcher> ignoreRequestMatchers, boolean enable) {
+        this(new SignatureHttpHeaderNames(), apiSecretAccountProvider, ignoreRequestMatchers, enable);
     }
 
     @Override
@@ -98,14 +101,14 @@ public class RequestSignFilter implements Filter, Ordered {
                     response.addHeader(DEBUG_SIGN_QUERY_HEADER_NAME, signatureRequest.getCanonicalizedQueryString());
                 }
             }
-            badRequest(response, "sign verify error");
+            badRequest(response, "Sign verify error");
         }
     }
 
     private void badRequest(HttpServletResponse response, String message) {
         response.setStatus(HttpStatus.BAD_REQUEST.value());
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        HttpResponseMessageUtils.writeJson(response, RestfulApiRespFactory.badRequest(message));
+        HttpResponseMessageUtils.writeJson(response, RestfulApiRespFactory.badRequest(SpringI18nMessageUtils.getMessage(message)));
     }
 
     private boolean ignoreSignCheck(HttpServletRequest request) {
@@ -121,19 +124,22 @@ public class RequestSignFilter implements Filter, Ordered {
         HttpServletRequest request = matcher.request;
         // TODO 临时增加签名版本用于切换
         String version = request.getHeader("Signature-Version");
+        ApiSecretAccount account = apiSecretAccountProvider.apply(accessKey);
         SignatureRequest.SignatureRequestBuilder result = SignatureRequest.builder()
                 // http 请求 path，不包含查询参数和域名
                 .requestPath(request.getRequestURI())
-                // 如果是 v2 版本则使用 queryParams
+                // 如果是 v2 版本则使用 queryParams TODO 待删除
                 .queryString(Objects.equals(version, "v2") ? null : fixQueryString(request.getQueryString()))
                 .queryParams(request.getParameterMap())
                 .method(request.getMethod().toUpperCase())
                 .nonce(request.getHeader(headerNames.nonce))
                 .timestamp(request.getHeader(headerNames.timestamp))
-                .secretKey(secretKeyProvider.apply(accessKey));
+                .secretKey(account.getSecretKey());
         if (matcher.signRequiredBody()) {
             result.requestBody(StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8));
         }
+        // 设置到签名认证账号到上下文中
+        request.setAttribute(WindHttpConstants.API_SECRET_ACCOUNT_ATTRIBUTE_NAME, account);
         return result.build();
     }
 
