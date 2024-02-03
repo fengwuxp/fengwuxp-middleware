@@ -2,7 +2,9 @@ package com.wind.server.web.security.signature;
 
 
 import com.google.common.collect.ImmutableSet;
+import com.wind.common.WindConstants;
 import com.wind.common.WindHttpConstants;
+import com.wind.common.annotations.VisibleForTesting;
 import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.common.signature.ApiSecretAccount;
 import com.wind.common.signature.SignatureRequest;
@@ -20,8 +22,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
 import javax.servlet.Filter;
@@ -34,6 +38,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -132,7 +139,7 @@ public class RequestSignFilter implements Filter, Ordered {
                 // 如果是 v2 版本则使用 queryParams TODO 待删除
                 .queryString(Objects.equals(version, "v2") ? null : fixQueryString(queryString))
                 // 仅在存在查询字符串时才设置，避免获取到表单参数
-                .queryParams(StringUtils.hasLength(queryString) ? request.getParameterMap() : null)
+                .queryParams(parseQueryParams(queryString))
                 .method(request.getMethod().toUpperCase())
                 .nonce(request.getHeader(headerNames.nonce))
                 .timestamp(request.getHeader(headerNames.timestamp))
@@ -150,9 +157,26 @@ public class RequestSignFilter implements Filter, Ordered {
         return WindWebFilterOrdered.REQUEST_SIGN_FILTER.getOrder();
     }
 
-    private String fixQueryString(String queryString) {
+    private static String fixQueryString(String queryString) {
         // @see https://juejin.cn/post/6844904034453864462#heading-2
         return queryString == null ? null : UriUtils.decode(queryString.replace("+", "%20"), StandardCharsets.UTF_8);
+    }
+
+    @VisibleForTesting
+    static Map<String, String[]> parseQueryParams(String queryString) {
+        if (StringUtils.hasText(queryString)) {
+            Map<String, String[]> result = new HashMap<>();
+            UriComponentsBuilder.fromUriString(String.format("%s%s%s", WindConstants.SLASH, WindConstants.QUESTION_MARK, UriUtils.decode(queryString, StandardCharsets.UTF_8)))
+                    .build()
+                    .getQueryParams()
+                    .forEach((k, v) -> {
+                        if (!ObjectUtils.isEmpty(v)) {
+                            result.put(k, v.toArray(new String[0]));
+                        }
+                    });
+            return result;
+        }
+        return Collections.emptyMap();
     }
 
     private static class RequestSignMatcher {

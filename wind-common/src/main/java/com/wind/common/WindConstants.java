@@ -24,6 +24,7 @@ public final class WindConstants {
 
     public static final String DOUBLE_DOT = "..";
     public static final String SLASH = "/";
+    public static final String QUESTION_MARK = "?";
     public static final String BACKSLASH = "\\";
     public static final String EMPTY = "";
     public static final String NULL = "null";
