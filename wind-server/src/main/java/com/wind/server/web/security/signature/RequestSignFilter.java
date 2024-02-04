@@ -2,7 +2,6 @@ package com.wind.server.web.security.signature;
 
 
 import com.google.common.collect.ImmutableSet;
-import com.wind.common.WindConstants;
 import com.wind.common.WindHttpConstants;
 import com.wind.common.annotations.VisibleForTesting;
 import com.wind.common.i18n.SpringI18nMessageUtils;
@@ -25,7 +24,6 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
 import javax.servlet.Filter;
@@ -166,9 +164,7 @@ public class RequestSignFilter implements Filter, Ordered {
     static Map<String, String[]> parseQueryParams(String queryString) {
         if (StringUtils.hasText(queryString)) {
             Map<String, String[]> result = new HashMap<>();
-            UriComponentsBuilder.fromUriString(String.format("%s%s%s", WindConstants.SLASH, WindConstants.QUESTION_MARK, UriUtils.decode(queryString, StandardCharsets.UTF_8)))
-                    .build()
-                    .getQueryParams()
+            RepeatableReadRequestWrapper.parseQueryParams(queryString)
                     .forEach((k, v) -> {
                         if (!ObjectUtils.isEmpty(v)) {
                             result.put(k, v.toArray(new String[0]));

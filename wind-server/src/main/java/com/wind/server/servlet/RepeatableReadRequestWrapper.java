@@ -1,9 +1,16 @@
 package com.wind.server.servlet;
 
+import com.wind.common.WindConstants;
+import com.wind.common.annotations.VisibleForTesting;
 import com.wind.common.exception.BaseException;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.ReadListener;
@@ -16,9 +23,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URLEncoder;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -45,16 +52,15 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
     @Nullable
     private BufferedReader reader;
 
+    private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+
     /**
      * Create a new RepeatableReadRequestWrapper for the given servlet request.
      *
      * @param request the original servlet request
      */
     public RepeatableReadRequestWrapper(HttpServletRequest request) {
-        super(request);
-        int contentLength = request.getContentLength();
-        this.cachedContent = new ByteArrayOutputStream(contentLength >= 0 ? contentLength : 1024);
-        this.contentCacheLimit = null;
+        this(request, request.getContentLength() > 0 ? request.getContentLength() : 1024);
     }
 
     /**
@@ -69,8 +75,8 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         super(request);
         this.cachedContent = new ByteArrayOutputStream(contentCacheLimit);
         this.contentCacheLimit = contentCacheLimit;
+        tryCacheRequestParameters();
     }
-
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
@@ -102,72 +108,42 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public String getParameter(String name) {
-        if (this.cachedContent.size() == 0 && isFormPost()) {
-            writeRequestParametersToCachedContent();
-        }
-        return super.getParameter(name);
+        return parameters.getFirst(name);
     }
 
     @Override
     public Map<String, String[]> getParameterMap() {
-        if (this.cachedContent.size() == 0 && isFormPost()) {
-            writeRequestParametersToCachedContent();
-        }
-        return super.getParameterMap();
+        Map<String, String[]> result = new HashMap<>();
+        parameters.forEach((name, values) -> {
+            if (values != null) {
+                result.put(name, values.toArray(new String[0]));
+            }
+        });
+        return result;
     }
 
     @Override
     public Enumeration<String> getParameterNames() {
-        if (this.cachedContent.size() == 0 && isFormPost()) {
-            writeRequestParametersToCachedContent();
-        }
-        return super.getParameterNames();
+        Iterator<String> iterator = parameters.keySet().iterator();
+        return new Enumeration<String>() {
+            @Override
+            public boolean hasMoreElements() {
+                return iterator.hasNext();
+            }
+
+            @Override
+            public String nextElement() {
+                return iterator.next();
+            }
+        };
     }
 
     @Override
     public String[] getParameterValues(String name) {
-        if (this.cachedContent.size() == 0 && isFormPost()) {
-            writeRequestParametersToCachedContent();
-        }
-        return super.getParameterValues(name);
+        tryCacheRequestParameters();
+        List<String> result = parameters.get(name);
+        return result == null ? null : result.toArray(new String[0]);
     }
-
-
-    private boolean isFormPost() {
-        String contentType = getContentType();
-        return (contentType != null && contentType.contains(MediaType.APPLICATION_FORM_URLENCODED_VALUE) &&
-                HttpMethod.POST.matches(getMethod()));
-    }
-
-    private void writeRequestParametersToCachedContent() {
-        try {
-            if (this.cachedContent.size() == 0) {
-                String requestEncoding = getCharacterEncoding();
-                Map<String, String[]> form = super.getParameterMap();
-                for (Iterator<String> nameIterator = form.keySet().iterator(); nameIterator.hasNext(); ) {
-                    String name = nameIterator.next();
-                    List<String> values = Arrays.asList(form.get(name));
-                    for (Iterator<String> valueIterator = values.iterator(); valueIterator.hasNext(); ) {
-                        String value = valueIterator.next();
-                        this.cachedContent.write(URLEncoder.encode(name, requestEncoding).getBytes());
-                        if (value != null) {
-                            this.cachedContent.write('=');
-                            this.cachedContent.write(URLEncoder.encode(value, requestEncoding).getBytes());
-                            if (valueIterator.hasNext()) {
-                                this.cachedContent.write('&');
-                            }
-                        }
-                    }
-                    if (nameIterator.hasNext()) {
-                        this.cachedContent.write('&');
-                    }
-                }
-            }
-        } catch (IOException ex) {
-            throw new IllegalStateException("Failed to write request parameters to cached content", ex);
-        }
-    }
-
 
     /**
      * Template method for handling a content overflow: specifically, a request
@@ -184,6 +160,42 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         throw BaseException.common("cache request body overflow，limit = " + contentCacheLimit);
     }
 
+    private void tryCacheRequestParameters() {
+        if (parameters.isEmpty()) {
+            fillParametersByQuery();
+            fillParametersByForm();
+        }
+    }
+
+    @VisibleForTesting
+    public static MultiValueMap<String, String> parseQueryParams(String queryString) {
+        if (StringUtils.hasText(queryString)) {
+            return UriComponentsBuilder.fromUriString(String.format("%s%s%s", WindConstants.SLASH, WindConstants.QUESTION_MARK, UriUtils.decode(queryString, StandardCharsets.UTF_8)))
+                    .build()
+                    .getQueryParams();
+        }
+        return new LinkedMultiValueMap<>();
+    }
+
+    private void fillParametersByQuery() {
+        parameters.putAll(parseQueryParams(getQueryString()));
+    }
+
+    private boolean isFormRequest() {
+        String contentType = getContentType();
+        return (contentType != null && contentType.contains(MediaType.APPLICATION_FORM_URLENCODED_VALUE));
+    }
+
+    private void fillParametersByForm() {
+        try {
+            if (isFormRequest()) {
+                String body = StreamUtils.copyToString(getInputStream(), StandardCharsets.UTF_8);
+                parameters.putAll(parseQueryParams(body));
+            }
+        } catch (IOException exception) {
+            throw new IllegalStateException("Failed to write request parameters to cached", exception);
+        }
+    }
 
     private class ContentCachingInputStream extends ServletInputStream {
 

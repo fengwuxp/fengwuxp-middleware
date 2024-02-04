@@ -96,7 +96,8 @@ public class WindI18nMessageSource extends AbstractResourceBasedMessageSource {
         return messageFormatCache.get(key, k -> {
             String message = resolveCodeWithoutArguments(code, locale);
             if (message == null) {
-                return null;
+                // 如果 code 中有占位符，直接返回 MessageFormat
+                return code.contains("{0}") ? new MessageFormat(code, locale) : null;
             }
             return new MessageFormat(message, locale);
         });
