@@ -647,7 +647,7 @@
                             <generateGitPropertiesFile>true</generateGitPropertiesFile>
                             <!-- 生成git属性文件路径及文件名，默认${project.build.outputDirectory}/git.properties -->
                             <generateGitPropertiesFilename>
-                                ${project.build.outputDirectory}/META-INF/git-infos.properties
+                                ${project.build.outputDirectory}/META-INF/${project.artifactId}/git.properties
                             </generateGitPropertiesFilename>
                             <includeOnlyProperties>
                                 <property>git.branch</property>
