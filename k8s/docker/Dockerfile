@@ -19,7 +19,7 @@ EXPOSE ${EXPOSE_PORT}
 
 WORKDIR /home/admin/run
 COPY ./startup.sh /home/admin/run
-COPY pre-stop.sh /home/admin/run
+COPY ./pre-stop.sh /home/admin/run
 
 RUN set -ex \
     && sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories \
