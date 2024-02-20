@@ -1,4 +1,4 @@
-package com.wind.core.api.signature;
+package com.wind.common.signature;
 
 import com.wind.common.exception.AssertUtils;
 import lombok.Builder;
