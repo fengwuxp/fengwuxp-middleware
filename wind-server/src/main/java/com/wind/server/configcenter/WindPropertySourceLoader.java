@@ -30,7 +30,6 @@ import static com.wind.common.WindConstants.SPRING_REDISSON_CONFIG_NAME;
 import static com.wind.common.WindConstants.WIND_MIDDLEWARE_SHARE_NAME;
 import static com.wind.common.WindConstants.WIND_REDISSON_PROPERTY_SOURCE_NAME;
 import static com.wind.common.WindConstants.WIND_SERVER_USED_MIDDLEWARE;
-import static org.springframework.cloud.bootstrap.BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
 /**
  * 配置中心配置加载器

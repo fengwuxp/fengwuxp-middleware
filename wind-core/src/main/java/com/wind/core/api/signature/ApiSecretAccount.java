@@ -1,4 +1,4 @@
-package com.wind.common.signature;
+package com.wind.core.api.signature;
 
 /**
  * @author wuxp

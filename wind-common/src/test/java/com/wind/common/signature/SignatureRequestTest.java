@@ -1,5 +1,6 @@
 package com.wind.common.signature;
 
+import com.wind.core.api.signature.SignatureRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

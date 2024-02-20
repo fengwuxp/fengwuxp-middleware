@@ -1,11 +1,8 @@
 package com.wind.common.exception;
 
-import com.wind.common.WindConstants;
 import com.wind.common.enums.DescriptiveEnum;
 
 import java.io.Serializable;
-
-import static com.wind.common.WindConstants.SUCCESSFUL_CODE;
 
 /**
  * 异常码描述接口，不同的业务场景可以实现该接口做扩展。
@@ -15,6 +12,11 @@ import static com.wind.common.WindConstants.SUCCESSFUL_CODE;
  * @see DefaultExceptionCode
  */
 public interface ExceptionCode extends DescriptiveEnum, Serializable {
+
+    /**
+     * 统一表示成功的 code
+     */
+    String SUCCESSFUL_CODE = "0";
 
     /**
      * 表示成功的 code
@@ -29,7 +31,7 @@ public interface ExceptionCode extends DescriptiveEnum, Serializable {
 
         @Override
         public String getDesc() {
-            return WindConstants.EMPTY;
+            return "";
         }
     };
 

@@ -5,7 +5,7 @@ import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.common.locks.LockFactory;
-import com.wind.common.locks.SimpleLockFactory;
+import com.wind.common.locks.JdkLockFactory;
 import com.wind.security.captcha.configuration.CaptchaProperties;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.Cache;
@@ -48,7 +48,7 @@ public class SimpleCaptchaGenerateChecker implements CaptchaGenerateChecker {
     private LockFactory lockFactory;
 
     public SimpleCaptchaGenerateChecker(CacheManager cacheManager, CaptchaProperties properties) {
-        this(cacheManager, properties, new SimpleLockFactory());
+        this(cacheManager, properties, new JdkLockFactory());
     }
 
     @Override

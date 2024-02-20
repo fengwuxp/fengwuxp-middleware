@@ -19,6 +19,7 @@
 
     <modules>
         <module>wind-server</module>
+        <module>wind-core</module>
         <module>wind-common</module>
         <module>wind-security</module>
         <module>wind-config-center</module>
@@ -195,6 +196,11 @@
             <dependency>
                 <groupId>com.wind.payment</groupId>
                 <artifactId>wind-payment-plugin-alipay</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.core</groupId>
+                <artifactId>wind-core</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

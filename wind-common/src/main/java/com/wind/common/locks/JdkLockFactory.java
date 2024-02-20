@@ -16,7 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author wuxp
  * @date 2023-11-14 08:48
  **/
-public class SimpleLockFactory implements LockFactory {
+public class JdkLockFactory implements LockFactory {
 
     /**
      * @key 锁标识

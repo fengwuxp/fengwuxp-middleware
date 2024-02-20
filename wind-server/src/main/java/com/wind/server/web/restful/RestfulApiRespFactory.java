@@ -1,18 +1,14 @@
 package com.wind.server.web.restful;
 
-import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.common.exception.ExceptionCode;
 import com.wind.common.query.supports.Pagination;
 import com.wind.server.web.supports.ApiResp;
+import com.wind.server.web.supports.ImmutableWebApiResponse;
 import com.wind.trace.WindTracer;
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
-
-import java.beans.Transient;
-import java.io.Serializable;
 
 
 /**
@@ -126,64 +122,7 @@ public final class RestfulApiRespFactory {
     }
 
     private static <T> ApiResp<T> of(HttpStatus httpStatus, T data, ExceptionCode code, String errorMessage) {
-        return new ImmutableApiResp<>(httpStatus, data, code, errorMessage);
-    }
-
-    static final class ImmutableApiResp<T> implements ApiResp<T>, Serializable {
-
-        private static final long serialVersionUID = -7557721954943132992L;
-
-        /**
-         * 响应的http status
-         */
-        private final transient HttpStatus httpStatus;
-
-        /**
-         * 响应数据
-         */
-        @Getter
-        private final T data;
-
-        /**
-         * 业务失败时的错误响应码
-         */
-        private final ExceptionCode errorCode;
-
-        /**
-         * 业务失败时的响应消息
-         */
-        @Getter
-        private final String errorMessage;
-
-        @Getter
-        private final String traceId;
-
-        ImmutableApiResp(HttpStatus httpStatus, T data, ExceptionCode errorCode, String errorMessage) {
-            AssertUtils.notNull(httpStatus, "argument httpStatus must not null");
-            AssertUtils.notNull(errorCode, "argument errorCode must not null");
-            this.httpStatus = httpStatus;
-            this.data = data;
-            this.errorCode = errorCode;
-            this.errorMessage = errorMessage;
-            this.traceId = WindTracer.TRACER.getTraceId();
-        }
-
-        @Override
-        @Transient
-        public HttpStatus getHttpStatus() {
-            return httpStatus;
-        }
-
-        @Override
-        public String getErrorCode() {
-            return errorCode.getCode();
-        }
-
-        @Override
-        public boolean isSuccess() {
-            return ExceptionCode.SUCCESSFUL.getCode().equals(errorCode.getCode());
-        }
-
+        return new ImmutableWebApiResponse<>(httpStatus, data, code, errorMessage, WindTracer.TRACER.getTraceId());
     }
 
 }

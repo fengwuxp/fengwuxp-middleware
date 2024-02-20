@@ -1,4 +1,4 @@
-package com.wind.common.signature;
+package com.wind.core.api.signature;
 
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
@@ -71,7 +71,7 @@ public final class Signer {
             byte[] md5Result = mac.doFinal(signText.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(md5Result);
         } catch (NoSuchAlgorithmException | InvalidKeyException exception) {
-            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, "签名验失败", exception);
+            throw new BaseException(DefaultExceptionCode.BAD_REQUEST, "签名验失败", exception);
         }
     }
 }

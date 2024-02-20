@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * 支出对消息做 i18n 处理 {@link #MESSAGE_I18N}
  *
  * @author wuxp
+ * @see https://www.yuque.com/suiyuerufeng-akjad/wind/vzoygfi6ehphzhvh
  */
 @Getter
 public class BaseException extends RuntimeException {

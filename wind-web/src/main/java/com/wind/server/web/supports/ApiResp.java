@@ -1,19 +1,19 @@
 package com.wind.server.web.supports;
 
+import com.wind.core.api.ApiResponse;
 import org.springframework.http.HttpStatus;
-import org.springframework.lang.Nullable;
 
 import java.beans.Transient;
-import java.io.Serializable;
 
 /**
+
  * api 统一响应
+ * TODO rename WebApiResponse
  *
  * @param <T>
  * @author wuxp
  */
-public interface ApiResp<T> extends Serializable {
-
+public interface ApiResp<T> extends ApiResponse<T> {
 
     /**
      * 获取本次请求响应的 http状态码
@@ -22,39 +22,4 @@ public interface ApiResp<T> extends Serializable {
      */
     @Transient
     HttpStatus getHttpStatus();
-
-    /**
-     * {@link #isSuccess()} 如果返回false,则表明业务处理失败，该数据则为业务失败时的数据
-     *
-     * @return 本次响应的数据
-     */
-    T getData();
-
-    /**
-     * 本次请求业务上是否成功
-     *
-     * @return <code>true</code> 业务处理成功
-     */
-    boolean isSuccess();
-
-    /**
-     * @return 错误码
-     */
-    String getErrorCode();
-
-    /**
-     * 获取消息描述
-     *
-     * @return 业务处理失败时返回的消息描述
-     */
-    @Nullable
-    String getErrorMessage();
-
-    /**
-     * 请求 traceId
-     *
-     * @return traceId
-     */
-    @Nullable
-    String getTraceId();
 }

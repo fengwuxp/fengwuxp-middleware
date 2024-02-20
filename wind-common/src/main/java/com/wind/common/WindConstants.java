@@ -45,12 +45,6 @@ public final class WindConstants {
 
     public static final String DEFAULT_TEXT = "default";
 
-
-    /**
-     * 统一表示成功的 code
-     */
-    public static final String SUCCESSFUL_CODE = "0";
-
     /**
      * 未知 text
      */
