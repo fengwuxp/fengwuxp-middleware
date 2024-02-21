@@ -1,14 +1,14 @@
 package com.wind.trace.thread;
 
-import com.google.common.collect.ImmutableMap;
-import com.wind.common.utils.IpAddressUtils;
+
+import com.wind.common.util.IpAddressUtils;
 import com.wind.sequence.SequenceGenerator;
 import com.wind.trace.WindTraceContext;
 import com.wind.trace.WindTracer;
 import org.slf4j.MDC;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Nonnull;
+import javax.validation.constraints.Null;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +40,7 @@ public final class WindThreadTracer implements WindTracer {
     }
 
     @Override
-    public void trace(String traceId, @Nonnull Map<String, Object> contextVariables) {
+    public void trace(String traceId, @Null Map<String, Object> contextVariables) {
         // TODO 暂时使用 MDC 保存
         MDC.put(TRACE_ID_NAME, StringUtils.hasText(traceId) ? traceId : TRACE_ID.next());
         contextVariables.forEach((k, val) -> {
@@ -80,11 +80,11 @@ public final class WindThreadTracer implements WindTracer {
         };
     }
 
-    @Nonnull
+    @Null
     private static Map<String, Object> getMdcContext() {
         Map<String, String> context = MDC.getCopyOfContextMap();
         if (context == null) {
-            context = ImmutableMap.of(TRACE_ID_NAME, TRACE_ID.next());
+            context = Collections.singletonMap(TRACE_ID_NAME, TRACE_ID.next());
             context.forEach(MDC::put);
         }
         return Collections.unmodifiableMap(new HashMap<>(context));

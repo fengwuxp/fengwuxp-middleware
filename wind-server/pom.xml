@@ -88,6 +88,10 @@
             <artifactId>wind-context-injection</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.wind.api.rest</groupId>
+            <artifactId>wind-api-rest</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
         </dependency>

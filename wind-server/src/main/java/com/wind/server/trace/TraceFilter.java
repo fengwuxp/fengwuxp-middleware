@@ -2,7 +2,7 @@ package com.wind.server.trace;
 
 import com.google.common.collect.ImmutableSet;
 import com.wind.common.WindConstants;
-import com.wind.common.utils.IpAddressUtils;
+import com.wind.common.util.IpAddressUtils;
 import com.wind.common.utils.ServiceInfoUtils;
 import com.wind.server.web.restful.RestfulApiRespFactory;
 import com.wind.server.web.supports.ApiResp;

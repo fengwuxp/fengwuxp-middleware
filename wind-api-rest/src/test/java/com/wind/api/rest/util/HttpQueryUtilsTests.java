@@ -1,5 +1,6 @@
-package com.wind.server.web.security.signature;
+package com.wind.api.rest.util;
 
+import com.wind.api.rest.util.HttpQueryUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.util.UriUtils;
@@ -9,21 +10,21 @@ import java.util.Map;
 
 /**
  * @author wuxp
- * @date 2024-02-02 19:54
+ * @date 2024-02-21 16:05
  **/
-class RequestSignFilterTests {
+ class HttpQueryUtilsTests {
 
     @Test
     void testParseQueryParams() {
-        Assertions.assertTrue(RequestSignFilter.parseQueryParams(null).isEmpty());
-        Map<String, String[]> queryParams = RequestSignFilter.parseQueryParams("name=张三&age=23&tags=t1&tags=t2");
+        Assertions.assertTrue(HttpQueryUtils.parseQueryParams(null).isEmpty());
+        Map<String, String[]> queryParams = HttpQueryUtils.parseQueryParamsAsMap("name=张三&age=23&tags=t1&tags=t2");
         Assertions.assertNotNull(queryParams);
         Assertions.assertEquals("张三", queryParams.get("name")[0]);
     }
 
     @Test
     void testParseQueryParamsByEncoding() {
-        Map<String, String[]> queryParams = RequestSignFilter.parseQueryParams("current=1&pageSize=10&nickname=%E6%B5%8B%E8%AF%95&orderFields=GMT_MODIFIED&orderTypes=DESC&loadRoles=true");
+        Map<String, String[]> queryParams = HttpQueryUtils.parseQueryParamsAsMap("current=1&pageSize=10&nickname=%E6%B5%8B%E8%AF%95&orderFields=GMT_MODIFIED&orderTypes=DESC&loadRoles=true");
         Assertions.assertNotNull(queryParams);
         Assertions.assertEquals("测试", queryParams.get("nickname")[0]);
     }
@@ -34,7 +35,7 @@ class RequestSignFilterTests {
         // https://www.ietf.org/rfc/rfc2396.txt
         String queryString = UriUtils.encodeQuery("rfc2396=*.,?-=+ (-12", StandardCharsets.UTF_8);
         Assertions.assertEquals("rfc2396=*.,?-=+%20(-12", queryString);
-        Map<String, String[]> queryParams = RequestSignFilter.parseQueryParams(queryString);
+        Map<String, String[]> queryParams = HttpQueryUtils.parseQueryParamsAsMap(queryString);
         Assertions.assertNotNull(queryParams);
         Assertions.assertEquals("*.,?-=+ (-12", queryParams.get("rfc2396")[0]);
         queryString = UriUtils.decode("nickname=%E6%B5%8B%E8%AF%95%20%2B", StandardCharsets.UTF_8);

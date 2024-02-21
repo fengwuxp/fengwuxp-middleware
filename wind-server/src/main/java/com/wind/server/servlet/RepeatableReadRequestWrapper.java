@@ -1,16 +1,12 @@
 package com.wind.server.servlet;
 
-import com.wind.common.WindConstants;
 import com.wind.common.exception.BaseException;
-import org.jetbrains.annotations.NotNull;
+import com.wind.api.rest.util.HttpQueryUtils;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.ReadListener;
@@ -168,18 +164,8 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         }
     }
 
-    @NotNull
-    public static MultiValueMap<String, String> parseQueryParams(String queryString) {
-        if (StringUtils.hasText(queryString)) {
-            return UriComponentsBuilder.fromUriString(String.format("%s%s%s", WindConstants.SLASH, WindConstants.QUESTION_MARK, UriUtils.decode(queryString, StandardCharsets.UTF_8)))
-                    .build()
-                    .getQueryParams();
-        }
-        return new LinkedMultiValueMap<>();
-    }
-
     private void fillParametersByQuery() {
-        parameters.putAll(parseQueryParams(getQueryString()));
+        parameters.putAll(HttpQueryUtils.parseQueryParams(getQueryString()));
     }
 
     private boolean isFormRequest() {
@@ -191,7 +177,7 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         try {
             if (isFormRequest()) {
                 String body = StreamUtils.copyToString(getInputStream(), StandardCharsets.UTF_8);
-                parameters.putAll(parseQueryParams(body));
+                parameters.putAll(HttpQueryUtils.parseQueryParams(body));
             }
         } catch (IOException exception) {
             throw new IllegalStateException("Failed to write request parameters to cached", exception);

@@ -18,8 +18,8 @@
             <artifactId>wind-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
+            <groupId>com.wind.trace</groupId>
+            <artifactId>wind-tracer</artifactId>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -30,8 +30,8 @@
             <artifactId>javax.servlet-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.trace</groupId>
-            <artifactId>wind-tracer</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
         </dependency>
     </dependencies>
 

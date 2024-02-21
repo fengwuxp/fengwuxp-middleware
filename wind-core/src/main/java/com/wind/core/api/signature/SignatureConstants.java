@@ -1,4 +1,4 @@
-package com.wind.server.web.security.signature;
+package com.wind.core.api.signature;
 
 /**
  * 签名相关常量

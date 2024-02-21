@@ -1,5 +1,6 @@
-package com.wind.common.signature;
+package com.wind.core.api.signature;
 
+import com.wind.common.WindConstants;
 import com.wind.common.exception.AssertUtils;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +18,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
- * 加签请求
+ * 摘要签名加签请求
  *
  * @author wuxp
  * @date 2023-10-18 22:08
@@ -26,11 +27,7 @@ import java.util.stream.Collectors;
 @Getter
 @Builder
 @FieldNameConstants
-public class SignatureRequest {
-
-    private static final String EQ = "=";
-
-    private static final String AND = "&";
+public class DigestSignatureRequest {
 
     private static final String MD5_TAG = "Md5";
 
@@ -75,7 +72,7 @@ public class SignatureRequest {
      */
     private final String secretKey;
 
-    private SignatureRequest(String method, String requestPath, String nonce, String timestamp, String queryString, Map<String, String[]> queryParams, String requestBody, String secretKey) {
+    private DigestSignatureRequest(String method, String requestPath, String nonce, String timestamp, String queryString, Map<String, String[]> queryParams, String requestBody, String secretKey) {
         AssertUtils.notNull(method, "method must not empty");
         AssertUtils.notNull(requestPath, "requestPath must not empty");
         AssertUtils.notNull(nonce, "nonce must not empty");
@@ -96,21 +93,21 @@ public class SignatureRequest {
      */
     public String getSignText() {
         StringBuilder builder = new StringBuilder()
-                .append(Fields.method).append(EQ).append(method).append(AND)
-                .append(Fields.requestPath).append(EQ).append(requestPath).append(AND)
-                .append(Fields.nonce).append(EQ).append(nonce).append(AND)
-                .append(Fields.timestamp).append(EQ).append(timestamp);
+                .append(Fields.method).append(WindConstants.EQ).append(method).append(WindConstants.AND)
+                .append(Fields.requestPath).append(WindConstants.EQ).append(requestPath).append(WindConstants.AND)
+                .append(Fields.nonce).append(WindConstants.EQ).append(nonce).append(WindConstants.AND)
+                .append(Fields.timestamp).append(WindConstants.EQ).append(timestamp);
         String canonicalizedQueryString = getCanonicalizedQueryString();
         if (StringUtils.hasLength(canonicalizedQueryString)) {
-            builder.append(AND)
+            builder.append(WindConstants.AND)
                     .append(String.format("%s%s", Fields.queryString, MD5_TAG))
-                    .append(EQ)
+                    .append(WindConstants.EQ)
                     .append(DigestUtils.md5DigestAsHex(canonicalizedQueryString.getBytes(StandardCharsets.UTF_8)));
         }
         if (StringUtils.hasLength(requestBody)) {
-            builder.append(AND)
+            builder.append(WindConstants.AND)
                     .append(String.format("%s%s", Fields.requestBody, MD5_TAG))
-                    .append(EQ)
+                    .append(WindConstants.EQ)
                     .append(DigestUtils.md5DigestAsHex(requestBody.getBytes(StandardCharsets.UTF_8)));
         }
         return builder.toString();
@@ -136,8 +133,8 @@ public class SignatureRequest {
                     }
                     return Arrays.stream(entry.getValue())
                             .map(val -> String.format("%s=%s", entry.getKey(), val))
-                            .collect(Collectors.joining(AND));
+                            .collect(Collectors.joining(WindConstants.AND));
                 })
-                .collect(Collectors.joining(AND));
+                .collect(Collectors.joining(WindConstants.AND));
     }
 }

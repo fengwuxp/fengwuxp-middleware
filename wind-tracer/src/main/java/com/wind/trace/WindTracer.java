@@ -2,8 +2,8 @@ package com.wind.trace;
 
 import com.wind.trace.thread.WindThreadTracer;
 
-import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import java.util.Collections;
 import java.util.Map;
 
@@ -30,7 +30,7 @@ public interface WindTracer {
      *
      * @param traceId traceId
      */
-    default void trace(@Nullable String traceId) {
+    default void trace(@Null String traceId) {
         trace(traceId, Collections.emptyMap());
     }
 
@@ -40,7 +40,7 @@ public interface WindTracer {
      * @param traceId          traceId 如果为空则生成新的 traceId
      * @param contextVariables 复制记录的上下文变量
      */
-    void trace(@Nullable String traceId, @NotNull Map<String, Object> contextVariables);
+    void trace(@Null String traceId, @NotNull Map<String, Object> contextVariables);
 
     /**
      * 清除线程上下文

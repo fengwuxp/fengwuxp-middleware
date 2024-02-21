@@ -1,4 +1,4 @@
-package com.wind.common.signature;
+package com.wind.core.api.signature;
 
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
@@ -12,26 +12,27 @@ import java.util.Base64;
 import java.util.Objects;
 
 /**
- * 签名验证
+ * 摘要签名验证
+ * 参见：https://www.yuque.com/suiyuerufeng-akjad/wind/qal4b72cxw84cu6g
  *
  * @author wuxp
  * @date 2023-10-18 22:08
  */
-public final class Signer {
+public final class DigestSigner {
 
     private static final String DEFAULT_ALGORITHM = "HmacSHA256";
 
     /**
      * 基于 sha256 算法
      */
-    public static final Signer SHA256 = new Signer(DEFAULT_ALGORITHM);
+    public static final DigestSigner SHA256 = new DigestSigner(DEFAULT_ALGORITHM);
 
     /**
      * algorithm the standard name of the requested MAC algorithm
      */
     private final String algorithm;
 
-    public Signer(String algorithm) {
+    public DigestSigner(String algorithm) {
         this.algorithm = algorithm;
     }
 
@@ -40,9 +41,9 @@ public final class Signer {
      *
      * @param sign    待验证的签名
      * @param request 用于验证签名的请求
-     * @return 签名验证是否成功
+     * @return 签名验证是否通过
      */
-    public boolean verify(String sign, SignatureRequest request) {
+    public boolean verify(String sign, DigestSignatureRequest request) {
         return Objects.equals(sign(request), sign);
     }
 
@@ -50,9 +51,9 @@ public final class Signer {
      * 生成签名
      *
      * @param request 签名请求
-     * @return 签名内容
+     * @return 签名结果
      */
-    public String sign(SignatureRequest request) {
+    public String sign(DigestSignatureRequest request) {
         return sign(request.getSignText(), request.getSecretKey());
     }
 

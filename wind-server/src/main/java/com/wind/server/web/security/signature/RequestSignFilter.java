@@ -2,13 +2,15 @@ package com.wind.server.web.security.signature;
 
 
 import com.google.common.collect.ImmutableSet;
+import com.wind.api.rest.client.DigestSignatureRequestInterceptor;
+import com.wind.api.rest.util.HttpQueryUtils;
 import com.wind.common.WindHttpConstants;
-import com.wind.common.annotations.VisibleForTesting;
 import com.wind.common.i18n.SpringI18nMessageUtils;
-import com.wind.common.signature.ApiSecretAccount;
-import com.wind.common.signature.SignatureRequest;
-import com.wind.common.signature.Signer;
 import com.wind.common.utils.ServiceInfoUtils;
+import com.wind.core.api.signature.ApiSecretAccount;
+import com.wind.core.api.signature.DigestSignatureRequest;
+import com.wind.core.api.signature.DigestSigner;
+import com.wind.core.api.signature.SignatureHttpHeaderNames;
 import com.wind.server.servlet.RepeatableReadRequestWrapper;
 import com.wind.server.web.filters.WindWebFilterOrdered;
 import com.wind.server.web.restful.RestfulApiRespFactory;
@@ -21,7 +23,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriUtils;
@@ -36,14 +37,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
-import static com.wind.server.web.security.signature.SignatureConstants.DEBUG_SIGN_QUERY_HEADER_NAME;
 
 /**
  * 接口请求验签
@@ -87,23 +84,23 @@ public class RequestSignFilter implements Filter, Ordered {
             return;
         }
         HttpServletResponse response = (HttpServletResponse) servletResponse;
-        String accessKey = request.getHeader(headerNames.accessKey);
+        String accessKey = request.getHeader(headerNames.getAccessKey());
         if (!StringUtils.hasLength(accessKey)) {
             badRequest(response, "request ak must not empty");
             return;
         }
         RequestSignMatcher signMatcher = new RequestSignMatcher(request);
-        SignatureRequest signatureRequest = buildSignatureRequest(accessKey, signMatcher);
-        String requestSign = request.getHeader(headerNames.sign);
-        if (Signer.SHA256.verify(requestSign, signatureRequest)) {
+        DigestSignatureRequest digestSignatureRequest = buildSignatureRequest(accessKey, signMatcher);
+        String requestSign = request.getHeader(headerNames.getSign());
+        if (DigestSigner.SHA256.verify(requestSign, digestSignatureRequest)) {
             chain.doFilter(signMatcher.request, servletResponse);
         } else {
             if (!ServiceInfoUtils.isOnline()) {
                 // 线下环境返回服务端的签名，用于 debug
-                response.addHeader(headerNames.debugSign, Signer.SHA256.sign(signatureRequest));
-                response.addHeader(headerNames.debugSignContent, signatureRequest.getSignText());
-                if (signatureRequest.getQueryString() != null || signatureRequest.getQueryParams() != null) {
-                    response.addHeader(DEBUG_SIGN_QUERY_HEADER_NAME, signatureRequest.getCanonicalizedQueryString());
+                response.addHeader(headerNames.getDebugSign(), DigestSigner.SHA256.sign(digestSignatureRequest));
+                response.addHeader(headerNames.getDebugSignContent(), digestSignatureRequest.getSignText());
+                if (digestSignatureRequest.getQueryString() != null || digestSignatureRequest.getQueryParams() != null) {
+                    response.addHeader(headerNames.getDebugSignQuery(), digestSignatureRequest.getCanonicalizedQueryString());
                 }
             }
             badRequest(response, "Sign verify error");
@@ -125,22 +122,22 @@ public class RequestSignFilter implements Filter, Ordered {
         return ignoreRequestMatchers.stream().anyMatch(requestMatcher -> requestMatcher.matches(request));
     }
 
-    private SignatureRequest buildSignatureRequest(String accessKey, RequestSignMatcher matcher) throws IOException {
+    private DigestSignatureRequest buildSignatureRequest(String accessKey, RequestSignMatcher matcher) throws IOException {
         HttpServletRequest request = matcher.request;
         // TODO 临时增加签名版本用于切换
         String version = request.getHeader("Signature-Version");
         ApiSecretAccount account = apiSecretAccountProvider.apply(accessKey);
         String queryString = request.getQueryString();
-        SignatureRequest.SignatureRequestBuilder result = SignatureRequest.builder()
+        DigestSignatureRequest.DigestSignatureRequestBuilder result = DigestSignatureRequest.builder()
                 // http 请求 path，不包含查询参数和域名
                 .requestPath(request.getRequestURI())
                 // 如果是 v2 版本则使用 queryParams TODO 待删除
                 .queryString(Objects.equals(version, "v2") ? null : fixQueryString(queryString))
                 // 仅在存在查询字符串时才设置，避免获取到表单参数
-                .queryParams(parseQueryParams(queryString))
+                .queryParams(HttpQueryUtils.parseQueryParamsAsMap(queryString))
                 .method(request.getMethod().toUpperCase())
-                .nonce(request.getHeader(headerNames.nonce))
-                .timestamp(request.getHeader(headerNames.timestamp))
+                .nonce(request.getHeader(headerNames.getNonce()))
+                .timestamp(request.getHeader(headerNames.getTimestamp()))
                 .secretKey(account.getSecretKey());
         if (matcher.signRequiredBody()) {
             result.requestBody(StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8));
@@ -160,20 +157,6 @@ public class RequestSignFilter implements Filter, Ordered {
         return queryString == null ? null : UriUtils.decode(queryString.replace("+", "%20"), StandardCharsets.UTF_8);
     }
 
-    @VisibleForTesting
-    static Map<String, String[]> parseQueryParams(String queryString) {
-        if (StringUtils.hasText(queryString)) {
-            Map<String, String[]> result = new HashMap<>();
-            RepeatableReadRequestWrapper.parseQueryParams(queryString)
-                    .forEach((key, values) -> {
-                        if (!ObjectUtils.isEmpty(values)) {
-                            result.put(key, values.toArray(new String[0]));
-                        }
-                    });
-            return result;
-        }
-        return Collections.emptyMap();
-    }
 
     private static class RequestSignMatcher {
 
@@ -194,7 +177,7 @@ public class RequestSignFilter implements Filter, Ordered {
         }
 
         boolean signRequiredBody() {
-            return SIGNE_CONTENT_TYPES.stream().anyMatch(mediaType -> mediaType.includes(contentType));
+            return DigestSignatureRequestInterceptor.signUseRequestBody(contentType);
         }
 
     }

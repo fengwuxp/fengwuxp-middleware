@@ -7,11 +7,11 @@
         <groupId>com.wind.middleware</groupId>
         <artifactId>wind-middleware</artifactId>
         <version>${revision}</version>
-        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <groupId>com.wind.sequence</groupId>
-    <artifactId>wind-sequence-generate</artifactId>
+    <groupId>com.wind.api.rest</groupId>
+    <artifactId>wind-api-rest</artifactId>
+
 
     <dependencies>
         <dependency>
@@ -19,8 +19,13 @@
             <artifactId>wind-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
+            <groupId>com.wind.trace</groupId>
+            <artifactId>wind-tracer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
         </dependency>
     </dependencies>
+
 </project>
