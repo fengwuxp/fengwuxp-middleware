@@ -81,7 +81,7 @@ public class RequestSignFilter implements Filter, Ordered {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
-        if (!enable || ignoreSignCheck(request)) {
+        if (!enable || ignoreCheckSignature(request)) {
             log.debug("request no signature required, enable = {}", false);
             chain.doFilter(servletRequest, servletResponse);
             return;
@@ -116,7 +116,7 @@ public class RequestSignFilter implements Filter, Ordered {
         HttpResponseMessageUtils.writeJson(response, RestfulApiRespFactory.badRequest(SpringI18nMessageUtils.getMessage(message)));
     }
 
-    private boolean ignoreSignCheck(HttpServletRequest request) {
+    private boolean ignoreCheckSignature(HttpServletRequest request) {
         if (HttpMethod.OPTIONS.matches(request.getMethod())) {
             // 跳过预检查请求
             return true;
@@ -165,9 +165,9 @@ public class RequestSignFilter implements Filter, Ordered {
         if (StringUtils.hasText(queryString)) {
             Map<String, String[]> result = new HashMap<>();
             RepeatableReadRequestWrapper.parseQueryParams(queryString)
-                    .forEach((k, v) -> {
-                        if (!ObjectUtils.isEmpty(v)) {
-                            result.put(k, v.toArray(new String[0]));
+                    .forEach((key, values) -> {
+                        if (!ObjectUtils.isEmpty(values)) {
+                            result.put(key, values.toArray(new String[0]));
                         }
                     });
             return result;

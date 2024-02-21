@@ -1,10 +1,10 @@
 package com.wind.server.servlet;
 
 import com.wind.common.WindConstants;
-import com.wind.common.annotations.VisibleForTesting;
 import com.wind.common.exception.BaseException;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
+import org.springframework.lang.NonNull;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
@@ -41,18 +41,19 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
 
     private final ByteArrayOutputStream cachedContent;
 
-    @Nullable
-    private final Integer contentCacheLimit;
+    private final int contentCacheLimit;
 
-    @Nullable
+    /**
+     * 查询参数、表单参数缓存
+     * {@link HttpServletRequest#getParameter(String)}
+     */
+    private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+
     private ServletInputStream inputStream;
 
     private BodyInputStream bodyInputStream;
 
-    @Nullable
     private BufferedReader reader;
-
-    private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 
     /**
      * Create a new RepeatableReadRequestWrapper for the given servlet request.
@@ -167,7 +168,7 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         }
     }
 
-    @VisibleForTesting
+    @NotNull
     public static MultiValueMap<String, String> parseQueryParams(String queryString) {
         if (StringUtils.hasText(queryString)) {
             return UriComponentsBuilder.fromUriString(String.format("%s%s%s", WindConstants.SLASH, WindConstants.QUESTION_MARK, UriUtils.decode(queryString, StandardCharsets.UTF_8)))
@@ -211,7 +212,7 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         public int read() throws IOException {
             int ch = this.is.read();
             if (ch != -1 && !this.overflow) {
-                if (contentCacheLimit != null && cachedContent.size() == contentCacheLimit) {
+                if (cachedContent.size() == contentCacheLimit) {
                     this.overflow = true;
                     handleContentOverflow(contentCacheLimit);
                 } else {
@@ -222,7 +223,7 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         }
 
         @Override
-        public int read(byte[] b) throws IOException {
+        public int read(@NonNull byte[] b) throws IOException {
             int count = this.is.read(b);
             writeToCache(b, 0, count);
             return count;
@@ -230,8 +231,7 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
 
         private void writeToCache(final byte[] b, final int off, int count) {
             if (!this.overflow && count > 0) {
-                if (contentCacheLimit != null &&
-                        count + cachedContent.size() > contentCacheLimit) {
+                if (count + cachedContent.size() > contentCacheLimit) {
                     this.overflow = true;
                     cachedContent.write(b, off, contentCacheLimit - cachedContent.size());
                     handleContentOverflow(contentCacheLimit);
@@ -242,7 +242,7 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         }
 
         @Override
-        public int read(final byte[] b, final int off, final int len) throws IOException {
+        public int read(@NonNull final byte[] b, final int off, final int len) throws IOException {
             int count = this.is.read(b, off, len);
             writeToCache(b, off, count);
             return count;
@@ -300,12 +300,12 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         }
 
         @Override
-        public int read(byte[] b, int off, int len) throws IOException {
+        public int read(@NonNull byte[] b, int off, int len) throws IOException {
             return this.delegate.read(b, off, len);
         }
 
         @Override
-        public int read(byte[] b) throws IOException {
+        public int read(@NonNull byte[] b) throws IOException {
             return this.delegate.read(b);
         }
 
@@ -325,8 +325,8 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         }
 
         @Override
-        public synchronized void mark(int readlimit) {
-            this.delegate.mark(readlimit);
+        public synchronized void mark(int readLimit) {
+            this.delegate.mark(readLimit);
         }
 
         @Override

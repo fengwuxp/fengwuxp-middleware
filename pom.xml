@@ -82,6 +82,7 @@
         <alipay-sdk.version>4.38.90.ALL</alipay-sdk.version>
         <weixin-java-pay.version>4.5.0</weixin-java-pay.version>
         <easyexcel.version>3.3.2</easyexcel.version>
+        <jetbrains-annotations.version>24.1.0</jetbrains-annotations.version>
         <podam.version>8.0.0.RELEASE</podam.version>
         <awaitility.version>4.2.0</awaitility.version>
         <junit-platform-surefire-provider.version>1.3.2</junit-platform-surefire-provider.version>
@@ -368,6 +369,11 @@
                 <groupId>org.apache.shardingsphere.elasticjob</groupId>
                 <artifactId>elasticjob-lite-spring-boot-starter</artifactId>
                 <version>${elasticjob.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains</groupId>
+                <artifactId>annotations</artifactId>
+                <version>${jetbrains-annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.shardingsphere.elasticjob</groupId>

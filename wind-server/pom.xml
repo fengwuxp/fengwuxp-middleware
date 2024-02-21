@@ -87,6 +87,10 @@
             <groupId>com.wind.context.variable</groupId>
             <artifactId>wind-context-injection</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

@@ -173,6 +173,7 @@ public class IndexHtmlResourcesFilter extends OncePerRequestFilter {
                 HEADER_CACHES.put(key, resp.getHeaders());
                 AssertUtils.isTrue(resp.hasBody(), () -> String.format("load resource： %s failure", key));
                 ByteArrayResource result = resp.getBody();
+                AssertUtils.notNull(result, "load html resource is null");
                 return result.getByteArray();
             });
         }

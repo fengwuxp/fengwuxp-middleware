@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.lang.NonNull;
 
 import static com.wind.common.WindConstants.WIND_SERVER_CONFIG_CENTER_PROPERTIES_PREFIX;
 
@@ -20,7 +21,7 @@ import static com.wind.common.WindConstants.WIND_SERVER_CONFIG_CENTER_PROPERTIES
 public abstract class WindAbstractPropertySourceInitializer implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
 
     @Override
-    public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
+    public void onApplicationEvent(@NonNull ApplicationEnvironmentPreparedEvent event) {
         WindPropertySourceLoader locator = getWindPropertySourceLocator(event);
         if (locator == null) {
             return;
