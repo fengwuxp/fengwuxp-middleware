@@ -1,4 +1,4 @@
-package com.wind.api.rest.client;
+package com.wind.client.rest;
 
 import com.wind.common.WindConstants;
 import com.wind.trace.WindTracer;

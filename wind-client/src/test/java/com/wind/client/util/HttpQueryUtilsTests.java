@@ -1,6 +1,5 @@
-package com.wind.api.rest.util;
+package com.wind.client.util;
 
-import com.wind.api.rest.util.HttpQueryUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.util.UriUtils;

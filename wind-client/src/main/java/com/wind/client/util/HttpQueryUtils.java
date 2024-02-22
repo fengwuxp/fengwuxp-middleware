@@ -1,4 +1,4 @@
-package com.wind.api.rest.util;
+package com.wind.client.util;
 
 import com.wind.common.WindConstants;
 import org.springframework.util.LinkedMultiValueMap;

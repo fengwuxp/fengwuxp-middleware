@@ -36,7 +36,7 @@
         <module>tools/h2-functions-for-mysql</module>
         <module>wind-elasticjob</module>
         <module>wind-dependencies</module>
-        <module>wind-api-rest</module>
+        <module>wind-client</module>
     </modules>
 
     <properties>
@@ -241,8 +241,8 @@
                 <version>${revision}</version>
             </dependency>
             <dependency>
-                <groupId>com.wind.api.rest</groupId>
-                <artifactId>wind-api-rest</artifactId>
+                <groupId>com.wind.client</groupId>
+                <artifactId>wind-client</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

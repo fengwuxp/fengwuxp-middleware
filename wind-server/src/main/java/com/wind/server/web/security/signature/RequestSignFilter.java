@@ -2,8 +2,8 @@ package com.wind.server.web.security.signature;
 
 
 import com.google.common.collect.ImmutableSet;
-import com.wind.api.rest.client.DigestSignatureRequestInterceptor;
-import com.wind.api.rest.util.HttpQueryUtils;
+import com.wind.client.rest.DigestSignatureRequestInterceptor;
+import com.wind.client.util.HttpQueryUtils;
 import com.wind.common.WindHttpConstants;
 import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.common.utils.ServiceInfoUtils;

@@ -1,4 +1,4 @@
-package com.wind.api.rest.client;
+package com.wind.client.rest;
 
 import com.wind.core.api.signature.ApiSecretAccount;
 import org.apache.commons.lang3.RandomStringUtils;

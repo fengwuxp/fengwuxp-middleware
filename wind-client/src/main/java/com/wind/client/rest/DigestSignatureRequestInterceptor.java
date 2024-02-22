@@ -1,6 +1,6 @@
-package com.wind.api.rest.client;
+package com.wind.client.rest;
 
-import com.wind.api.rest.util.HttpQueryUtils;
+import com.wind.client.util.HttpQueryUtils;
 import com.wind.common.exception.AssertUtils;
 import com.wind.core.api.signature.ApiSecretAccount;
 import com.wind.core.api.signature.DigestSignatureRequest;
