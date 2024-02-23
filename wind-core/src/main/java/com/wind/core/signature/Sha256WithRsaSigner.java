@@ -1,4 +1,4 @@
-package com.wind.core.api.signature;
+package com.wind.core.signature;
 
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
@@ -15,7 +15,7 @@ import java.security.spec.X509EncodedKeySpec;
 
 
 /**
- * SHA256 with RSA签名验证是一种常见的数字签名方法，它结合了消息摘要算法（SHA-256）和非对称加密算法（RSA）。这种签名机制确保数据的完整性和来源的真实性
+ * SHA256 With RSA 签名验证是一种常见的数字签名方法，它结合了消息摘要算法（SHA-256）和非对称加密算法（RSA）。这种签名机制确保数据的完整性和来源的真实性
  *
  * @author wuxp
  * @date 2024-02-21 17:58

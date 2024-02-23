@@ -46,7 +46,7 @@ public final class SignatureHttpHeaderNames {
     }
 
     private static String getHeaderName(String headerPrefix, String headerName) {
-        if (StringUtils.hasLength(headerName)) {
+        if (StringUtils.hasLength(headerPrefix)) {
             return headerPrefix + WindConstants.DASHED + headerName;
         }
         return headerName;

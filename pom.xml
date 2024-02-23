@@ -37,6 +37,7 @@
         <module>wind-elasticjob</module>
         <module>wind-dependencies</module>
         <module>wind-client</module>
+        <module>wind-sentinel</module>
     </modules>
 
     <properties>
@@ -62,6 +63,7 @@
         <spring-boot.version>2.7.16</spring-boot.version>
         <spring-cloud-commons.version>3.1.6</spring-cloud-commons.version>
         <spring-cloud-albaba.version>2021.0.5.0</spring-cloud-albaba.version>
+        <sentinel.version>1.8.7</sentinel.version>
         <mysql.version>8.0.33</mysql.version>
         <mybatis-flex.version>1.7.0</mybatis-flex.version>
         <commons-io.version>2.13.0</commons-io.version>
@@ -251,6 +253,11 @@
                 <version>${revision}</version>
             </dependency>
             <dependency>
+                <groupId>com.wind.sentinel</groupId>
+                <artifactId>wind-sentinel</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.wind.context.variable</groupId>
                 <artifactId>wind-context-annotations</artifactId>
                 <version>${revision}</version>
@@ -391,6 +398,12 @@
                 <groupId>org.dromara.dynamictp</groupId>
                 <artifactId>dynamic-tp-spring-cloud-starter-nacos</artifactId>
                 <version>${dynamic-tp.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.alibaba.csp/sentinel-core -->
+            <dependency>
+                <groupId>com.alibaba.csp</groupId>
+                <artifactId>sentinel-core</artifactId>
+                <version>${sentinel.version}</version>
             </dependency>
             <dependency>
                 <groupId>uk.co.jemos.podam</groupId>

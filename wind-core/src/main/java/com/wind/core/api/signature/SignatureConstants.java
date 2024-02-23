@@ -25,8 +25,8 @@ final class SignatureConstants {
     static final String TIMESTAMP_HEADER_NAME = "Timestamp";
 
     /**
-     * 请求头：AK
-     * 用于交换 SK
+     * 请求头：访问标识
+     * 用于交换签名秘钥
      */
     static final String ACCESS_KEY_HEADER_NAME = "Access-Key";
 

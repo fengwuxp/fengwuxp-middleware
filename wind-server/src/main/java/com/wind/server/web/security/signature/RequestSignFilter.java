@@ -1,15 +1,14 @@
 package com.wind.server.web.security.signature;
 
 
-import com.google.common.collect.ImmutableSet;
-import com.wind.client.rest.DigestSignatureRequestInterceptor;
+import com.wind.client.rest.ApiSignatureRequestInterceptor;
 import com.wind.client.util.HttpQueryUtils;
 import com.wind.common.WindHttpConstants;
 import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.common.util.ServiceInfoUtils;
 import com.wind.core.api.signature.ApiSecretAccount;
-import com.wind.core.api.signature.DigestSignatureRequest;
-import com.wind.core.api.signature.DigestSigner;
+import com.wind.core.api.signature.ApiSignatureRequest;
+import com.wind.core.api.signature.ApiSigner;
 import com.wind.core.api.signature.SignatureHttpHeaderNames;
 import com.wind.server.servlet.RepeatableReadRequestWrapper;
 import com.wind.server.web.filters.WindWebFilterOrdered;
@@ -38,24 +37,18 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Function;
 
 
 /**
  * 接口请求验签
- * 参见文档：https://www.yuque.com/suiyuerufeng-akjad/wind/zvhdgh1voqxa0ly1
+ * 参见：https://www.yuque.com/suiyuerufeng-akjad/wind/zl1ygpq3pitl00qp
  *
  * @author wuxp
  */
 @Slf4j
 @AllArgsConstructor
 public class RequestSignFilter implements Filter, Ordered {
-
-    /**
-     * 需要 requestBody 参与签名的 content-type
-     */
-    private static final Set<MediaType> SIGNE_CONTENT_TYPES = ImmutableSet.of(MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED);
 
     private final SignatureHttpHeaderNames headerNames;
 
@@ -67,12 +60,17 @@ public class RequestSignFilter implements Filter, Ordered {
     private final Collection<RequestMatcher> ignoreRequestMatchers;
 
     /**
+     * 签名器
+     */
+    private final ApiSigner signer;
+
+    /**
      * 是否启用
      */
     private final boolean enable;
 
     public RequestSignFilter(Function<String, ApiSecretAccount> apiSecretAccountProvider, Collection<RequestMatcher> ignoreRequestMatchers, boolean enable) {
-        this(new SignatureHttpHeaderNames(), apiSecretAccountProvider, ignoreRequestMatchers, enable);
+        this(new SignatureHttpHeaderNames(), apiSecretAccountProvider, ignoreRequestMatchers, ApiSigner.HMAC_SHA256, enable);
     }
 
     @Override
@@ -86,24 +84,24 @@ public class RequestSignFilter implements Filter, Ordered {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String accessKey = request.getHeader(headerNames.getAccessKey());
         if (!StringUtils.hasLength(accessKey)) {
-            badRequest(response, "request ak must not empty");
+            badRequest(response, "request access key must not empty");
             return;
         }
         RequestSignMatcher signMatcher = new RequestSignMatcher(request);
-        DigestSignatureRequest digestSignatureRequest = buildSignatureRequest(accessKey, signMatcher);
+        ApiSignatureRequest apiSignatureRequest = buildSignatureRequest(accessKey, signMatcher);
         String requestSign = request.getHeader(headerNames.getSign());
-        if (DigestSigner.SHA256.verify(requestSign, digestSignatureRequest)) {
+        if (signer.verify(apiSignatureRequest, requestSign)) {
             chain.doFilter(signMatcher.request, servletResponse);
         } else {
             if (!ServiceInfoUtils.isOnline()) {
                 // 线下环境返回服务端的签名，用于 debug
-                response.addHeader(headerNames.getDebugSign(), DigestSigner.SHA256.sign(digestSignatureRequest));
-                response.addHeader(headerNames.getDebugSignContent(), digestSignatureRequest.getSignText());
-                if (digestSignatureRequest.getQueryString() != null || digestSignatureRequest.getQueryParams() != null) {
-                    response.addHeader(headerNames.getDebugSignQuery(), digestSignatureRequest.getCanonicalizedQueryString());
+                response.addHeader(headerNames.getDebugSign(), signer.sign(apiSignatureRequest));
+                response.addHeader(headerNames.getDebugSignContent(), apiSignatureRequest.getSignTextForDigest());
+                if (apiSignatureRequest.getQueryString() != null || apiSignatureRequest.getQueryParams() != null) {
+                    response.addHeader(headerNames.getDebugSignQuery(), apiSignatureRequest.getCanonicalizedQueryString());
                 }
             }
-            badRequest(response, "Sign verify error");
+            badRequest(response, "sign verify error");
         }
     }
 
@@ -122,13 +120,13 @@ public class RequestSignFilter implements Filter, Ordered {
         return ignoreRequestMatchers.stream().anyMatch(requestMatcher -> requestMatcher.matches(request));
     }
 
-    private DigestSignatureRequest buildSignatureRequest(String accessKey, RequestSignMatcher matcher) throws IOException {
+    private ApiSignatureRequest buildSignatureRequest(String accessKey, RequestSignMatcher matcher) throws IOException {
         HttpServletRequest request = matcher.request;
         // TODO 临时增加签名版本用于切换
         String version = request.getHeader("Signature-Version");
         ApiSecretAccount account = apiSecretAccountProvider.apply(accessKey);
         String queryString = request.getQueryString();
-        DigestSignatureRequest.DigestSignatureRequestBuilder result = DigestSignatureRequest.builder()
+        ApiSignatureRequest.ApiSignatureRequestBuilder result = ApiSignatureRequest.builder()
                 // http 请求 path，不包含查询参数和域名
                 .requestPath(request.getRequestURI())
                 // 如果是 v2 版本则使用 queryParams TODO 待删除
@@ -177,7 +175,7 @@ public class RequestSignFilter implements Filter, Ordered {
         }
 
         boolean signRequiredBody() {
-            return DigestSignatureRequestInterceptor.signUseRequestBody(contentType);
+            return ApiSignatureRequestInterceptor.signUseRequestBody(contentType);
         }
 
     }

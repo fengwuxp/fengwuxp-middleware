@@ -18,7 +18,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
- * 摘要签名加签请求
+ * API 签名加签对象
  *
  * @author wuxp
  * @date 2023-10-18 22:08
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @Getter
 @Builder
 @FieldNameConstants
-public class DigestSignatureRequest {
+public class ApiSignatureRequest {
 
     private static final String MD5_TAG = "Md5";
 
@@ -68,16 +68,16 @@ public class DigestSignatureRequest {
     private final String requestBody;
 
     /**
-     * sk
+     * 签名秘钥
      */
     private final String secretKey;
 
-    private DigestSignatureRequest(String method, String requestPath, String nonce, String timestamp, String queryString, Map<String, String[]> queryParams, String requestBody, String secretKey) {
-        AssertUtils.notNull(method, "method must not empty");
-        AssertUtils.notNull(requestPath, "requestPath must not empty");
-        AssertUtils.notNull(nonce, "nonce must not empty");
-        AssertUtils.notNull(timestamp, "timestamp must not empty");
-        AssertUtils.notNull(secretKey, "secretKey must not empty");
+    private ApiSignatureRequest(String method, String requestPath, String nonce, String timestamp, String queryString, Map<String, String[]> queryParams, String requestBody,String secretKey) {
+        AssertUtils.hasText(method, "method must not empty");
+        AssertUtils.hasText(requestPath, "requestPath must not empty");
+        AssertUtils.hasText(nonce, "nonce must not empty");
+        AssertUtils.hasText(timestamp, "timestamp must not empty");
+        AssertUtils.hasText(secretKey, "secretKey must not empty");
         this.method = method.toUpperCase();
         this.requestPath = requestPath;
         this.nonce = nonce;
@@ -89,28 +89,40 @@ public class DigestSignatureRequest {
     }
 
     /**
-     * @return 获取签名字符串
+     * @return 获取摘要签名字符串
      */
-    public String getSignText() {
-        StringBuilder builder = new StringBuilder()
+    public String getSignTextForDigest() {
+        StringBuilder result = new StringBuilder()
                 .append(Fields.method).append(WindConstants.EQ).append(method).append(WindConstants.AND)
                 .append(Fields.requestPath).append(WindConstants.EQ).append(requestPath).append(WindConstants.AND)
                 .append(Fields.nonce).append(WindConstants.EQ).append(nonce).append(WindConstants.AND)
                 .append(Fields.timestamp).append(WindConstants.EQ).append(timestamp);
         String canonicalizedQueryString = getCanonicalizedQueryString();
         if (StringUtils.hasLength(canonicalizedQueryString)) {
-            builder.append(WindConstants.AND)
+            result.append(WindConstants.AND)
                     .append(String.format("%s%s", Fields.queryString, MD5_TAG))
                     .append(WindConstants.EQ)
                     .append(DigestUtils.md5DigestAsHex(canonicalizedQueryString.getBytes(StandardCharsets.UTF_8)));
         }
         if (StringUtils.hasLength(requestBody)) {
-            builder.append(WindConstants.AND)
+            result.append(WindConstants.AND)
                     .append(String.format("%s%s", Fields.requestBody, MD5_TAG))
                     .append(WindConstants.EQ)
                     .append(DigestUtils.md5DigestAsHex(requestBody.getBytes(StandardCharsets.UTF_8)));
         }
-        return builder.toString();
+        return result.toString();
+    }
+
+    /**
+     * @return 获取 Sha256WithRsa 签名字符串
+     */
+    public String getSignTextForSha256WithRsa() {
+        String canonicalizedQueryString = getCanonicalizedQueryString();
+        return method + WindConstants.SPACE + requestPath + WindConstants.LF +
+                timestamp + WindConstants.LF +
+                nonce + WindConstants.LF +
+                (StringUtils.hasText(canonicalizedQueryString) ? canonicalizedQueryString : WindConstants.EMPTY) + WindConstants.LF +
+                (StringUtils.hasText(requestBody) ? requestBody : WindConstants.EMPTY) + WindConstants.LF;
     }
 
     /**
