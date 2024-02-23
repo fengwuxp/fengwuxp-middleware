@@ -12,10 +12,12 @@ import java.util.Objects;
 public interface ApiSecretAccount {
 
     /**
-     * @return 账号唯一标识
+     * AccessKey or AppId
+     *
+     * @return 账号访问唯一标识
      */
     @NotBlank
-    String getId();
+    String getAccessId();
 
     /**
      * @return 获取签名密钥
@@ -23,13 +25,13 @@ public interface ApiSecretAccount {
     @NotBlank
     String getSecretKey();
 
-    static ApiSecretAccount immutable(String accountId, String secretKey) {
-        Objects.requireNonNull(accountId, "argument accountId must not null");
+    static ApiSecretAccount immutable(String accessId, String secretKey) {
+        Objects.requireNonNull(accessId, "argument accessId must not null");
         Objects.requireNonNull(secretKey, "argument secretKey must not null");
         return new ApiSecretAccount() {
             @Override
-            public String getId() {
-                return accountId;
+            public String getAccessId() {
+                return accessId;
             }
 
             @Override

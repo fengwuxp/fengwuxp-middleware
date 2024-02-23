@@ -71,7 +71,7 @@ public class ApiSignatureRequestInterceptor implements ClientHttpRequestIntercep
             builder.requestBody(new String(body, StandardCharsets.UTF_8));
         }
         ApiSignatureRequest signatureRequest = builder.build();
-        request.getHeaders().add(headerNames.getAccessKey(), account.getId());
+        request.getHeaders().add(headerNames.getAccessKey(), account.getAccessId());
         request.getHeaders().add(headerNames.getTimestamp(), signatureRequest.getTimestamp());
         request.getHeaders().add(headerNames.getNonce(), signatureRequest.getNonce());
         String sign = signer.sign(signatureRequest);

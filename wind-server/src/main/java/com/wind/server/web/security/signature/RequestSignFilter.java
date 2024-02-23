@@ -3,6 +3,7 @@ package com.wind.server.web.security.signature;
 
 import com.wind.client.rest.ApiSignatureRequestInterceptor;
 import com.wind.client.util.HttpQueryUtils;
+import com.wind.common.WindConstants;
 import com.wind.common.WindHttpConstants;
 import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.common.util.ServiceInfoUtils;
@@ -70,7 +71,11 @@ public class RequestSignFilter implements Filter, Ordered {
     private final boolean enable;
 
     public RequestSignFilter(Function<String, ApiSecretAccount> apiSecretAccountProvider, Collection<RequestMatcher> ignoreRequestMatchers, boolean enable) {
-        this(new SignatureHttpHeaderNames(), apiSecretAccountProvider, ignoreRequestMatchers, ApiSigner.HMAC_SHA256, enable);
+        this(WindConstants.WIND, apiSecretAccountProvider, ignoreRequestMatchers, enable);
+    }
+
+    public RequestSignFilter(String headerPrefix, Function<String, ApiSecretAccount> apiSecretAccountProvider, Collection<RequestMatcher> ignoreRequestMatchers, boolean enable) {
+        this(new SignatureHttpHeaderNames(headerPrefix), apiSecretAccountProvider, ignoreRequestMatchers, ApiSigner.HMAC_SHA256, enable);
     }
 
     @Override
