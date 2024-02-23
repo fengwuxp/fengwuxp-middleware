@@ -4,7 +4,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
     <parent>
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies -->
         <groupId>org.springframework.boot</groupId>
@@ -14,7 +13,7 @@
 
     <groupId>com.wind.middleware</groupId>
     <artifactId>wind-middleware</artifactId>
-    <version>${revision}</version>
+     <version>${revision}</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -41,7 +40,7 @@
     </modules>
 
     <properties>
-        <revision>1.0.0-SNAPSHOT</revision>
+        <revision>1.0.1-SNAPSHOT</revision>
         <!--   占位使用     -->
         <jacoco-coverage-agent/>
 
@@ -145,122 +144,122 @@
             <dependency>
                 <groupId>com.wind.tools</groupId>
                 <artifactId>mybatis-plus-annotation-processor</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.tools</groupId>
                 <artifactId>wind-mybatis-flex-processor</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.tools.h2</groupId>
                 <artifactId>h2-functions-for-mysql</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.loggin.logback</groupId>
                 <artifactId>logback-kafka-appender</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.configcenter</groupId>
                 <artifactId>wind-config-center-core</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.configcenter</groupId>
                 <artifactId>wind-nacos-spring-cloud-config-starter</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.elasticjob</groupId>
                 <artifactId>wind-elasticjob</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.script</groupId>
                 <artifactId>wind-script</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.office</groupId>
                 <artifactId>wind-office-core</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.office</groupId>
                 <artifactId>wind-office-excel</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.payment</groupId>
                 <artifactId>wind-payment-plugin-core</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.payment</groupId>
                 <artifactId>wind-payment-plugin-alipay</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.core</groupId>
                 <artifactId>wind-core</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.common</groupId>
                 <artifactId>wind-common</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.server</groupId>
                 <artifactId>wind-server</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.web</groupId>
                 <artifactId>wind-web</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.security.core</groupId>
                 <artifactId>wind-security-core</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.security</groupId>
                 <artifactId>wind-security-captcha</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.security</groupId>
                 <artifactId>wind-security-authentication</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.sequence</groupId>
                 <artifactId>wind-sequence-generate</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.client</groupId>
                 <artifactId>wind-client</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.trace</groupId>
                 <artifactId>wind-tracer</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.sentinel</groupId>
                 <artifactId>wind-sentinel</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.context.variable</groupId>
                 <artifactId>wind-context-annotations</artifactId>
-                <version>${revision}</version>
+                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.wind.context.variable</groupId>
