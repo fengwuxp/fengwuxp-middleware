@@ -1,4 +1,4 @@
-package com.wind.common.utils;
+package com.wind.common.util;
 
 /**
  * 类探测工具

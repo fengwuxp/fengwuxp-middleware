@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.wind.nacos.utils;
+package com.wind.nacos.util;
 
 /**
  * @author zkzlx

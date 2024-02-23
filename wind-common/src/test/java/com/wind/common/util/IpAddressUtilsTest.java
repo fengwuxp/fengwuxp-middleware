@@ -1,6 +1,5 @@
-package com.wind.common.utils;
+package com.wind.common.util;
 
-import com.wind.common.util.IpAddressUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

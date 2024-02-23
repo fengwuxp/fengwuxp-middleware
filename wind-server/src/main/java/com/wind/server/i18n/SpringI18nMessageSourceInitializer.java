@@ -1,7 +1,7 @@
 package com.wind.server.i18n;
 
 import com.wind.common.i18n.SpringI18nMessageUtils;
-import com.wind.web.utils.HttpServletRequestUtils;
+import com.wind.web.util.HttpServletRequestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;

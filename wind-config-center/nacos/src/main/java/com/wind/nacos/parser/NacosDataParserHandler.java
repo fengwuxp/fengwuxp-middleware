@@ -16,7 +16,7 @@
 
 package com.wind.nacos.parser;
 
-import com.wind.nacos.utils.NacosConfigUtils;
+import com.wind.nacos.util.NacosConfigUtils;
 import org.springframework.boot.env.OriginTrackedMapPropertySource;
 import org.springframework.boot.env.PropertiesPropertySourceLoader;
 import org.springframework.boot.env.PropertySourceLoader;

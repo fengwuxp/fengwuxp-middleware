@@ -1,7 +1,7 @@
 package com.wind.common.config;
 
 import com.wind.common.exception.AssertUtils;
-import com.wind.common.utils.StringJoinSplitUtils;
+import com.wind.common.util.StringJoinSplitUtils;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.lang.Nullable;
 

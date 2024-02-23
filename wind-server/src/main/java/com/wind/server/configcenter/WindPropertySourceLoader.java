@@ -5,7 +5,7 @@ import com.wind.common.WindConstants;
 import com.wind.common.enums.ConfigFileType;
 import com.wind.common.enums.WindMiddlewareType;
 import com.wind.common.exception.AssertUtils;
-import com.wind.common.utils.ClassDetectionUtils;
+import com.wind.common.util.ClassDetectionUtils;
 import com.wind.configcenter.core.ConfigRepository;
 import com.wind.configcenter.core.ConfigRepository.ConfigDescriptor;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package com.wind.common.utils;
+package com.wind.common.util;
 
 import com.google.common.collect.ImmutableSet;
 import com.wind.common.WindConstants;

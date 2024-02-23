@@ -1,4 +1,4 @@
-package com.wind.common.utils;
+package com.wind.common.util;
 
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 

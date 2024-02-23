@@ -1,4 +1,4 @@
-package com.wind.security.web.utils;
+package com.wind.security.web.util;
 
 import com.wind.common.WindConstants;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;

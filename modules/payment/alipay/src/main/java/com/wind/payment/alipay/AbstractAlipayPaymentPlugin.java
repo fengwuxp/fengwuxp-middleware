@@ -60,7 +60,6 @@ public abstract class AbstractAlipayPaymentPlugin implements PaymentTransactionP
 
     static final String ERROR_PATTERN = "errorCode：%s，errorMessage：%s";
 
-
     private static final String ALI_PAY_DEV = "alipaydev";
 
     private final AliPayPartnerConfig config;
@@ -320,6 +319,7 @@ public abstract class AbstractAlipayPaymentPlugin implements PaymentTransactionP
     private void verifySign(AlipayAsyncNoticeRequest request) {
         // 签名验证
         Map<String, String> signParams = new HashMap<>();
+        // 深 Copy
         Map<String, String> params = JSON.parseObject(JSON.toJSONString(request), new TypeReference<Map<String, String>>() {
         });
         for (Map.Entry<String, String> entry : params.entrySet()) {
@@ -330,7 +330,7 @@ public abstract class AbstractAlipayPaymentPlugin implements PaymentTransactionP
         }
         AliPayPartnerConfig.EncryptType signType = AliPayPartnerConfig.EncryptType.valueOf(params.get("sign_type"));
         try {
-            // 切记 rsaPublicKey 是支付宝的公钥，请去open.alipay.com对应应用下查看。
+            // 切记 rsaPublicKey 是支付宝的公钥，请去 open.alipay.com 对应应用下查看。
             boolean result = AlipaySignature.rsaCheckV1(signParams, config.getRsaPublicKey(), config.getCharset(), signType.name());
             AssertUtils.isTrue(result, "支付宝通知签名验证失败");
         } catch (AlipayApiException e) {
