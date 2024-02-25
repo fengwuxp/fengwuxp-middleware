@@ -45,6 +45,8 @@ spec:
               value: "${JAVA_OPTS}"
             - name: SPRING_CLOUD_OPTS
               value: "${SPRING_CLOUD_OPTS} -Dspring.profiles.active=${SPRING_PROFILE_ACTIVE}"
+            - name: TZ
+              value: ${TIME_ZONE}
           resources: # 容器资源管理
             limits: # 资源限制（监控使用情况）
               cpu: "${LIMIT_CPU}"

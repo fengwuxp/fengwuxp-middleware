@@ -29,4 +29,5 @@ exec "$JAVACMD" \
   $SPRING_APPLICATION_OPTS \
   -Dfile.encoding=UTF8 \
   -Dsun.jnu.encoding=UTF8 \
+  -Duser.timezone=$TZ \
   -jar bootstrap.jar $@
