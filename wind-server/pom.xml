@@ -89,7 +89,7 @@
         </dependency>
         <dependency>
             <groupId>com.wind.client</groupId>
-            <artifactId>wind-client</artifactId>
+            <artifactId>wind-restful</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>

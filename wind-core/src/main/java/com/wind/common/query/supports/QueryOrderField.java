@@ -42,6 +42,7 @@ public interface QueryOrderField {
      * @param fields 排序字段列表
      * @return 排序字段列表
      */
+    @SafeVarargs
     static <T extends QueryOrderField> T[] of(T... fields) {
         return fields;
     }

@@ -2,7 +2,9 @@ package com.wind.server.web.supports;
 
 import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.ExceptionCode;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import org.springframework.http.HttpStatus;
 
 import java.beans.Transient;
@@ -10,9 +12,12 @@ import java.io.Serializable;
 
 /**
  * 不可变的 WebApiResponse
+ *
  * @author wuxp
  * @date 2024-02-20 10:39
  **/
+@ToString
+@EqualsAndHashCode
 public class ImmutableWebApiResponse<T> implements ApiResp<T>, Serializable {
 
     private static final long serialVersionUID = -7557721954943132992L;

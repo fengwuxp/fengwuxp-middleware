@@ -37,12 +37,6 @@ final class SignatureConstants {
     static final String SIGN_HEADER_NAME = "Sign";
 
     /**
-     * 在签名验证失败时返回服务端的签名内容
-     * 仅在线下联调环境下开启
-     */
-    static final String DEBUG_SIGN_HEADER_NAME = "Debug-Sign";
-
-    /**
      * 在签名验证失败时返回服务端的原始签名串
      * 仅在线下联调环境下开启
      */

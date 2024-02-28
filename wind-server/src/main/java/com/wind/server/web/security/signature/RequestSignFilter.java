@@ -100,7 +100,6 @@ public class RequestSignFilter implements Filter, Ordered {
         } else {
             if (!ServiceInfoUtils.isOnline()) {
                 // 线下环境返回服务端的签名，用于 debug
-                response.addHeader(headerNames.getDebugSign(), signer.sign(apiSignatureRequest));
                 response.addHeader(headerNames.getDebugSignContent(), apiSignatureRequest.getSignTextForDigest());
                 if (apiSignatureRequest.getQueryString() != null || apiSignatureRequest.getQueryParams() != null) {
                     response.addHeader(headerNames.getDebugSignQuery(), apiSignatureRequest.getCanonicalizedQueryString());

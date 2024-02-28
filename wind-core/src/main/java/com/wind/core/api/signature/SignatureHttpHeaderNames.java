@@ -23,8 +23,6 @@ public final class SignatureHttpHeaderNames {
 
     final String sign;
 
-    final String debugSign;
-
     final String debugSignContent;
 
     final String debugSignQuery;
@@ -39,7 +37,6 @@ public final class SignatureHttpHeaderNames {
                 getHeaderName(headerPrefix, SignatureConstants.TIMESTAMP_HEADER_NAME),
                 getHeaderName(headerPrefix, SignatureConstants.ACCESS_KEY_HEADER_NAME),
                 getHeaderName(headerPrefix, SignatureConstants.SIGN_HEADER_NAME),
-                SignatureConstants.DEBUG_SIGN_HEADER_NAME,
                 SignatureConstants.DEBUG_SIGN_CONTENT_HEADER_NAME,
                 SignatureConstants.DEBUG_SIGN_QUERY_HEADER_NAME
         );
