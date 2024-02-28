@@ -18,6 +18,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okio.Buffer;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -96,9 +97,12 @@ public class ApiSigntureReqeustretOkHttpInterceptor implements Interceptor {
 
     private Map<String, String[]> parseQueryParamsAsMap(HttpUrl url) {
         Map<String, String[]> result = new HashMap<>();
-        String queryString;
+        String queryString = url.url().getQuery();
+        if (!StringUtils.hasText(queryString)) {
+            return result;
+        }
         try {
-            queryString = URLDecoder.decode(url.url().getQuery(), StandardCharsets.UTF_8.name());
+            queryString = URLDecoder.decode(queryString, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException exception) {
             throw new BaseException(DefaultExceptionCode.BAD_REQUEST, "decode url error", exception);
         }

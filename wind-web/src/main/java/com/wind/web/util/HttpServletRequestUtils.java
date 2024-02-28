@@ -34,4 +34,10 @@ public final class HttpServletRequestUtils {
         }
         return ((ServletRequestAttributes) requestAttributes).getRequest();
     }
+
+    public static <T> T requiredRequestAttribute(String name, HttpServletRequest request) {
+        Object result = request.getAttribute(name);
+        AssertUtils.notNull(result, () -> String.format("attribute = %s must not null", name));
+        return (T) result;
+    }
 }
