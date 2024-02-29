@@ -6,7 +6,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.wind.client.rest.ApiSignatureRequestInterceptor;
 import com.wind.common.WindConstants;
 import com.wind.common.WindHttpConstants;
-import com.wind.common.exception.AssertUtils;
 import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.common.util.ServiceInfoUtils;
 import com.wind.core.api.signature.ApiSecretAccount;
@@ -26,7 +25,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriUtils;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -39,7 +37,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.function.Function;
 
 
@@ -100,15 +97,23 @@ public class RequestSignFilter implements Filter, Ordered {
             return;
         }
 
-        Collection<ApiSecretAccount> accounts = getApiSecretAccounts(accessKey);
-        AssertUtils.notEmpty(accounts, "not found api secret account");
         MediaType contentType = StringUtils.hasLength(request.getContentType()) ? MediaType.parseMediaType(request.getContentType()) : null;
         boolean signRequiredBody = ApiSignatureRequestInterceptor.signRequiredRequestBody(contentType);
         HttpServletRequest httpRequest = signRequiredBody ? new RepeatableReadRequestWrapper(request) : request;
         ApiSignatureRequest signatureRequest = buildSignatureRequest(httpRequest, signRequiredBody);
         String requestSign = request.getHeader(headerNames.getSign());
-        // 验签
-        for (ApiSecretAccount account : accounts) {
+
+        // 优先使用缓存中的账号验签
+        ApiSecretAccount cacheAccount = accountCaches.getIfPresent(accessKey);
+        if (cacheAccount != null && signer.verify(signatureRequest, cacheAccount.getSecretKey(), requestSign)) {
+            // 设置到签名认证账号到上下文中
+            request.setAttribute(WindHttpConstants.API_SECRET_ACCOUNT_ATTRIBUTE_NAME, cacheAccount);
+            chain.doFilter(httpRequest, servletResponse);
+            return;
+        }
+
+        // 缓存中不存或使用缓存账号验证失败在则加载秘钥账号，可能同时存在多个，用于替换秘钥的场景
+        for (ApiSecretAccount account : apiSecretAccountProvider.apply(accessKey)) {
             if (signer.verify(signatureRequest, account.getSecretKey(), requestSign)) {
                 // 更新缓存
                 accountCaches.put(accessKey, account);
@@ -129,15 +134,6 @@ public class RequestSignFilter implements Filter, Ordered {
             }
         }
         badRequest(response, "sign verify error");
-    }
-
-    private Collection<ApiSecretAccount> getApiSecretAccounts(String accessKey) {
-        ApiSecretAccount account = accountCaches.getIfPresent(accessKey);
-        if (account == null) {
-            // 缓存中不存在则加载秘钥账号，可能同时存在多个，用于替换秘钥的场景
-            return apiSecretAccountProvider.apply(accessKey);
-        }
-        return Collections.singleton(account);
     }
 
     private void badRequest(HttpServletResponse response, String message) {
