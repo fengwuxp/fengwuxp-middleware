@@ -29,14 +29,14 @@ public interface ApiSigner {
          * @return 签名验证是否通过
          */
         @Override
-        public boolean verify(ApiSignatureRequest request, String sign) {
-            return Objects.equals(sign(request), sign);
+        public boolean verify(ApiSignatureRequest request, String secretKey, String sign) {
+            return Objects.equals(sign(request, secretKey), sign);
         }
 
 
         @Override
-        public String sign(ApiSignatureRequest request) {
-            return HmacSHA256Signer.sign(request.getSignTextForDigest(), request.getSecretKey());
+        public String sign(ApiSignatureRequest request, String secretKey) {
+            return HmacSHA256Signer.sign(request.getSignTextForDigest(), secretKey);
         }
     };
 
@@ -46,13 +46,13 @@ public interface ApiSigner {
     ApiSigner SHA256_WITH_RSA = new ApiSigner() {
 
         @Override
-        public String sign(ApiSignatureRequest request) {
-            return Sha256WithRsaSigner.sign(request.getSignTextForSha256WithRsa(), request.getSecretKey());
+        public String sign(ApiSignatureRequest request, String secretKey) {
+            return Sha256WithRsaSigner.sign(request.getSignTextForSha256WithRsa(), secretKey);
         }
 
         @Override
-        public boolean verify(ApiSignatureRequest request, String sign) {
-            return Sha256WithRsaSigner.verify(request.getSignTextForSha256WithRsa(), request.getSecretKey(), sign);
+        public boolean verify(ApiSignatureRequest request, String secretKey, String sign) {
+            return Sha256WithRsaSigner.verify(request.getSignTextForSha256WithRsa(), secretKey, sign);
         }
     };
 
@@ -60,18 +60,20 @@ public interface ApiSigner {
     /**
      * 生成签名
      *
-     * @param request 签名请求
+     * @param request   签名请求
+     * @param secretKey 签名秘钥
      * @return 签名结果
      */
     @NotNull
-    String sign(@NotNull ApiSignatureRequest request);
+    String sign(@NotNull ApiSignatureRequest request, String secretKey);
 
     /**
      * 签名验证
      *
-     * @param request 用于验证签名的请求
-     * @param sign    待验证的签名
+     * @param request   用于验证签名的请求
+     * @param secretKey 签名秘钥
+     * @param sign      待验证的签名
      * @return 签名验证是否通过
      */
-    boolean verify(@NotNull ApiSignatureRequest request, @NotNull String sign);
+    boolean verify(@NotNull ApiSignatureRequest request, String secretKey, @NotNull String sign);
 }

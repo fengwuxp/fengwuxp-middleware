@@ -2,6 +2,8 @@ package com.wind.core.api.signature;
 
 import com.wind.common.WindConstants;
 import com.wind.common.exception.AssertUtils;
+import com.wind.common.exception.BaseException;
+import com.wind.common.exception.DefaultExceptionCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
@@ -11,10 +13,14 @@ import org.springframework.util.DigestUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import javax.validation.constraints.NotNull;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -54,13 +60,7 @@ public class ApiSignatureRequest {
     /**
      * 请求查询字符串
      */
-    @Deprecated
-    private final String queryString;
-
-    /**
-     * 查询参数
-     */
-    private final Map<String, String[]> queryParams;
+    private final String canonicalizedQueryString;
 
     /**
      * 请求体
@@ -68,24 +68,25 @@ public class ApiSignatureRequest {
     private final String requestBody;
 
     /**
-     * 签名秘钥
+     * 签名版本 v2版本查询字符需要排序
+     * {@link #buildCanonicalizedQueryString}
      */
-    private final String secretKey;
+    @Deprecated
+    private final String version;
 
-    private ApiSignatureRequest(String method, String requestPath, String nonce, String timestamp, String queryString, Map<String, String[]> queryParams, String requestBody,String secretKey) {
+    private ApiSignatureRequest(String method, String requestPath, String nonce, String timestamp, String decodeQueryString, String requestBody, String version) {
         AssertUtils.hasText(method, "method must not empty");
         AssertUtils.hasText(requestPath, "requestPath must not empty");
         AssertUtils.hasText(nonce, "nonce must not empty");
         AssertUtils.hasText(timestamp, "timestamp must not empty");
-        AssertUtils.hasText(secretKey, "secretKey must not empty");
         this.method = method.toUpperCase();
         this.requestPath = requestPath;
         this.nonce = nonce;
         this.timestamp = timestamp;
-        this.queryString = queryString;
-        this.queryParams = queryParams == null ? null : new TreeMap<>(queryParams);
+        // 如果是 v2 版本，则将查询字符串 key 按照字典序排序
+        this.canonicalizedQueryString = Objects.equals(version, "v2") ? buildCanonicalizedQueryString(parseQueryParamsAsMap(decodeQueryString)) : decodeQueryString;
         this.requestBody = requestBody;
-        this.secretKey = secretKey;
+        this.version = version;
     }
 
     /**
@@ -97,10 +98,9 @@ public class ApiSignatureRequest {
                 .append(Fields.requestPath).append(WindConstants.EQ).append(requestPath).append(WindConstants.AND)
                 .append(Fields.nonce).append(WindConstants.EQ).append(nonce).append(WindConstants.AND)
                 .append(Fields.timestamp).append(WindConstants.EQ).append(timestamp);
-        String canonicalizedQueryString = getCanonicalizedQueryString();
         if (StringUtils.hasLength(canonicalizedQueryString)) {
             result.append(WindConstants.AND)
-                    .append(String.format("%s%s", Fields.queryString, MD5_TAG))
+                    .append(String.format("%s%s", Fields.canonicalizedQueryString, MD5_TAG))
                     .append(WindConstants.EQ)
                     .append(DigestUtils.md5DigestAsHex(canonicalizedQueryString.getBytes(StandardCharsets.UTF_8)));
         }
@@ -117,7 +117,6 @@ public class ApiSignatureRequest {
      * @return 获取 Sha256WithRsa 签名字符串
      */
     public String getSignTextForSha256WithRsa() {
-        String canonicalizedQueryString = getCanonicalizedQueryString();
         return method + WindConstants.SPACE + requestPath + WindConstants.LF +
                 timestamp + WindConstants.LF +
                 nonce + WindConstants.LF +
@@ -129,11 +128,7 @@ public class ApiSignatureRequest {
      * @return 获取按照字典序的查询字符串
      */
     @Nullable
-    public String getCanonicalizedQueryString() {
-        if (StringUtils.hasLength(queryString)) {
-            // 兼容模式  TODO 待删除
-            return queryString;
-        }
+    private String buildCanonicalizedQueryString(Map<String, String[]> queryParams) {
         if (ObjectUtils.isEmpty(queryParams)) {
             return null;
         }
@@ -148,5 +143,31 @@ public class ApiSignatureRequest {
                             .collect(Collectors.joining(WindConstants.AND));
                 })
                 .collect(Collectors.joining(WindConstants.AND));
+    }
+
+    private Map<String, String[]> parseQueryParamsAsMap(String queryString) {
+        Map<String, String[]> result = new HashMap<>();
+        if (StringUtils.hasText(queryString)) {
+            String[] parts = decodeQueryString(queryString).split(WindConstants.AND);
+            for (String part : parts) {
+                String[] keyValue = part.split(WindConstants.EQ);
+                if (keyValue.length == 2) {
+                    result.put(keyValue[0], new String[]{keyValue[1]});
+                } else {
+                    result.put(keyValue[0], new String[0]);
+                }
+            }
+        }
+        return result;
+    }
+
+    @NotNull
+    private String decodeQueryString(String queryString) {
+        try {
+            // @see https://juejin.cn/post/6844904034453864462#heading-2
+            return queryString == null ? null : URLDecoder.decode(queryString.replace("+", "%20"), StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException exception) {
+            throw new BaseException(DefaultExceptionCode.BAD_REQUEST, "decode url error", exception);
+        }
     }
 }

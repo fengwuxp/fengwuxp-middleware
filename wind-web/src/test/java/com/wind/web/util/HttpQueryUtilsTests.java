@@ -1,4 +1,4 @@
-package com.wind.client.util;
+package com.wind.web.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

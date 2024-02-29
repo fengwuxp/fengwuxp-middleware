@@ -1,9 +1,6 @@
 package com.wind.client.retrofit;
 
-import com.wind.common.WindConstants;
 import com.wind.common.exception.AssertUtils;
-import com.wind.common.exception.BaseException;
-import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.core.api.signature.ApiSecretAccount;
 import com.wind.core.api.signature.ApiSignatureRequest;
 import com.wind.core.api.signature.ApiSigner;
@@ -21,13 +18,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -52,10 +45,16 @@ public class ApiSigntureReqeustretOkHttpInterceptor implements Interceptor {
 
     private final ApiSigner signer;
 
-    public ApiSigntureReqeustretOkHttpInterceptor(Function<Request, ApiSecretAccount> accountProvider, SignatureHttpHeaderNames headerNames, ApiSigner signer) {
+    public ApiSigntureReqeustretOkHttpInterceptor(Function<Request, ApiSecretAccount> accountProvider) {
+        this(accountProvider, ApiSigner.HMAC_SHA256, null);
+    }
+
+    public ApiSigntureReqeustretOkHttpInterceptor(Function<Request, ApiSecretAccount> accountProvider, ApiSigner signer, String headerPrefix) {
+        AssertUtils.notNull(accountProvider, "argument accountProvider must not null");
+        AssertUtils.notNull(signer, "argument signer must not null");
         this.accountProvider = accountProvider;
-        this.headerNames = headerNames;
         this.signer = signer;
+        this.headerNames = new SignatureHttpHeaderNames(headerPrefix);
     }
 
     @NotNull
@@ -65,14 +64,15 @@ public class ApiSigntureReqeustretOkHttpInterceptor implements Interceptor {
         ApiSecretAccount account = accountProvider.apply(request);
         AssertUtils.notNull(account, "ApiSecretAccount must not null");
         ApiSignatureRequest.ApiSignatureRequestBuilder builder = ApiSignatureRequest.builder();
+        String signVersion = "v2";
         builder.method(request.method())
                 .requestPath(request.url().encodedPath())
                 .nonce(SequenceGenerator.randomAlphanumeric(32))
                 .timestamp(String.valueOf(System.currentTimeMillis()))
-                .queryParams(parseQueryParamsAsMap(request.url()))
-                .secretKey(account.getSecretKey());
+                .canonicalizedQueryString(getQueryString(request.url()))
+                .version(signVersion);
         RequestBody requestBody = request.body();
-        if (signUseRequestBody(requestBody)) {
+        if (signRequiredRequestBody(requestBody)) {
             Buffer buffer = new Buffer();
             requestBody.writeTo(buffer);
             builder.requestBody(new String(buffer.readByteArray(), StandardCharsets.UTF_8));
@@ -83,8 +83,8 @@ public class ApiSigntureReqeustretOkHttpInterceptor implements Interceptor {
         requestBuilder.addHeader(headerNames.getTimestamp(), signatureRequest.getTimestamp());
         requestBuilder.addHeader(headerNames.getNonce(), signatureRequest.getNonce());
         // TODO 待删除
-        requestBuilder.addHeader("Signature-Version", "v2");
-        String sign = signer.sign(signatureRequest);
+        requestBuilder.addHeader("Signature-Version", signVersion);
+        String sign = signer.sign(signatureRequest, account.getSecretKey());
         requestBuilder.addHeader(headerNames.getSign(), sign);
         log.debug("api sign object = {} , sign = {}", request, sign);
         Response result = chain.proceed(requestBuilder.build());
@@ -95,30 +95,12 @@ public class ApiSigntureReqeustretOkHttpInterceptor implements Interceptor {
         return result;
     }
 
-    private Map<String, String[]> parseQueryParamsAsMap(HttpUrl url) {
-        Map<String, String[]> result = new HashMap<>();
+    private String getQueryString(HttpUrl url) {
         String queryString = url.url().getQuery();
-        if (!StringUtils.hasText(queryString)) {
-            return result;
-        }
-        try {
-            queryString = URLDecoder.decode(queryString, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException exception) {
-            throw new BaseException(DefaultExceptionCode.BAD_REQUEST, "decode url error", exception);
-        }
-        String[] parts = queryString.split(WindConstants.AND);
-        for (String part : parts) {
-            String[] keyValue = part.split(WindConstants.EQ);
-            if (keyValue.length == 2) {
-                result.put(keyValue[0], new String[]{keyValue[1]});
-            } else {
-                result.put(keyValue[0], new String[0]);
-            }
-        }
-        return result;
+        return StringUtils.hasText(queryString) ? queryString : null;
     }
 
-    private boolean signUseRequestBody(RequestBody requestBody) {
+    private boolean signRequiredRequestBody(RequestBody requestBody) {
         if (requestBody == null) {
             return false;
         }

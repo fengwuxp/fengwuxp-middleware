@@ -1,6 +1,5 @@
 package com.wind.client.rest;
 
-import com.wind.client.util.HttpQueryUtils;
 import com.wind.common.exception.AssertUtils;
 import com.wind.core.api.signature.ApiSecretAccount;
 import com.wind.core.api.signature.ApiSignatureRequest;
@@ -65,16 +64,15 @@ public class ApiSignatureRequestInterceptor implements ClientHttpRequestIntercep
                 .requestPath(request.getURI().getPath())
                 .nonce(SequenceGenerator.randomAlphanumeric(32))
                 .timestamp(String.valueOf(System.currentTimeMillis()))
-                .queryParams(HttpQueryUtils.parseQueryParamsAsMap(request.getURI().getQuery()))
-                .secretKey(account.getSecretKey());
-        if (signUseRequestBody(request.getHeaders().getContentType())) {
+                .canonicalizedQueryString(request.getURI().getQuery());
+        if (signRequiredRequestBody(request.getHeaders().getContentType())) {
             builder.requestBody(new String(body, StandardCharsets.UTF_8));
         }
         ApiSignatureRequest signatureRequest = builder.build();
         request.getHeaders().add(headerNames.getAccessKey(), account.getAccessId());
         request.getHeaders().add(headerNames.getTimestamp(), signatureRequest.getTimestamp());
         request.getHeaders().add(headerNames.getNonce(), signatureRequest.getNonce());
-        String sign = signer.sign(signatureRequest);
+        String sign = signer.sign(signatureRequest, account.getSecretKey());
         request.getHeaders().add(headerNames.getSign(), sign);
         if (log.isDebugEnabled()) {
             log.debug("api sign object = {} , sign = {}", request, sign);
@@ -83,7 +81,7 @@ public class ApiSignatureRequestInterceptor implements ClientHttpRequestIntercep
     }
 
     // TODO 暂时先放到这里，待重构
-    public static boolean signUseRequestBody(@Nullable MediaType contentType) {
+    public static boolean signRequiredRequestBody(@Nullable MediaType contentType) {
         if (contentType == null) {
             return false;
         }
