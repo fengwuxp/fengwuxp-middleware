@@ -15,17 +15,14 @@ import java.util.concurrent.atomic.AtomicReference;
  * @date 2023-12-21 18:19
  **/
 @Slf4j
-
 public class SpringApplicationContextUtils {
 
     private final ApplicationContext context;
 
     private static final AtomicReference<SpringApplicationContextUtils> HOLDER = new AtomicReference<>();
 
-    public SpringApplicationContextUtils(ApplicationContext context) {
-        AssertUtils.notNull(context, "context must not null");
+    private SpringApplicationContextUtils(ApplicationContext context) {
         this.context = context;
-        HOLDER.set(this);
     }
 
     public static String getProperty(String key) {
@@ -36,8 +33,15 @@ public class SpringApplicationContextUtils {
         getContext().publishEvent(event);
     }
 
+    public static void refreshContext(ApplicationContext context) {
+        AssertUtils.notNull(context, "argument context must not null");
+        HOLDER.set(new SpringApplicationContextUtils(context));
+    }
+
     static ApplicationContext getContext() {
-        AssertUtils.notNull(HOLDER.get(), "context not init");
-        return HOLDER.get().context;
+        SpringApplicationContextUtils utils = HOLDER.get();
+        AssertUtils.notNull(utils, "context utils not init, please call use #refreshContext");
+        AssertUtils.notNull(utils.context, "spring application context not init");
+        return utils.context;
     }
 }

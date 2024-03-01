@@ -46,13 +46,13 @@ public interface ApiSigner {
     ApiSigner SHA256_WITH_RSA = new ApiSigner() {
 
         @Override
-        public String sign(ApiSignatureRequest request, String secretKey) {
-            return Sha256WithRsaSigner.sign(request.getSignTextForSha256WithRsa(), secretKey);
+        public String sign(ApiSignatureRequest request, String privateKey) {
+            return Sha256WithRsaSigner.sign(request.getSignTextForSha256WithRsa(), privateKey);
         }
 
         @Override
-        public boolean verify(ApiSignatureRequest request, String secretKey, String sign) {
-            return Sha256WithRsaSigner.verify(request.getSignTextForSha256WithRsa(), secretKey, sign);
+        public boolean verify(ApiSignatureRequest request, String publicKey, String sign) {
+            return Sha256WithRsaSigner.verify(request.getSignTextForSha256WithRsa(), publicKey, sign);
         }
     };
 

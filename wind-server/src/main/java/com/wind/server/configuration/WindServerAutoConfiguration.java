@@ -6,8 +6,7 @@ import com.wind.script.auditlog.AuditLogRecorder;
 import com.wind.script.auditlog.ScriptAuditLogRecorder;
 import com.wind.server.actuate.health.GracefulShutdownHealthIndicator;
 import com.wind.server.aop.WindControllerMethodInterceptor;
-import com.wind.server.initialization.SystemInitializationListener;
-import com.wind.server.initialization.SystemInitializer;
+import com.wind.server.initialization.WindApplicationStartedListener;
 import com.wind.server.logging.WebAuditLogRecorder;
 import com.wind.server.web.exception.RespfulErrorAttributes;
 import lombok.extern.slf4j.Slf4j;
@@ -90,9 +89,8 @@ public class WindServerAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean(SystemInitializer.class)
-    public SystemInitializationListener systemInitializationListener(Collection<SystemInitializer> initializers) {
-        return new SystemInitializationListener(initializers);
+    public WindApplicationStartedListener windApplicationStartedListener() {
+        return new WindApplicationStartedListener();
     }
 
 }

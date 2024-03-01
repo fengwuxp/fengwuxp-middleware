@@ -1,26 +1,28 @@
 package com.wind.server.initialization;
 
+import com.wind.common.spring.SpringApplicationContextUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.OrderComparator;
 import org.springframework.util.StopWatch;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * 系统初始化器执行入口
+ * 应用 Started 事件监听
  *
  * @author wuxp
  * @date 2023-10-22 07:49
  **/
 @Slf4j
 @AllArgsConstructor
-public class SystemInitializationListener implements ApplicationListener<ApplicationStartedEvent> {
-
-    private final Collection<SystemInitializer> initializers;
+public class WindApplicationStartedListener implements ApplicationListener<ApplicationStartedEvent> {
 
     private final AtomicBoolean flag = new AtomicBoolean(false);
 
@@ -29,10 +31,20 @@ public class SystemInitializationListener implements ApplicationListener<Applica
         if (flag.get()) {
             return;
         }
+        // 重新设置一下 SpringApplicationContextUtils
+        SpringApplicationContextUtils.refreshContext(event.getApplicationContext());
+        // 执行系统初始化器
+        execSystemInitializers(event.getApplicationContext());
+    }
+
+    private void execSystemInitializers(ApplicationContext context) {
         log.info("begin execute SystemInitializer");
         StopWatch watch = new StopWatch();
         watch.start("system-initialization-task");
         try {
+            List<SystemInitializer> initializers = new ArrayList<>(context.getBeansOfType(SystemInitializer.class)
+                    .values());
+            OrderComparator.sort(initializers);
             initializers.stream()
                     .filter(SystemInitializer::requiredInitialize)
                     .forEach(SystemInitializer::initialize);
