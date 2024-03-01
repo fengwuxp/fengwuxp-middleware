@@ -64,7 +64,7 @@ public class ApiSignatureRequestInterceptor implements ClientHttpRequestIntercep
                 .requestPath(request.getURI().getPath())
                 .nonce(SequenceGenerator.randomAlphanumeric(32))
                 .timestamp(String.valueOf(System.currentTimeMillis()))
-                .canonicalizedQueryString(request.getURI().getQuery());
+                .queryString(request.getURI().getQuery());
         if (signRequiredRequestBody(request.getHeaders().getContentType())) {
             builder.requestBody(new String(body, StandardCharsets.UTF_8));
         }

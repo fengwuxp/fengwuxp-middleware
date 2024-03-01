@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
@@ -60,7 +61,7 @@ public class ApiSignatureRequest {
     /**
      * 请求查询字符串
      */
-    private final String canonicalizedQueryString;
+    private final String queryString;
 
     /**
      * 请求体
@@ -84,7 +85,7 @@ public class ApiSignatureRequest {
         this.nonce = nonce;
         this.timestamp = timestamp;
         // 如果是 v2 版本，则将查询字符串 key 按照字典序排序
-        this.canonicalizedQueryString = Objects.equals(version, "v2") ? buildCanonicalizedQueryString(parseQueryParamsAsMap(decodeQueryString)) : decodeQueryString;
+        this.queryString = Objects.equals(version, "v2") ? buildCanonicalizedQueryString(parseQueryParamsAsMap(decodeQueryString)) : decodeQueryString;
         this.requestBody = requestBody;
         this.version = version;
     }
@@ -98,11 +99,11 @@ public class ApiSignatureRequest {
                 .append(Fields.requestPath).append(WindConstants.EQ).append(requestPath).append(WindConstants.AND)
                 .append(Fields.nonce).append(WindConstants.EQ).append(nonce).append(WindConstants.AND)
                 .append(Fields.timestamp).append(WindConstants.EQ).append(timestamp);
-        if (StringUtils.hasLength(canonicalizedQueryString)) {
+        if (StringUtils.hasLength(queryString)) {
             result.append(WindConstants.AND)
-                    .append(String.format("%s%s", Fields.canonicalizedQueryString, MD5_TAG))
+                    .append(String.format("%s%s", Fields.queryString, MD5_TAG))
                     .append(WindConstants.EQ)
-                    .append(DigestUtils.md5DigestAsHex(canonicalizedQueryString.getBytes(StandardCharsets.UTF_8)));
+                    .append(DigestUtils.md5DigestAsHex(queryString.getBytes(StandardCharsets.UTF_8)));
         }
         if (StringUtils.hasLength(requestBody)) {
             result.append(WindConstants.AND)
@@ -120,7 +121,7 @@ public class ApiSignatureRequest {
         return method + WindConstants.SPACE + requestPath + WindConstants.LF +
                 timestamp + WindConstants.LF +
                 nonce + WindConstants.LF +
-                (StringUtils.hasText(canonicalizedQueryString) ? canonicalizedQueryString : WindConstants.EMPTY) + WindConstants.LF +
+                (StringUtils.hasText(queryString) ? queryString : WindConstants.EMPTY) + WindConstants.LF +
                 (StringUtils.hasText(requestBody) ? requestBody : WindConstants.EMPTY) + WindConstants.LF;
     }
 
@@ -132,7 +133,8 @@ public class ApiSignatureRequest {
         if (ObjectUtils.isEmpty(queryParams)) {
             return null;
         }
-        return queryParams.entrySet()
+        Map<String, String[]> sortedKeyParams = new TreeMap<>(queryParams);
+        return sortedKeyParams.entrySet()
                 .stream()
                 .map(entry -> {
                     if (ObjectUtils.isEmpty(entry.getValue())) {

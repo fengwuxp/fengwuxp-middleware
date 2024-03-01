@@ -69,7 +69,7 @@ public class ApiSigntureReqeustretOkHttpInterceptor implements Interceptor {
                 .requestPath(request.url().encodedPath())
                 .nonce(SequenceGenerator.randomAlphanumeric(32))
                 .timestamp(String.valueOf(System.currentTimeMillis()))
-                .canonicalizedQueryString(getQueryString(request.url()))
+                .queryString(getQueryString(request.url()))
                 .version(signVersion);
         RequestBody requestBody = request.body();
         if (signRequiredRequestBody(requestBody)) {

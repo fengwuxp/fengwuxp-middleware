@@ -129,8 +129,8 @@ public class RequestSignFilter implements Filter, Ordered {
         if (!ServiceInfoUtils.isOnline()) {
             // 线下环境返回服务端的签名字符串，方便客户端排查签名错误
             response.addHeader(headerNames.getDebugSignContent(), signatureRequest.getSignTextForDigest());
-            if (StringUtils.hasText(signatureRequest.getCanonicalizedQueryString())) {
-                response.addHeader(headerNames.getDebugSignQuery(), signatureRequest.getCanonicalizedQueryString());
+            if (StringUtils.hasText(signatureRequest.getQueryString())) {
+                response.addHeader(headerNames.getDebugSignQuery(), signatureRequest.getQueryString());
             }
         }
         badRequest(response, "sign verify error");
@@ -155,7 +155,7 @@ public class RequestSignFilter implements Filter, Ordered {
         ApiSignatureRequest.ApiSignatureRequestBuilder result = ApiSignatureRequest.builder()
                 // http 请求 path，不包含查询参数和域名
                 .requestPath(request.getRequestURI())
-                .canonicalizedQueryString(request.getQueryString())
+                .queryString(request.getQueryString())
                 // 仅在存在查询字符串时才设置，避免获取到表单参数
                 .method(request.getMethod().toUpperCase())
                 .nonce(request.getHeader(headerNames.getNonce()))
