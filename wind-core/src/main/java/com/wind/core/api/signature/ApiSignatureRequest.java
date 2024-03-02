@@ -17,11 +17,13 @@ import javax.validation.constraints.NotNull;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -129,35 +131,40 @@ public class ApiSignatureRequest {
      * @return 获取按照字典序的查询字符串
      */
     @Nullable
-    private String buildCanonicalizedQueryString(Map<String, String[]> queryParams) {
+    private String buildCanonicalizedQueryString(Map<String, List<String>> queryParams) {
         if (ObjectUtils.isEmpty(queryParams)) {
             return null;
         }
-        Map<String, String[]> sortedKeyParams = new TreeMap<>(queryParams);
+        Map<String, List<String>> sortedKeyParams = new TreeMap<>(queryParams);
         return sortedKeyParams.entrySet()
                 .stream()
                 .map(entry -> {
                     if (ObjectUtils.isEmpty(entry.getValue())) {
                         return null;
                     }
-                    return Arrays.stream(entry.getValue())
+                    return entry.getValue()
+                            .stream()
                             .map(val -> String.format("%s=%s", entry.getKey(), val))
                             .collect(Collectors.joining(WindConstants.AND));
                 })
                 .collect(Collectors.joining(WindConstants.AND));
     }
 
-    private Map<String, String[]> parseQueryParamsAsMap(String queryString) {
-        Map<String, String[]> result = new HashMap<>();
+    private Map<String, List<String>> parseQueryParamsAsMap(String queryString) {
+        Map<String, List<String>> result = new HashMap<>();
         if (StringUtils.hasText(queryString)) {
             String[] parts = decodeQueryString(queryString).split(WindConstants.AND);
             for (String part : parts) {
-                String[] keyValue = part.split(WindConstants.EQ);
-                if (keyValue.length == 2) {
-                    result.put(keyValue[0], new String[]{keyValue[1]});
-                } else {
-                    result.put(keyValue[0], new String[0]);
+                String[] keyValues = part.split(WindConstants.EQ);
+                String key = keyValues[0];
+                List<String> values = result.get(key);
+                if (values == null) {
+                    values = new ArrayList<>();
                 }
+                if (keyValues.length == 2) {
+                    values.add(keyValues[1]);
+                }
+                result.put(key, values);
             }
         }
         return result;
