@@ -139,13 +139,14 @@ public class ApiSignatureRequest {
                 .stream()
                 .map(entry -> {
                     if (ObjectUtils.isEmpty(entry.getValue())) {
-                        return null;
+                        return entry.getKey()+WindConstants.EQ;
                     }
                     return entry.getValue()
                             .stream()
                             .map(val -> String.format("%s=%s", entry.getKey(), val))
                             .collect(Collectors.joining(WindConstants.AND));
                 })
+                .filter(StringUtils::hasText)
                 .collect(Collectors.joining(WindConstants.AND));
     }
 
