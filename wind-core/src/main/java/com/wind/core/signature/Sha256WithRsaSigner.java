@@ -38,9 +38,9 @@ public final class Sha256WithRsaSigner {
      * @return 签名结果
      */
     public static String sign(String signText, String privateKey) {
+        // 构造PKCS8EncodedKeySpec对象
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64Utils.decodeFromString(privateKey));
         try {
-            // 构造PKCS8EncodedKeySpec对象
-            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64Utils.decodeFromString(privateKey));
             // 指定加密算法
             KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
             // 用私钥对信息生成数字签名

@@ -75,7 +75,7 @@ public class RequestSignFilter implements Filter, Ordered {
     private final boolean enable;
 
     public RequestSignFilter(Function<String, Collection<ApiSecretAccount>> apiSecretAccountProvider, Collection<RequestMatcher> ignoreRequestMatchers, boolean enable) {
-        this(WindConstants.WIND, apiSecretAccountProvider, ignoreRequestMatchers, enable);
+        this(null, apiSecretAccountProvider, ignoreRequestMatchers, enable);
     }
 
     public RequestSignFilter(String headerPrefix, Function<String, Collection<ApiSecretAccount>> apiSecretAccountProvider, Collection<RequestMatcher> ignoreRequestMatchers, boolean enable) {
