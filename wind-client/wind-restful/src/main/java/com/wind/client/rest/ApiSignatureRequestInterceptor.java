@@ -3,7 +3,6 @@ package com.wind.client.rest;
 import com.wind.common.exception.AssertUtils;
 import com.wind.core.api.signature.ApiSecretAccount;
 import com.wind.core.api.signature.ApiSignatureRequest;
-import com.wind.core.api.signature.ApiSigner;
 import com.wind.core.api.signature.SignatureHttpHeaderNames;
 import com.wind.sequence.SequenceGenerator;
 import lombok.extern.slf4j.Slf4j;
@@ -40,17 +39,13 @@ public class ApiSignatureRequestInterceptor implements ClientHttpRequestIntercep
 
     private final SignatureHttpHeaderNames headerNames;
 
-    private final ApiSigner signer;
-
     public ApiSignatureRequestInterceptor(Function<HttpRequest, ApiSecretAccount> accountProvider) {
-        this(accountProvider, ApiSigner.HMAC_SHA256, null);
+        this(accountProvider, null);
     }
 
-    public ApiSignatureRequestInterceptor(Function<HttpRequest, ApiSecretAccount> accountProvider, ApiSigner signer, String headerPrefix) {
+    public ApiSignatureRequestInterceptor(Function<HttpRequest, ApiSecretAccount> accountProvider, String headerPrefix) {
         AssertUtils.notNull(accountProvider, "argument accountProvider must not null");
-        AssertUtils.notNull(signer, "argument signer must not null");
         this.accountProvider = accountProvider;
-        this.signer = signer;
         this.headerNames = new SignatureHttpHeaderNames(headerPrefix);
     }
 
@@ -69,10 +64,10 @@ public class ApiSignatureRequestInterceptor implements ClientHttpRequestIntercep
             builder.requestBody(new String(body, StandardCharsets.UTF_8));
         }
         ApiSignatureRequest signatureRequest = builder.build();
-        request.getHeaders().add(headerNames.getAccessKey(), account.getAccessId());
+        request.getHeaders().add(headerNames.getAccessId(), account.getAccessId());
         request.getHeaders().add(headerNames.getTimestamp(), signatureRequest.getTimestamp());
         request.getHeaders().add(headerNames.getNonce(), signatureRequest.getNonce());
-        String sign = signer.sign(signatureRequest, account.getSecretKey());
+        String sign = account.getSignAlgorithm().sign(signatureRequest, account.getSecretKey());
         request.getHeaders().add(headerNames.getSign(), sign);
         if (log.isDebugEnabled()) {
             log.debug("api sign object = {} , sign = {}", request, sign);

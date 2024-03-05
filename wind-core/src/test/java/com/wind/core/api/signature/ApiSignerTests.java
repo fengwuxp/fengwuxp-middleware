@@ -18,8 +18,8 @@ class ApiSignerTests {
     void testSha256Sign() {
         String secretKey = "0241nl401kmdsai21o312..";
         ApiSignatureRequest signatureRequest = mockRequest();
-        String sign = ApiSigner.HMAC_SHA256.sign(signatureRequest, secretKey);
-        Assertions.assertTrue(ApiSigner.HMAC_SHA256.verify(copyAndReplaceScretRequest(signatureRequest), secretKey, sign));
+        String sign = ApiSignAlgorithm.HMAC_SHA256.sign(signatureRequest, secretKey);
+        Assertions.assertTrue(ApiSignAlgorithm.HMAC_SHA256.verify(copyAndReplaceScretRequest(signatureRequest), secretKey, sign));
     }
 
     @Test
@@ -28,8 +28,8 @@ class ApiSignerTests {
         String publicKey = Base64Utils.encodeToString(keyPair.getPublic().getEncoded());
         String privateKey = Base64Utils.encodeToString(keyPair.getPrivate().getEncoded());
         ApiSignatureRequest signatureRequest = mockRequest();
-        String sign = ApiSigner.SHA256_WITH_RSA.sign(signatureRequest, privateKey);
-        Assertions.assertTrue(ApiSigner.SHA256_WITH_RSA.verify(copyAndReplaceScretRequest(signatureRequest), publicKey, sign));
+        String sign = ApiSignAlgorithm.SHA256_WITH_RSA.sign(signatureRequest, privateKey);
+        Assertions.assertTrue(ApiSignAlgorithm.SHA256_WITH_RSA.verify(copyAndReplaceScretRequest(signatureRequest), publicKey, sign));
     }
 
     private static ApiSignatureRequest copyAndReplaceScretRequest(ApiSignatureRequest signatureRequest) {

@@ -3,7 +3,6 @@ package com.wind.client.retrofit;
 import com.wind.common.exception.AssertUtils;
 import com.wind.core.api.signature.ApiSecretAccount;
 import com.wind.core.api.signature.ApiSignatureRequest;
-import com.wind.core.api.signature.ApiSigner;
 import com.wind.core.api.signature.SignatureHttpHeaderNames;
 import com.wind.sequence.SequenceGenerator;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +31,7 @@ import java.util.function.Function;
  * @date 2024-02-26 18:59
  **/
 @Slf4j
-public class ApiSigntureReqeustretOkHttpInterceptor implements Interceptor {
+public class OkHttpApiSignatureRequestInterceptor implements Interceptor {
 
     /**
      * 需要 requestBody 参与签名的 Content-Type
@@ -43,17 +42,13 @@ public class ApiSigntureReqeustretOkHttpInterceptor implements Interceptor {
 
     private final SignatureHttpHeaderNames headerNames;
 
-    private final ApiSigner signer;
-
-    public ApiSigntureReqeustretOkHttpInterceptor(Function<Request, ApiSecretAccount> accountProvider) {
-        this(accountProvider, ApiSigner.HMAC_SHA256, null);
+    public OkHttpApiSignatureRequestInterceptor(Function<Request, ApiSecretAccount> accountProvider) {
+        this(accountProvider, null);
     }
 
-    public ApiSigntureReqeustretOkHttpInterceptor(Function<Request, ApiSecretAccount> accountProvider, ApiSigner signer, String headerPrefix) {
+    public OkHttpApiSignatureRequestInterceptor(Function<Request, ApiSecretAccount> accountProvider, String headerPrefix) {
         AssertUtils.notNull(accountProvider, "argument accountProvider must not null");
-        AssertUtils.notNull(signer, "argument signer must not null");
         this.accountProvider = accountProvider;
-        this.signer = signer;
         this.headerNames = new SignatureHttpHeaderNames(headerPrefix);
     }
 
@@ -79,12 +74,12 @@ public class ApiSigntureReqeustretOkHttpInterceptor implements Interceptor {
         }
         ApiSignatureRequest signatureRequest = builder.build();
         Request.Builder requestBuilder = request.newBuilder();
-        requestBuilder.addHeader(headerNames.getAccessKey(), account.getAccessId());
+        requestBuilder.addHeader(headerNames.getAccessId(), account.getAccessId());
         requestBuilder.addHeader(headerNames.getTimestamp(), signatureRequest.getTimestamp());
         requestBuilder.addHeader(headerNames.getNonce(), signatureRequest.getNonce());
         // TODO 待删除
         requestBuilder.addHeader("Signature-Version", signVersion);
-        String sign = signer.sign(signatureRequest, account.getSecretKey());
+        String sign = account.getSignAlgorithm().sign(signatureRequest, account.getSecretKey());
         requestBuilder.addHeader(headerNames.getSign(), sign);
         log.debug("api sign object = {} , sign = {}", request, sign);
         Response result = chain.proceed(requestBuilder.build());

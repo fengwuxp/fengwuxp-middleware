@@ -19,7 +19,12 @@ public final class SignatureHttpHeaderNames {
 
     final String timestamp;
 
+    @Deprecated
     final String accessKey;
+
+    final String accessId;
+
+    final String secretVersion;
 
     final String sign;
 
@@ -36,6 +41,8 @@ public final class SignatureHttpHeaderNames {
                 getHeaderName(headerPrefix, SignatureConstants.NONCE_HEADER_NAME),
                 getHeaderName(headerPrefix, SignatureConstants.TIMESTAMP_HEADER_NAME),
                 getHeaderName(headerPrefix, SignatureConstants.ACCESS_KEY_HEADER_NAME),
+                getHeaderName(headerPrefix, SignatureConstants.ACCESS_ID_HEADER_NAME),
+                getHeaderName(headerPrefix, SignatureConstants.SECRET_VERSION_HEADER_NAME),
                 getHeaderName(headerPrefix, SignatureConstants.SIGN_HEADER_NAME),
                 SignatureConstants.DEBUG_SIGN_CONTENT_HEADER_NAME,
                 SignatureConstants.DEBUG_SIGN_QUERY_HEADER_NAME
@@ -43,9 +50,9 @@ public final class SignatureHttpHeaderNames {
     }
 
     private static String getHeaderName(String headerPrefix, String headerName) {
-        if (StringUtils.hasLength(headerPrefix)) {
-            return headerPrefix + WindConstants.DASHED + headerName;
+        if (!StringUtils.hasText(headerPrefix)) {
+            headerPrefix = WindConstants.WIND;
         }
-        return headerName;
+        return headerPrefix + WindConstants.DASHED + headerName;
     }
 }

@@ -1,6 +1,7 @@
 package com.wind.core.api.signature;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 /**
@@ -25,9 +26,16 @@ public interface ApiSecretAccount {
     @NotBlank
     String getSecretKey();
 
-    static ApiSecretAccount immutable(String accessId, String secretKey) {
+    /**
+     * @return 签名算法
+     */
+    @NotNull
+     ApiSignAlgorithm getSignAlgorithm();
+
+    static ApiSecretAccount immutable(String accessId, String secretKey, ApiSignAlgorithm signer) {
         Objects.requireNonNull(accessId, "argument accessId must not null");
         Objects.requireNonNull(secretKey, "argument secretKey must not null");
+        Objects.requireNonNull(signer, "argument signer must not null");
         return new ApiSecretAccount() {
             @Override
             public String getAccessId() {
@@ -37,6 +45,11 @@ public interface ApiSecretAccount {
             @Override
             public String getSecretKey() {
                 return secretKey;
+            }
+
+            @Override
+            public ApiSignAlgorithm getSignAlgorithm() {
+                return signer;
             }
         };
     }

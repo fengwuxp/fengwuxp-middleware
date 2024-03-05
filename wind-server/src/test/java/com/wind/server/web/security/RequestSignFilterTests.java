@@ -4,6 +4,7 @@ import com.wind.client.rest.ApiSignatureRequestInterceptor;
 import com.wind.common.WindConstants;
 import com.wind.common.WindHttpConstants;
 import com.wind.core.api.signature.ApiSecretAccount;
+import com.wind.core.api.signature.ApiSignAlgorithm;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,14 +28,14 @@ import java.util.Collections;
  **/
 class RequestSignFilterTests {
 
-    private final ApiSecretAccount secretAccount = ApiSecretAccount.immutable(RandomStringUtils.randomAlphabetic(12), RandomStringUtils.randomAlphabetic(32));
+    private final ApiSecretAccount secretAccount = ApiSecretAccount.immutable(RandomStringUtils.randomAlphabetic(12), RandomStringUtils.randomAlphabetic(32), ApiSignAlgorithm.HMAC_SHA256);
 
     private RequestSignFilter signFilter;
 
     @BeforeEach
     void setup() {
         System.setProperty(WindConstants.SPRING_PROFILES_ACTIVE, WindConstants.DEV);
-        signFilter = new RequestSignFilter(s -> Collections.singleton(secretAccount), Collections.emptyList(), true);
+        signFilter = new RequestSignFilter((accessId, secretVersion) -> secretAccount, Collections.emptyList(), true);
     }
 
     @Test

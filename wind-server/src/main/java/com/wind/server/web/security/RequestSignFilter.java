@@ -1,16 +1,12 @@
 package com.wind.server.web.security;
 
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.wind.client.rest.ApiSignatureRequestInterceptor;
-import com.wind.common.WindConstants;
 import com.wind.common.WindHttpConstants;
 import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.common.util.ServiceInfoUtils;
 import com.wind.core.api.signature.ApiSecretAccount;
 import com.wind.core.api.signature.ApiSignatureRequest;
-import com.wind.core.api.signature.ApiSigner;
 import com.wind.core.api.signature.SignatureHttpHeaderNames;
 import com.wind.server.servlet.RepeatableReadRequestWrapper;
 import com.wind.server.web.filters.WindWebFilterOrdered;
@@ -22,6 +18,7 @@ import org.springframework.core.Ordered;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
@@ -35,9 +32,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Collection;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 
 /**
@@ -50,14 +46,9 @@ import java.util.function.Function;
 @AllArgsConstructor
 public class RequestSignFilter implements Filter, Ordered {
 
-    private final Cache<String, ApiSecretAccount> accountCaches = Caffeine.newBuilder()
-            .expireAfterWrite(Duration.ofHours(2))
-            .maximumSize(1000)
-            .build();
-
     private final SignatureHttpHeaderNames headerNames;
 
-    private final Function<String, Collection<ApiSecretAccount>> apiSecretAccountProvider;
+    private final ApiSecretAccountProvider apiSecretAccountProvider;
 
     /**
      * 忽略接口验签的请求匹配器
@@ -65,21 +56,16 @@ public class RequestSignFilter implements Filter, Ordered {
     private final Collection<RequestMatcher> ignoreRequestMatchers;
 
     /**
-     * 签名器
-     */
-    private final ApiSigner signer;
-
-    /**
      * 是否启用
      */
     private final boolean enable;
 
-    public RequestSignFilter(Function<String, Collection<ApiSecretAccount>> apiSecretAccountProvider, Collection<RequestMatcher> ignoreRequestMatchers, boolean enable) {
-        this(null, apiSecretAccountProvider, ignoreRequestMatchers, enable);
+    public RequestSignFilter(ApiSecretAccountProvider accountProvider, Collection<RequestMatcher> ignoreRequestMatchers, boolean enable) {
+        this(new SignatureHttpHeaderNames(), accountProvider, ignoreRequestMatchers, enable);
     }
 
-    public RequestSignFilter(String headerPrefix, Function<String, Collection<ApiSecretAccount>> apiSecretAccountProvider, Collection<RequestMatcher> ignoreRequestMatchers, boolean enable) {
-        this(new SignatureHttpHeaderNames(headerPrefix), apiSecretAccountProvider, ignoreRequestMatchers, ApiSigner.HMAC_SHA256, enable);
+    public RequestSignFilter(String headerPrefix, ApiSecretAccountProvider accountProvider, Collection<RequestMatcher> ignoreRequestMatchers, boolean enable) {
+        this(new SignatureHttpHeaderNames(headerPrefix), accountProvider, ignoreRequestMatchers, enable);
     }
 
     @Override
@@ -91,8 +77,11 @@ public class RequestSignFilter implements Filter, Ordered {
             return;
         }
         HttpServletResponse response = (HttpServletResponse) servletResponse;
-        String accessKey = request.getHeader(headerNames.getAccessKey());
-        if (!StringUtils.hasLength(accessKey)) {
+        String accessId = request.getHeader(headerNames.getAccessId());
+        if (!StringUtils.hasText(accessId)) {
+            accessId = request.getHeader(headerNames.getAccessKey());
+        }
+        if (!StringUtils.hasLength(accessId)) {
             badRequest(response, "request access key must not empty");
             return;
         }
@@ -103,29 +92,19 @@ public class RequestSignFilter implements Filter, Ordered {
         ApiSignatureRequest signatureRequest = buildSignatureRequest(httpRequest, signRequiredBody);
         String requestSign = request.getHeader(headerNames.getSign());
 
-        // 优先使用缓存中的账号验签
-        ApiSecretAccount cacheAccount = accountCaches.getIfPresent(accessKey);
-        if (cacheAccount != null && signer.verify(signatureRequest, cacheAccount.getSecretKey(), requestSign)) {
+        // 使用访问标识和秘钥版本号加载秘钥账号
+        ApiSecretAccount account = apiSecretAccountProvider.apply(accessId, headerNames.getSecretVersion());
+        if (account == null) {
+            badRequest(response, String.format("please check %s, %s request header", headerNames.getAccessId(), headerNames.getSecretVersion()));
+            return;
+        }
+        if (account.getSignAlgorithm().verify(signatureRequest, account.getSecretKey(), requestSign)) {
             // 设置到签名认证账号到上下文中
-            request.setAttribute(WindHttpConstants.API_SECRET_ACCOUNT_ATTRIBUTE_NAME, cacheAccount);
+            request.setAttribute(WindHttpConstants.API_SECRET_ACCOUNT_ATTRIBUTE_NAME, account);
             chain.doFilter(httpRequest, servletResponse);
             return;
         }
 
-        // 缓存中不存或使用缓存账号验证失败在则加载秘钥账号，可能同时存在多个，用于替换秘钥的场景
-        for (ApiSecretAccount account : apiSecretAccountProvider.apply(accessKey)) {
-            if (signer.verify(signatureRequest, account.getSecretKey(), requestSign)) {
-                // 更新缓存
-                accountCaches.put(accessKey, account);
-                // 设置到签名认证账号到上下文中
-                request.setAttribute(WindHttpConstants.API_SECRET_ACCOUNT_ATTRIBUTE_NAME, account);
-                chain.doFilter(httpRequest, servletResponse);
-                return;
-            }
-        }
-
-        // 验证失败，移除缓存的账号
-        accountCaches.invalidate(accessKey);
         if (!ServiceInfoUtils.isOnline()) {
             // 线下环境返回服务端的签名字符串，方便客户端排查签名错误
             response.addHeader(headerNames.getDebugSignContent(), signatureRequest.getSignTextForDigest());
@@ -171,5 +150,17 @@ public class RequestSignFilter implements Filter, Ordered {
     @Override
     public int getOrder() {
         return WindWebFilterOrdered.REQUEST_SIGN_FILTER.getOrder();
+    }
+
+
+    public interface ApiSecretAccountProvider extends BiFunction<String, String, ApiSecretAccount> {
+
+        /**
+         * @param accessId      客户端访问标识，AppId  or AccessKey
+         * @param secretVersion 秘钥版本 可能为空
+         * @return Api 秘钥账户列表
+         */
+        @Override
+        ApiSecretAccount apply(String accessId, @Nullable String secretVersion);
     }
 }
