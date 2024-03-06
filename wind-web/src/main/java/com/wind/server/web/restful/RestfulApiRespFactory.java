@@ -72,6 +72,10 @@ public final class RestfulApiRespFactory {
         return unAuthorized(null, errorMessage);
     }
 
+    public static <T> ApiResp<T> unAuthorized(ExceptionCode code, String errorMessage) {
+        return of(HttpStatus.UNAUTHORIZED, null, code, errorMessage);
+    }
+
     public static <T> ApiResp<T> unAuthorized(T data, String errorMessage) {
         return of(HttpStatus.UNAUTHORIZED, data, DefaultExceptionCode.UNAUTHORIZED, errorMessage);
     }

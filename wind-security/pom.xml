@@ -17,6 +17,7 @@
         <module>authentication</module>
         <module>captcha</module>
         <module>core</module>
+        <module>mfa</module>
     </modules>
 
     <properties>

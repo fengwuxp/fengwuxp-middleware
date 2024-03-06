@@ -85,6 +85,7 @@
         <alipay-sdk.version>4.38.90.ALL</alipay-sdk.version>
         <weixin-java-pay.version>4.5.0</weixin-java-pay.version>
         <easyexcel.version>3.3.2</easyexcel.version>
+        <googleauth.version>1.5.0</googleauth.version>
         <jetbrains-annotations.version>24.1.0</jetbrains-annotations.version>
         <podam.version>8.0.0.RELEASE</podam.version>
         <awaitility.version>4.2.0</awaitility.version>
@@ -244,6 +245,11 @@
             <dependency>
                 <groupId>com.wind.security</groupId>
                 <artifactId>wind-security-authentication</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.security</groupId>
+                <artifactId>wind-security-mfa</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -428,6 +434,11 @@
                 <groupId>com.squareup.retrofit2</groupId>
                 <artifactId>converter-jackson</artifactId>
                 <version>${retrofit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.warrenstrange</groupId>
+                <artifactId>googleauth</artifactId>
+                <version>${googleauth.version}</version>
             </dependency>
             <dependency>
                 <groupId>uk.co.jemos.podam</groupId>
