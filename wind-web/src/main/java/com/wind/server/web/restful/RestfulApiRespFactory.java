@@ -22,7 +22,6 @@ public final class RestfulApiRespFactory {
         throw new AssertionError();
     }
 
-
     /*-------------------- 2xx -------------------*/
 
     public static <T> ApiResp<T> ok() {
@@ -43,7 +42,6 @@ public final class RestfulApiRespFactory {
     public static <T> ApiResp<Pagination<T>> pagination(Pagination<T> pagination) {
         return ok(pagination);
     }
-
 
     /*-------------------- 4xx -------------------*/
 
@@ -67,7 +65,6 @@ public final class RestfulApiRespFactory {
         return unAuthorized("未登录，请先登录");
     }
 
-
     public static <T> ApiResp<T> unAuthorized(String errorMessage) {
         return unAuthorized(DefaultExceptionCode.UNAUTHORIZED, errorMessage);
     }
@@ -79,7 +76,6 @@ public final class RestfulApiRespFactory {
     public static <T> ApiResp<T> unAuthorized(T data, String errorMessage) {
         return of(HttpStatus.UNAUTHORIZED, data, DefaultExceptionCode.UNAUTHORIZED, errorMessage);
     }
-
 
     public static <T> ApiResp<T> forBidden() {
         return forBidden("无权限访问该资源");
@@ -100,7 +96,6 @@ public final class RestfulApiRespFactory {
     public static <T> ApiResp<T> toManyRequests(String errorMessage) {
         return of(HttpStatus.TOO_MANY_REQUESTS, null, DefaultExceptionCode.TO_MANY_REQUESTS, errorMessage);
     }
-
 
     /*-------------------- business handle error 5xx -------------------*/
 
