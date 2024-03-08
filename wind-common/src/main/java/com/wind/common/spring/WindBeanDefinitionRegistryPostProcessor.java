@@ -7,6 +7,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -16,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
- * 手动注册 bean 支持
+ * 手动注册 Bean 支持
  * 参见：https://mp.weixin.qq.com/s/gwX9KuVRCvdoKrOIwHRZ-Q
  *
  * @author wuxp
@@ -30,6 +31,10 @@ public class WindBeanDefinitionRegistryPostProcessor implements ApplicationConte
      * @value bean definition supplier
      */
     private static final Map<String, Supplier<BeanDefinition>> BEAN_DEFINITIONS = new ConcurrentHashMap<>();
+
+    static {
+        BEAN_DEFINITIONS.put(SpringApplicationContextUtils.class.getName(), () -> new RootBeanDefinition(SpringApplicationContextUtils.class));
+    }
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
