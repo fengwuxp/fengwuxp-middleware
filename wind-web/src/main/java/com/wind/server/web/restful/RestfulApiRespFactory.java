@@ -69,7 +69,7 @@ public final class RestfulApiRespFactory {
 
 
     public static <T> ApiResp<T> unAuthorized(String errorMessage) {
-        return unAuthorized(null, errorMessage);
+        return unAuthorized(DefaultExceptionCode.UNAUTHORIZED, errorMessage);
     }
 
     public static <T> ApiResp<T> unAuthorized(ExceptionCode code, String errorMessage) {
@@ -91,6 +91,14 @@ public final class RestfulApiRespFactory {
 
     public static <T> ApiResp<T> forBidden(T data, String errorMessage) {
         return of(HttpStatus.FORBIDDEN, data, DefaultExceptionCode.FORBIDDEN, errorMessage);
+    }
+
+    public static <T> ApiResp<T> toManyRequests() {
+        return of(HttpStatus.TOO_MANY_REQUESTS, null, DefaultExceptionCode.TO_MANY_REQUESTS, DefaultExceptionCode.TO_MANY_REQUESTS.getDesc());
+    }
+
+    public static <T> ApiResp<T> toManyRequests(String errorMessage) {
+        return of(HttpStatus.TOO_MANY_REQUESTS, null, DefaultExceptionCode.TO_MANY_REQUESTS, errorMessage);
     }
 
 
