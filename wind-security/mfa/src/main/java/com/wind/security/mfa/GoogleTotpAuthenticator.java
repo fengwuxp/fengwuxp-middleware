@@ -24,6 +24,8 @@ import java.io.IOException;
  **/
 public class GoogleTotpAuthenticator implements TotpAuthenticator {
 
+    private static final int DEFAULT_QR_CODE_SIZE = 300;
+
     private final GoogleAuthenticator googleAuthenticator;
 
     public GoogleTotpAuthenticator(GoogleAuthenticatorConfig config, ICredentialRepository repository) {
@@ -51,12 +53,12 @@ public class GoogleTotpAuthenticator implements TotpAuthenticator {
     private String convertQrCode(String url) {
         try {
             QRCodeWriter writer = new QRCodeWriter();
-            BitMatrix bitMatrix = writer.encode(url, BarcodeFormat.QR_CODE, 300, 300);
+            BitMatrix bitMatrix = writer.encode(url, BarcodeFormat.QR_CODE, DEFAULT_QR_CODE_SIZE, DEFAULT_QR_CODE_SIZE);
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             MatrixToImageWriter.writeToStream(bitMatrix, "PNG", stream);
             return Base64Utils.encodeToString(stream.toByteArray());
-        } catch (WriterException | IOException e) {
-            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, "生成绑定 MFA 认证二维码失败", e);
+        } catch (WriterException | IOException exception) {
+            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, "生成绑定MFA认证二维码失败", exception);
         }
     }
 

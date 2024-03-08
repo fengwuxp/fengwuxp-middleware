@@ -36,8 +36,14 @@ public final class HttpServletRequestUtils {
     }
 
     public static <T> T requiredRequestAttribute(String name, HttpServletRequest request) {
-        Object result = request.getAttribute(name);
+        T result = getRequestAttribute(name, request);
         AssertUtils.notNull(result, () -> String.format("attribute = %s must not null", name));
-        return (T) result;
+        return result;
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public static <T> T getRequestAttribute(String name, HttpServletRequest request) {
+        return (T) request.getAttribute(name);
     }
 }

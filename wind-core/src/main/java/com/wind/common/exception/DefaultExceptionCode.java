@@ -20,6 +20,8 @@ public enum DefaultExceptionCode implements ExceptionCode {
 
     FORBIDDEN("403", "无权限"),
 
+    TO_MANY_REQUESTS("429", "请求过于频繁"),
+
     NOT_FOUND("404", "资源不存在"),
 
     COMMON_ERROR("500", "通用业务错误");
