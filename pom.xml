@@ -37,6 +37,7 @@
         <module>wind-dependencies</module>
         <module>wind-sentinel</module>
         <module>wind-client</module>
+        <module>modules/object-sensitive</module>
     </modules>
 
     <properties>
@@ -220,6 +221,11 @@
             <dependency>
                 <groupId>com.wind.common</groupId>
                 <artifactId>wind-common</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.sensitive</groupId>
+                <artifactId>wind-object-sensitive</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

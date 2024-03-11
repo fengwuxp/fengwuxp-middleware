@@ -25,4 +25,9 @@ public final class WindHttpConstants {
      */
     public static final String HTTP_USER_AGENT_HEADER_NAME = "User-Agent";
 
+    /**
+     * 匹配所有路径的 Ant pattern
+     */
+    public static final String ALL_PATH_ANT_PATTERN = "/**";
+
 }

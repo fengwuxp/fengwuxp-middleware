@@ -94,6 +94,7 @@
         <dependency>
             <groupId>com.wind.sentinel</groupId>
             <artifactId>wind-sentinel</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
