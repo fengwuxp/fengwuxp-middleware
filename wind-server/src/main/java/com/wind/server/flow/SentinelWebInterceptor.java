@@ -14,6 +14,7 @@ import com.wind.web.util.HttpServletRequestUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -31,7 +32,8 @@ import java.util.function.Function;
 @AllArgsConstructor
 public class SentinelWebInterceptor implements HandlerInterceptor {
 
-    private static final String SENTINEL_ENTRY_ATTRIBUTE_NAME = SentinelWebInterceptor.class.getName() + ".entry";
+    @VisibleForTesting
+    static final String SENTINEL_ENTRY_ATTRIBUTE_NAME = SentinelWebInterceptor.class.getName() + ".entry";
 
     private final Function<HttpServletRequest, FlowResource> resourceProvider;
 
@@ -71,6 +73,7 @@ public class SentinelWebInterceptor implements HandlerInterceptor {
             log.warn("no entry found in request, key = {}", SENTINEL_ENTRY_ATTRIBUTE_NAME);
             return;
         }
+        entry.exit();
         request.removeAttribute(SENTINEL_ENTRY_ATTRIBUTE_NAME);
         if (exception != null) {
             Tracer.traceEntry(exception, entry);

@@ -1,9 +1,9 @@
 package com.wind.sensitive;
 
-import com.sun.istack.internal.Nullable;
 import com.wind.common.exception.AssertUtils;
 import com.wind.sensitive.annotation.Sensitive;
 import lombok.Data;
+import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.Field;

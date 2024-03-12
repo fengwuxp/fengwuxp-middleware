@@ -63,9 +63,10 @@ public interface ConfigRepository {
      *
      * @param descriptor 配置描述符
      * @param listener   监听配置
+     * @return 配置订阅实例
      */
-    default void onChange(ConfigDescriptor descriptor, ConfigListener listener) {
-        throw new UnsupportedOperationException("un support config listener");
+    default ConfigSubscription onChange(ConfigDescriptor descriptor, ConfigListener listener) {
+        throw new UnsupportedOperationException("un support listen config");
     }
 
     interface ConfigListener {
@@ -75,6 +76,34 @@ public interface ConfigRepository {
 
         void change(List<PropertySource<?>> configs);
     }
+
+    /**
+     * 配置订阅
+     */
+    interface ConfigSubscription {
+
+        ConfigDescriptor getConfigDescriptor();
+
+        /**
+         * 取消订阅
+         */
+        void unsubscribe();
+
+        static ConfigSubscription empty(ConfigDescriptor descriptor) {
+            return new ConfigSubscription() {
+                @Override
+                public ConfigDescriptor getConfigDescriptor() {
+                    return descriptor;
+                }
+
+                @Override
+                public void unsubscribe() {
+
+                }
+            };
+        }
+    }
+
 
     interface ConfigDescriptor {
 
