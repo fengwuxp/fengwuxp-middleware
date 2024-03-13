@@ -31,11 +31,20 @@ public class NacosConfigRepository implements ConfigRepository {
     private final NacosConfigProperties properties;
 
     @Override
+    public void saveTextConfig(ConfigDescriptor descriptor, String content, String checkSha) {
+        try {
+            configService.publishConfigCas(descriptor.getConfigId(), descriptor.getGroup(), content, checkSha);
+        } catch (NacosException exception) {
+            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, String.format("save config：%s error", descriptor.getConfigId()), exception);
+        }
+    }
+
+    @Override
     public String getTextConfig(ConfigDescriptor descriptor) {
         try {
             return configService.getConfig(descriptor.getConfigId(), descriptor.getGroup(), properties.getTimeout());
         } catch (NacosException exception) {
-            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, String.format("load config：%s failure", descriptor.getConfigId()), exception);
+            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, String.format("load config：%s error", descriptor.getConfigId()), exception);
         }
     }
 
@@ -80,11 +89,16 @@ public class NacosConfigRepository implements ConfigRepository {
         };
     }
 
+    @Override
+    public String getConfigSourceName() {
+        return "Nacos-Config";
+    }
+
     private List<PropertySource<?>> getPropertySources(ConfigDescriptor descriptor, String content) {
         try {
             return NacosDataParserHandler.getInstance().parseNacosData(descriptor.getConfigId(), content, descriptor.getFileType().getFileExtension());
         } catch (IOException exception) {
-            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, String.format("parse config：%s failure", descriptor.getConfigId()), exception);
+            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, String.format("parse config：%s error", descriptor.getConfigId()), exception);
         }
     }
 

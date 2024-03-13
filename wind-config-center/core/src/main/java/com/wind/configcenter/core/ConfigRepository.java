@@ -24,16 +24,23 @@ public interface ConfigRepository {
 
     PropertySourceLoader PROPERTY_SOURCE_LOADER = new PropertiesPropertySourceLoader();
 
-    String WIND_PROPERTY_SOURCE_NAME = "Nacos-Config";
+    default void saveTextConfig(ConfigDescriptor descriptor, String content) {
+        saveTextConfig(descriptor, content, null);
+    }
 
     /**
-     * 配置来源名称
+     * 保存配置
      *
-     * @return 例如：Nacos-Config
+     * @param descriptor 配置描述
+     * @param content    配置内容
+     * @param checkSha   配置内容 check
      */
-    default String getConfigSourceName() {
-        return WIND_PROPERTY_SOURCE_NAME;
-    }
+    void saveTextConfig(ConfigDescriptor descriptor, String content, @Nullable String checkSha);
+
+    /**
+     * @return 配置来源名称
+     */
+    String getConfigSourceName();
 
     /**
      * 获取文本格式的配置
