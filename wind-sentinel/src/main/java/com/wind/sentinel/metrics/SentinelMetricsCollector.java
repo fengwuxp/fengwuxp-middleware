@@ -1,9 +1,5 @@
 package com.wind.sentinel.metrics;
 
-/**
- * @author wuxp
- * @date 2024-03-13 11:16
- **/
 
 import com.alibaba.csp.sentinel.config.SentinelConfig;
 import com.alibaba.csp.sentinel.metric.extension.MetricExtension;
@@ -23,9 +19,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
- * Sentinel Metrics Extension
+ * Sentinel Metrics 采集
  *
  * @author wuxp
+ * @date 2024-03-13 11:16
  * @see com.alibaba.csp.sentinel.metric.extension.MetricExtensionProvider
  */
 public class SentinelMetricsCollector implements MetricExtension {
