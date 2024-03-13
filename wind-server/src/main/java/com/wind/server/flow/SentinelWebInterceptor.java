@@ -4,13 +4,16 @@ import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.Tracer;
 import com.alibaba.csp.sentinel.context.ContextUtil;
+import com.alibaba.csp.sentinel.metric.extension.MetricExtensionProvider;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.sentinel.FlowResource;
+import com.wind.sentinel.metrics.SentinelMetricsCollector;
 import com.wind.server.web.restful.RestfulApiRespFactory;
 import com.wind.web.util.HttpResponseMessageUtils;
 import com.wind.web.util.HttpServletRequestUtils;
+import io.micrometer.core.instrument.Tags;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +38,11 @@ public class SentinelWebInterceptor implements HandlerInterceptor {
     @VisibleForTesting
     static final String SENTINEL_ENTRY_ATTRIBUTE_NAME = SentinelWebInterceptor.class.getName() + ".entry";
 
+    static {
+        // 增加自定义的指标收集器
+        MetricExtensionProvider.addMetricExtension(new SentinelMetricsCollector());
+    }
+
     private final Function<HttpServletRequest, FlowResource> resourceProvider;
 
     private final BlockExceptionHandler blockExceptionHandler;
@@ -52,7 +60,7 @@ public class SentinelWebInterceptor implements HandlerInterceptor {
         }
         ContextUtil.enter(resource.getContextName(), resource.getOrigin());
         try {
-            Entry entry = SphU.entry(resource.getName(), resource.getResourceType(), resource.getEntryType());
+            Entry entry = SphU.entry(resource.getName(), resource.getResourceType(), resource.getEntryType(), new Object[]{Tags.of(resource.getMetricsTags())});
             request.setAttribute(SENTINEL_ENTRY_ATTRIBUTE_NAME, entry);
         } catch (BlockException exception) {
             try {

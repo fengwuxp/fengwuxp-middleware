@@ -1,6 +1,10 @@
 package com.wind.sentinel;
 
 import com.alibaba.csp.sentinel.EntryType;
+import io.micrometer.core.instrument.Tag;
+
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * 流控资源定义
@@ -34,4 +38,11 @@ public interface FlowResource {
      * @return 请求来源
      */
     String getOrigin();
+
+    /**
+     * @return 资源需要额外采集的标签
+     */
+    default Iterable<Tag> getMetricsTags() {
+        return Collections.emptyList();
+    }
 }

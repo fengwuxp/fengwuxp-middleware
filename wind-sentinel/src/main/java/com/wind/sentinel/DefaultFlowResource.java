@@ -1,9 +1,12 @@
 package com.wind.sentinel;
 
 import com.alibaba.csp.sentinel.EntryType;
+import io.micrometer.core.instrument.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Collection;
 
 /**
  * @author wuxp
@@ -23,4 +26,6 @@ public class DefaultFlowResource implements FlowResource {
     private String contextName;
 
     private String origin;
+
+    private Iterable<Tag> metricsTags;
 }
