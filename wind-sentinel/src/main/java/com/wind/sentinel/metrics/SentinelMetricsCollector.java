@@ -1,7 +1,6 @@
 package com.wind.sentinel.metrics;
 
 
-import com.alibaba.csp.sentinel.config.SentinelConfig;
 import com.alibaba.csp.sentinel.metric.extension.MetricExtension;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import io.micrometer.core.instrument.Metrics;
@@ -30,12 +29,13 @@ public class SentinelMetricsCollector implements MetricExtension {
     /**
      * Prefix used for all Sentinel metric names.
      */
-    private static final String SENTINEL_METRIC_NAME_PREFIX = "sentinel." + SentinelConfig.getAppName();
+    private static final String SENTINEL_METRIC_NAME_PREFIX = "sentinel.flow";
 
     /**
      * 请求通过 Metric name
      */
     private static final String PASS_REQUESTS_TOTAL = SENTINEL_METRIC_NAME_PREFIX + ".pass.requests.total";
+
     /**
      * 触发流控
      */
