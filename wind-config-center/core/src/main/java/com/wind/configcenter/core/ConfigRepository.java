@@ -24,18 +24,13 @@ public interface ConfigRepository {
 
     PropertySourceLoader PROPERTY_SOURCE_LOADER = new PropertiesPropertySourceLoader();
 
-    default void saveTextConfig(ConfigDescriptor descriptor, String content) {
-        saveTextConfig(descriptor, content, null);
-    }
-
     /**
      * 保存配置
      *
      * @param descriptor 配置描述
      * @param content    配置内容
-     * @param checkSha   配置内容 check
      */
-    void saveTextConfig(ConfigDescriptor descriptor, String content, @Nullable String checkSha);
+    void saveTextConfig(ConfigDescriptor descriptor, String content);
 
     /**
      * @return 配置来源名称
@@ -153,6 +148,11 @@ public interface ConfigRepository {
             return null;
         }
 
+        /**
+         * 是否可刷新
+         *
+         * @return if true 允许刷新
+         */
         default boolean isRefreshable() {
             return true;
         }

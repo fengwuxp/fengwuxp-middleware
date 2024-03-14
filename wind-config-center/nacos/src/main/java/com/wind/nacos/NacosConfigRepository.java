@@ -31,9 +31,9 @@ public class NacosConfigRepository implements ConfigRepository {
     private final NacosConfigProperties properties;
 
     @Override
-    public void saveTextConfig(ConfigDescriptor descriptor, String content, String checkSha) {
+    public void saveTextConfig(ConfigDescriptor descriptor, String content) {
         try {
-            configService.publishConfigCas(descriptor.getConfigId(), descriptor.getGroup(), content, checkSha);
+            configService.publishConfig(descriptor.getConfigId(), descriptor.getGroup(), content, descriptor.getFileType().getFileExtension());
         } catch (NacosException exception) {
             throw new BaseException(DefaultExceptionCode.COMMON_ERROR, String.format("save config：%s error", descriptor.getConfigId()), exception);
         }
@@ -58,7 +58,7 @@ public class NacosConfigRepository implements ConfigRepository {
 
     @Override
     public ConfigSubscription onChange(ConfigDescriptor descriptor, ConfigListener listener) {
-        if (descriptor.isRefreshable()) {
+        if (!descriptor.isRefreshable()) {
             log.warn("config unsupported refresh, dataId = {}，group = {}", descriptor.getConfigId(), descriptor.getGroup());
             return ConfigSubscription.empty(descriptor);
 
