@@ -5,7 +5,6 @@ import com.wind.common.WindConstants;
 import com.wind.common.util.IpAddressUtils;
 import com.wind.common.util.ServiceInfoUtils;
 import com.wind.server.web.restful.RestfulApiRespFactory;
-import com.wind.server.web.supports.ApiResp;
 import com.wind.trace.WindTracer;
 import com.wind.web.util.HttpResponseMessageUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -59,20 +58,18 @@ public class TraceFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain chain) throws ServletException, IOException {
-        String traceId = trace(request);
         try {
             if (!ServiceInfoUtils.isOnline()) {
                 // 线下环境增加服务端 ip 返回
                 response.setHeader(REAL_SERVER_IP, IpAddressUtils.getLocalIpv4());
             }
-            // 提前写入 traceId 到响应头，避免 response committed 后
-            response.setHeader(WIND_TRANCE_ID_HEADER_NAME, traceId);
+            // 提前写入 traceId 到响应头，避免 response committed 后无法写回
+            response.setHeader(WIND_TRANCE_ID_HEADER_NAME, trace(request));
             chain.doFilter(request, response);
         } catch (Throwable throwable) {
             // 统一错误捕获
-            log.error("request error", throwable);
-            ApiResp<Void> resp = RestfulApiRespFactory.withThrowable(throwable);
-            HttpResponseMessageUtils.writeApiResp(response, resp);
+            log.error("request error, cause by = {}", throwable.getMessage(), throwable);
+            HttpResponseMessageUtils.writeApiResp(response, RestfulApiRespFactory.withThrowable(throwable));
         } finally {
             WindTracer.TRACER.clearTraceContext();
         }
@@ -89,7 +86,7 @@ public class TraceFilter extends OncePerRequestFilter {
         contextVariables.put(HTTP_USER_AGENT_HEADER_NAME, request.getHeader(HttpHeaders.USER_AGENT));
         contextVariables.put(LOCAL_HOST_IP_V4, IpAddressUtils.getLocalIpv4());
         WindTracer.TRACER.trace(traceId, contextVariables);
-        return  WindTracer.TRACER.getTraceId();
+        return WindTracer.TRACER.getTraceId();
     }
 
     /**
