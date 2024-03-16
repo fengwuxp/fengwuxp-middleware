@@ -613,6 +613,50 @@
                 <compilerArgument>-parameters</compilerArgument>
             </properties>
         </profile>
+        <profile>
+            <id>测试覆盖率采集</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>report-aggregate</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>report-aggregate</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>target/site/jacoco</outputDirectory>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>merge-results</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>merge</goal>
+                                </goals>
+                                <configuration>
+                                    <fileSets>
+                                        <fileSet>
+                                            <directory>target/</directory>
+                                            <includes>
+                                                <include>**/target/jacoco.exec</include>
+                                            </includes>
+                                        </fileSet>
+                                    </fileSets>
+                                    <destFile>target/aggregate.exec</destFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
 
         <profile>
             <id>跳过测试</id>
