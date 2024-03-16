@@ -45,7 +45,7 @@ public class ImmutableApiResponse<T> implements ApiResponse<T>, Serializable {
         return ExceptionCode.SUCCESSFUL.getCode().equals(errorCode);
     }
 
-    // 给序列号框架使用
+    // 给序列化框架使用
     ImmutableApiResponse() {
         this(null, null, null, null);
     }
