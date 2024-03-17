@@ -37,6 +37,7 @@
         <module>wind-dependencies</module>
         <module>wind-sentinel</module>
         <module>wind-client</module>
+        <module>wind-archetype</module>
         <module>modules/object-sensitive</module>
     </modules>
 
@@ -86,6 +87,8 @@
         <alipay-sdk.version>4.38.90.ALL</alipay-sdk.version>
         <weixin-java-pay.version>4.5.0</weixin-java-pay.version>
         <easyexcel.version>3.3.2</easyexcel.version>
+        <swagger-openapiv3.version>2.2.9</swagger-openapiv3.version>
+        <springdoc-openapi-ui.version>1.7.0</springdoc-openapi-ui.version>
         <googleauth.version>1.5.0</googleauth.version>
         <jetbrains-annotations.version>24.1.0</jetbrains-annotations.version>
         <podam.version>8.0.0.RELEASE</podam.version>
@@ -450,6 +453,16 @@
                 <groupId>com.warrenstrange</groupId>
                 <artifactId>googleauth</artifactId>
                 <version>${googleauth.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger-openapiv3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-ui</artifactId>
+                <version>${springdoc-openapi-ui.version}</version>
             </dependency>
             <dependency>
                 <groupId>uk.co.jemos.podam</groupId>
