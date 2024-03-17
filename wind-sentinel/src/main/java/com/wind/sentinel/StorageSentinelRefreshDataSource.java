@@ -31,7 +31,7 @@ public class StorageSentinelRefreshDataSource<T> extends AutoRefreshDataSource<S
     public StorageSentinelRefreshDataSource(Supplier<String> configRepository, Class<T> configType, long recommendRefreshMs) {
         super(source -> JSON.parseArray(source, configType), recommendRefreshMs);
         this.configRepository = configRepository;
-        FlowRuleListenRegister.registerListen(configType, this);
+        SentinelRuleListenRegister.registerListen(configType, this);
         initConfig();
     }
 

@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author wuxp
  * @date 2024-03-07 17:49
  **/
-public interface BlockExceptionHandler {
+public interface SentinelBlockExceptionHandler {
 
     /**
      * Handle the request when blocked.

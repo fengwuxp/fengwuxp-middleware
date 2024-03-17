@@ -6,8 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Collection;
-
 /**
  * @author wuxp
  * @date 2024-03-07 15:44
@@ -15,7 +13,7 @@ import java.util.Collection;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DefaultFlowResource implements FlowResource {
+public class DefaultSentinelResource implements SentinelResource {
 
     private String name;
 

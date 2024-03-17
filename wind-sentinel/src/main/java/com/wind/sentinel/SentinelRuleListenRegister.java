@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  * @author wuxp
  * @date 2024-03-12 10:06
  **/
-final class FlowRuleListenRegister {
+final class SentinelRuleListenRegister {
 
     /**
      * @key Sentinel 配置类类型
@@ -41,7 +41,7 @@ final class FlowRuleListenRegister {
         RULE_LISTEN_REGISTERS.put(AuthorityRule.class, AuthorityRuleManager::register2Property);
     }
 
-    private FlowRuleListenRegister() {
+    private SentinelRuleListenRegister() {
         throw new AssertionError();
     }
 

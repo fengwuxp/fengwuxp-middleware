@@ -15,7 +15,7 @@ import java.util.List;
  * @date 2024-03-12 10:04
  **/
 @Slf4j
-public class ConfigCenterDataSource<T> extends AbstractDataSource<String, List<T>> {
+public class ConfigCenterSentinelDataSource<T> extends AbstractDataSource<String, List<T>> {
 
     private final ConfigRepository configRepository;
 
@@ -23,7 +23,7 @@ public class ConfigCenterDataSource<T> extends AbstractDataSource<String, List<T
 
     private final ConfigRepository.ConfigSubscription subscription;
 
-    public ConfigCenterDataSource(ConfigRepository configRepository, ConfigRepository.ConfigDescriptor descriptor, Class<T> configType) {
+    public ConfigCenterSentinelDataSource(ConfigRepository configRepository, ConfigRepository.ConfigDescriptor descriptor, Class<T> configType) {
         super(source -> JSON.parseArray(source, configType));
         this.configRepository = configRepository;
         this.descriptor = descriptor;
@@ -38,7 +38,7 @@ public class ConfigCenterDataSource<T> extends AbstractDataSource<String, List<T
                 log.debug("unsupported update, please see change(String config) method");
             }
         });
-        FlowRuleListenRegister.registerListen(configType, this);
+        SentinelRuleListenRegister.registerListen(configType, this);
         initConfig();
     }
 

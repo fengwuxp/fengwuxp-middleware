@@ -5,7 +5,7 @@ import com.alibaba.csp.sentinel.slots.block.degrade.DegradeRule;
 import com.alibaba.csp.sentinel.slots.block.degrade.DegradeRuleManager;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
-import com.wind.sentinel.DefaultFlowResource;
+import com.wind.sentinel.DefaultSentinelResource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -76,8 +76,8 @@ class SentinelWebInterceptorTests {
         }
     }
 
-    private DefaultFlowResource createResource(String name) {
-        DefaultFlowResource result = new DefaultFlowResource();
+    private DefaultSentinelResource createResource(String name) {
+        DefaultSentinelResource result = new DefaultSentinelResource();
         result.setName(name);
         result.setContextName("wind");
         result.setEntryType(EntryType.IN);

@@ -8,7 +8,7 @@ import com.alibaba.csp.sentinel.metric.extension.MetricExtensionProvider;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.common.i18n.SpringI18nMessageUtils;
-import com.wind.sentinel.FlowResource;
+import com.wind.sentinel.SentinelResource;
 import com.wind.sentinel.metrics.SentinelMetricsCollector;
 import com.wind.server.web.restful.RestfulApiRespFactory;
 import com.wind.web.util.HttpResponseMessageUtils;
@@ -43,17 +43,17 @@ public class SentinelWebInterceptor implements HandlerInterceptor {
         MetricExtensionProvider.addMetricExtension(new SentinelMetricsCollector());
     }
 
-    private final Function<HttpServletRequest, FlowResource> resourceProvider;
+    private final Function<HttpServletRequest, SentinelResource> resourceProvider;
 
-    private final BlockExceptionHandler blockExceptionHandler;
+    private final SentinelBlockExceptionHandler blockExceptionHandler;
 
-    public SentinelWebInterceptor(Function<HttpServletRequest, FlowResource> resourceProvider) {
+    public SentinelWebInterceptor(Function<HttpServletRequest, SentinelResource> resourceProvider) {
         this(resourceProvider, SentinelWebInterceptor::defaultHandleBlockException);
     }
 
     @Override
     public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) {
-        FlowResource resource = resourceProvider.apply(request);
+        SentinelResource resource = resourceProvider.apply(request);
         if (resource == null || ObjectUtils.isEmpty(resource.getName())) {
             log.debug("no resource found in request, request uri = {}", request.getRequestURI());
             return true;

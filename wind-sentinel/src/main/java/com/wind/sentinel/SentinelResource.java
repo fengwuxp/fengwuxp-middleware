@@ -3,16 +3,15 @@ package com.wind.sentinel;
 import com.alibaba.csp.sentinel.EntryType;
 import io.micrometer.core.instrument.Tag;
 
-import java.util.Collection;
 import java.util.Collections;
 
 /**
- * 流控资源定义
+ * sentinel 流控资源定义
  *
  * @author wuxp
  * @date 2024-03-07 15:24
  **/
-public interface FlowResource {
+public interface SentinelResource {
 
     /**
      * @return 资源名称
