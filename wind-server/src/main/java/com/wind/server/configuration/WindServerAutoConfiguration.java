@@ -12,8 +12,8 @@ import com.wind.server.web.exception.RespfulErrorAttributes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.support.DefaultBeanFactoryPointcutAdvisor;
-import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -21,10 +21,10 @@ import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.Ordered;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import static com.wind.common.WindConstants.CONTROLLER_METHOD_ASPECT_NAME;
 import static com.wind.common.WindConstants.ENABLED_NAME;
@@ -55,20 +55,19 @@ public class WindServerAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = CONTROLLER_METHOD_ASPECT_NAME, name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
-    public WindControllerMethodInterceptor windControllerMethodInterceptor(ApplicationContext context) {
+    public WindControllerMethodInterceptor windControllerMethodInterceptor(ApplicationContext context, Collection<MethodParameterInjector> injectors) {
         ScriptAuditLogRecorder recorder = null;
-        Collection<MethodParameterInjector> injectors = Collections.emptyList();
         try {
             recorder = context.getBean(ScriptAuditLogRecorder.class);
-            injectors = context.getBeansOfType(MethodParameterInjector.class).values();
-        } catch (BeansException exception) {
-            log.error("un enable audit log or method parameter", exception);
+        } catch (NestedRuntimeException exception) {
+            log.info("un enable audit log");
         }
         return new WindControllerMethodInterceptor(recorder, MethodParameterInjector.composite(injectors));
     }
 
     @Bean
     @ConditionalOnBean(WindControllerMethodInterceptor.class)
+    @ConditionalOnExpression("#{environment['wind.server.controller-method-aspect.expression']!=null}")
     public DefaultBeanFactoryPointcutAdvisor windControllerMethodAspectPointcutAdvisor(WindControllerMethodInterceptor advice, WindServerProperties properties) {
         String expression = properties.getControllerMethodAspect().getExpression();
         AssertUtils.hasLength(expression, String.format("%s 未配置", CONTROLLER_METHOD_ASPECT_NAME));
