@@ -37,7 +37,7 @@ public class RespfulErrorAttributes implements ErrorAttributes, HandlerException
 
         @Override
         public String getDesc() {
-            return "spring 默认处理的错误";
+            return "Spring 默认错误处理";
         }
     };
 
@@ -63,7 +63,7 @@ public class RespfulErrorAttributes implements ErrorAttributes, HandlerException
 
     @Nullable
     @Override
-    public ModelAndView resolveException(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nullable Object handler, Exception ex) {
+    public ModelAndView resolveException(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nullable Object handler, @Nonnull Exception ex) {
         return attributes.resolveException(request, response, handler, ex);
     }
 }

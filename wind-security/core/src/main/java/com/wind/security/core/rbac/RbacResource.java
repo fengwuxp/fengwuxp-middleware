@@ -1,6 +1,6 @@
 package com.wind.security.core.rbac;
 
-import com.wind.common.utils.StringJoinSplitUtils;
+import com.wind.common.util.StringJoinSplitUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.util.StringUtils;

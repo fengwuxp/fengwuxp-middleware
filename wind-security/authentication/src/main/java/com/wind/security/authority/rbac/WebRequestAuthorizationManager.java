@@ -3,7 +3,7 @@ package com.wind.security.authority.rbac;
 import com.wind.security.core.SecurityAccessOperations;
 import com.wind.security.core.rbac.RbacResource;
 import com.wind.security.core.rbac.RbacResourceService;
-import com.wind.security.web.utils.RequestMatcherUtils;
+import com.wind.security.web.util.RequestMatcherUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;

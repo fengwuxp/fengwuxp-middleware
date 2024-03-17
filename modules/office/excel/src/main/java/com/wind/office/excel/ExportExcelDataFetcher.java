@@ -10,6 +10,17 @@ import java.util.List;
  **/
 public interface ExportExcelDataFetcher<T> {
 
+    int DEFAULT_TOTAL = -1;
+
+    /**
+     * 统计总数
+     *
+     * @return -1 表示不关心总数，查询到没有为止
+     */
+    default int count() {
+        return DEFAULT_TOTAL;
+    }
+
     /**
      * 抓取数据
      *

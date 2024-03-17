@@ -13,9 +13,9 @@ public final class CaptchaI18nMessageKeys {
     }
 
     /**
-     * 验证码不存在
+     * 验证码不存在或已失效
      */
-    public static final String CAPTCHA_NOT_EXIST = "$.captcha.not.exist";
+    public static final String CAPTCHA_NOT_EXIST_OR_EXPIRED = "$.captcha.not.exist.or.expired";
 
     /**
      * 验证码发送流控
@@ -31,11 +31,6 @@ public final class CaptchaI18nMessageKeys {
      * 并发生成验证码
      */
     public static final String CAPTCHA_CONCURRENT_GENERATE = "$.captcha.concurrent.generate.error";
-
-    /**
-     * 验证码已失效
-     */
-    public static final String CAPTCHA_EXPIRED = "$.captcha.expired";
 
     /**
      * 验证码验证失败

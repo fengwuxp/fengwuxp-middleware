@@ -13,7 +13,7 @@ class SpringExpressionConditionalExpressionJoinerTest {
     private final SpringExpressionConditionalExpressionJoiner joiner = new SpringExpressionConditionalExpressionJoiner();
 
     @Test
-    public void testJoin() {
+    void testJoin() {
         Assertions.assertEquals("#user.age == 10", joiner.join(createContextVariable("user.age"), createConstant(10), Op.EQ));
         Assertions.assertEquals("#user.age > 10", joiner.join(createContextVariable("user.age"), createConstant(10), Op.GE));
         Assertions.assertEquals("#user.age >= 10", joiner.join(createContextVariable("user.age"), createConstant(10), Op.GET));

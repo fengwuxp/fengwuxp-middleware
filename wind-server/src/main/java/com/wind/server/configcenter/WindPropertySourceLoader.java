@@ -5,7 +5,7 @@ import com.wind.common.WindConstants;
 import com.wind.common.enums.ConfigFileType;
 import com.wind.common.enums.WindMiddlewareType;
 import com.wind.common.exception.AssertUtils;
-import com.wind.common.utils.ClassDetectionUtils;
+import com.wind.common.util.ClassDetectionUtils;
 import com.wind.configcenter.core.ConfigRepository;
 import com.wind.configcenter.core.ConfigRepository.ConfigDescriptor;
 import lombok.AllArgsConstructor;
@@ -30,7 +30,6 @@ import static com.wind.common.WindConstants.SPRING_REDISSON_CONFIG_NAME;
 import static com.wind.common.WindConstants.WIND_MIDDLEWARE_SHARE_NAME;
 import static com.wind.common.WindConstants.WIND_REDISSON_PROPERTY_SOURCE_NAME;
 import static com.wind.common.WindConstants.WIND_SERVER_USED_MIDDLEWARE;
-import static org.springframework.cloud.bootstrap.BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
 /**
  * 配置中心配置加载器
@@ -60,11 +59,6 @@ public class WindPropertySourceLoader {
      * @param environment spring environment
      */
     public void loadGlobalConfigs(ConfigurableEnvironment environment) {
-        // 在 bootstrap 阶段加载全局配置
-        if (environment.getPropertySources().contains(WindConstants.GLOBAL_CONFIG_NAME)) {
-            return;
-        }
-        log.info("load global config");
         CompositePropertySource globalProperties = new CompositePropertySource(WindConstants.GLOBAL_CONFIG_NAME);
         ConfigDescriptor descriptor = ConfigDescriptor.immutable(WindConstants.GLOBAL_CONFIG_NAME, WindConstants.GLOBAL_CONFIG_GROUP);
         List<PropertySource<?>> configs = repository.getConfigs(descriptor);
@@ -78,10 +72,6 @@ public class WindPropertySourceLoader {
      * @param environment spring environment
      */
     public void loadConfigs(ConfigurableEnvironment environment) {
-        // don't listen to events in a bootstrap context
-        if (environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
-            return;
-        }
         environment.getPropertySources().addLast(locateConfigs(environment));
     }
 
@@ -99,7 +89,12 @@ public class WindPropertySourceLoader {
                 // redisson 配置支持
                 loadRedissonConfig(name, result);
             } else {
-                loadConfigs(buildDescriptor(name + WindConstants.DASHED + type.name().toLowerCase(), type.name()), result);
+                SimpleConfigDescriptor descriptor = buildDescriptor(name + WindConstants.DASHED + type.name().toLowerCase(), type.name());
+                if (Objects.equals(type, WindMiddlewareType.DYNAMIC_TP)) {
+                    // dynamic-tp 使用 yaml
+                    descriptor.setFileType(ConfigFileType.YAML);
+                }
+                loadConfigs(descriptor, result);
             }
         }
         // 加载应用配置
@@ -124,10 +119,12 @@ public class WindPropertySourceLoader {
     }
 
     private SimpleConfigDescriptor buildDescriptor(String name, String group) {
+        return buildDescriptor(name, group, properties.getConfigFileType());
+    }
+
+    private SimpleConfigDescriptor buildDescriptor(String name, String group, ConfigFileType fileType) {
         SimpleConfigDescriptor result = SimpleConfigDescriptor.of(name, group);
-        if (result.getFileType() == null) {
-            result.setFileType(properties.getConfigFileType());
-        }
+        result.setFileType(fileType);
         // 开启 RefreshScope 支持
         result.setRefreshable(true);
         return result;
@@ -143,7 +140,7 @@ public class WindPropertySourceLoader {
 
     private void loadRedissonConfig(String redissonName, CompositePropertySource result) {
         if (StringUtils.hasLength(redissonName)) {
-            String name = String.format("%s%s%s", redissonName, WindConstants.DASHED, "redisson");
+            String name = String.format("%s%s%s", redissonName, WindConstants.DASHED, WindConstants.REDISSON_NAME);
             ConfigDescriptor descriptor = ConfigDescriptor.immutable(name, WindMiddlewareType.REDIS.name(), ConfigFileType.YAML);
             Map<String, Object> source = ImmutableMap.of(SPRING_REDISSON_CONFIG_NAME, repository.getTextConfig(descriptor));
             result.addFirstPropertySource(new MapPropertySource(WIND_REDISSON_PROPERTY_SOURCE_NAME, source));

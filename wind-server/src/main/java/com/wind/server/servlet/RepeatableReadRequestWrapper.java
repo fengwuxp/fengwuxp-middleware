@@ -1,9 +1,12 @@
 package com.wind.server.servlet;
 
 import com.wind.common.exception.BaseException;
-import org.springframework.http.HttpMethod;
+import com.wind.web.util.HttpQueryUtils;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.ReadListener;
@@ -16,9 +19,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URLEncoder;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -34,15 +37,18 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
 
     private final ByteArrayOutputStream cachedContent;
 
-    @Nullable
-    private final Integer contentCacheLimit;
+    private final int contentCacheLimit;
 
-    @Nullable
+    /**
+     * 查询参数、表单参数缓存
+     * {@link HttpServletRequest#getParameter(String)}
+     */
+    private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+
     private ServletInputStream inputStream;
 
     private BodyInputStream bodyInputStream;
 
-    @Nullable
     private BufferedReader reader;
 
     /**
@@ -51,10 +57,7 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
      * @param request the original servlet request
      */
     public RepeatableReadRequestWrapper(HttpServletRequest request) {
-        super(request);
-        int contentLength = request.getContentLength();
-        this.cachedContent = new ByteArrayOutputStream(contentLength >= 0 ? contentLength : 1024);
-        this.contentCacheLimit = null;
+        this(request, request.getContentLength() > 0 ? request.getContentLength() : 1024);
     }
 
     /**
@@ -69,8 +72,8 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         super(request);
         this.cachedContent = new ByteArrayOutputStream(contentCacheLimit);
         this.contentCacheLimit = contentCacheLimit;
+        tryCacheRequestParameters();
     }
-
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
@@ -102,72 +105,42 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public String getParameter(String name) {
-        if (this.cachedContent.size() == 0 && isFormPost()) {
-            writeRequestParametersToCachedContent();
-        }
-        return super.getParameter(name);
+        return parameters.getFirst(name);
     }
 
     @Override
     public Map<String, String[]> getParameterMap() {
-        if (this.cachedContent.size() == 0 && isFormPost()) {
-            writeRequestParametersToCachedContent();
-        }
-        return super.getParameterMap();
+        Map<String, String[]> result = new HashMap<>();
+        parameters.forEach((name, values) -> {
+            if (values != null) {
+                result.put(name, values.toArray(new String[0]));
+            }
+        });
+        return result;
     }
 
     @Override
     public Enumeration<String> getParameterNames() {
-        if (this.cachedContent.size() == 0 && isFormPost()) {
-            writeRequestParametersToCachedContent();
-        }
-        return super.getParameterNames();
+        Iterator<String> iterator = parameters.keySet().iterator();
+        return new Enumeration<String>() {
+            @Override
+            public boolean hasMoreElements() {
+                return iterator.hasNext();
+            }
+
+            @Override
+            public String nextElement() {
+                return iterator.next();
+            }
+        };
     }
 
     @Override
     public String[] getParameterValues(String name) {
-        if (this.cachedContent.size() == 0 && isFormPost()) {
-            writeRequestParametersToCachedContent();
-        }
-        return super.getParameterValues(name);
+        tryCacheRequestParameters();
+        List<String> result = parameters.get(name);
+        return result == null ? null : result.toArray(new String[0]);
     }
-
-
-    private boolean isFormPost() {
-        String contentType = getContentType();
-        return (contentType != null && contentType.contains(MediaType.APPLICATION_FORM_URLENCODED_VALUE) &&
-                HttpMethod.POST.matches(getMethod()));
-    }
-
-    private void writeRequestParametersToCachedContent() {
-        try {
-            if (this.cachedContent.size() == 0) {
-                String requestEncoding = getCharacterEncoding();
-                Map<String, String[]> form = super.getParameterMap();
-                for (Iterator<String> nameIterator = form.keySet().iterator(); nameIterator.hasNext(); ) {
-                    String name = nameIterator.next();
-                    List<String> values = Arrays.asList(form.get(name));
-                    for (Iterator<String> valueIterator = values.iterator(); valueIterator.hasNext(); ) {
-                        String value = valueIterator.next();
-                        this.cachedContent.write(URLEncoder.encode(name, requestEncoding).getBytes());
-                        if (value != null) {
-                            this.cachedContent.write('=');
-                            this.cachedContent.write(URLEncoder.encode(value, requestEncoding).getBytes());
-                            if (valueIterator.hasNext()) {
-                                this.cachedContent.write('&');
-                            }
-                        }
-                    }
-                    if (nameIterator.hasNext()) {
-                        this.cachedContent.write('&');
-                    }
-                }
-            }
-        } catch (IOException ex) {
-            throw new IllegalStateException("Failed to write request parameters to cached content", ex);
-        }
-    }
-
 
     /**
      * Template method for handling a content overflow: specifically, a request
@@ -184,6 +157,32 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         throw BaseException.common("cache request body overflow，limit = " + contentCacheLimit);
     }
 
+    private void tryCacheRequestParameters() {
+        if (parameters.isEmpty()) {
+            fillParametersByQuery();
+            fillParametersByForm();
+        }
+    }
+
+    private void fillParametersByQuery() {
+        parameters.putAll(HttpQueryUtils.parseQueryParams(getQueryString()));
+    }
+
+    private boolean isFormRequest() {
+        String contentType = getContentType();
+        return (contentType != null && contentType.contains(MediaType.APPLICATION_FORM_URLENCODED_VALUE));
+    }
+
+    private void fillParametersByForm() {
+        try {
+            if (isFormRequest()) {
+                String body = StreamUtils.copyToString(getInputStream(), StandardCharsets.UTF_8);
+                parameters.putAll(HttpQueryUtils.parseQueryParams(body));
+            }
+        } catch (IOException exception) {
+            throw new IllegalStateException("Failed to write request parameters to cached", exception);
+        }
+    }
 
     private class ContentCachingInputStream extends ServletInputStream {
 
@@ -199,7 +198,7 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         public int read() throws IOException {
             int ch = this.is.read();
             if (ch != -1 && !this.overflow) {
-                if (contentCacheLimit != null && cachedContent.size() == contentCacheLimit) {
+                if (cachedContent.size() == contentCacheLimit) {
                     this.overflow = true;
                     handleContentOverflow(contentCacheLimit);
                 } else {
@@ -210,7 +209,7 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         }
 
         @Override
-        public int read(byte[] b) throws IOException {
+        public int read(@NonNull byte[] b) throws IOException {
             int count = this.is.read(b);
             writeToCache(b, 0, count);
             return count;
@@ -218,8 +217,7 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
 
         private void writeToCache(final byte[] b, final int off, int count) {
             if (!this.overflow && count > 0) {
-                if (contentCacheLimit != null &&
-                        count + cachedContent.size() > contentCacheLimit) {
+                if (count + cachedContent.size() > contentCacheLimit) {
                     this.overflow = true;
                     cachedContent.write(b, off, contentCacheLimit - cachedContent.size());
                     handleContentOverflow(contentCacheLimit);
@@ -230,7 +228,7 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         }
 
         @Override
-        public int read(final byte[] b, final int off, final int len) throws IOException {
+        public int read(@NonNull final byte[] b, final int off, final int len) throws IOException {
             int count = this.is.read(b, off, len);
             writeToCache(b, off, count);
             return count;
@@ -288,12 +286,12 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         }
 
         @Override
-        public int read(byte[] b, int off, int len) throws IOException {
+        public int read(@NonNull byte[] b, int off, int len) throws IOException {
             return this.delegate.read(b, off, len);
         }
 
         @Override
-        public int read(byte[] b) throws IOException {
+        public int read(@NonNull byte[] b) throws IOException {
             return this.delegate.read(b);
         }
 
@@ -313,8 +311,8 @@ public class RepeatableReadRequestWrapper extends HttpServletRequestWrapper {
         }
 
         @Override
-        public synchronized void mark(int readlimit) {
-            this.delegate.mark(readlimit);
+        public synchronized void mark(int readLimit) {
+            this.delegate.mark(readLimit);
         }
 
         @Override

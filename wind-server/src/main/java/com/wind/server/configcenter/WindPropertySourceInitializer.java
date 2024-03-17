@@ -1,59 +1,32 @@
 package com.wind.server.configcenter;
 
 
-import com.wind.configcenter.core.ConfigRepository;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.ConfigurableBootstrapContext;
-import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
-import org.springframework.boot.context.logging.LoggingApplicationListener;
-import org.springframework.boot.context.properties.bind.Bindable;
-import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.lang.NonNull;
 
-import static com.wind.common.WindConstants.WIND_SERVER_CONFIG_CENTER_PROPERTIES_PREFIX;
+import static org.springframework.cloud.bootstrap.BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
 /**
- * 从配置中心加载配置入口
- * 该 {ApplicationListener} 要在，{@link LoggingApplicationListener} 之前
+ * 从配置中心加载中间件、应用等配置
  *
  * @author wuxp
  * @date 2023-10-18 12:55
- * @see LoggingApplicationListener
  **/
 @Slf4j
-@AllArgsConstructor
-public class WindPropertySourceInitializer implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
+public class WindPropertySourceInitializer extends WindAbstractPropertySourceInitializer {
 
     @Override
-    public void onApplicationEvent(@NonNull ApplicationEnvironmentPreparedEvent event) {
-        WindPropertySourceLoader locator = getWindPropertySourceLocator(event);
-        if (locator == null) {
+    protected void load(WindPropertySourceLoader loader, ConfigurableEnvironment environment) {
+        // don't listen to events in a bootstrap context
+        if (environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
             return;
         }
-        log.info("load config center properties");
-        locator.loadGlobalConfigs(event.getEnvironment());
-        locator.loadConfigs(event.getEnvironment());
-    }
-
-    private WindPropertySourceLoader getWindPropertySourceLocator(ApplicationEnvironmentPreparedEvent event) {
-        ConfigurableEnvironment environment = event.getEnvironment();
-        ConfigurableBootstrapContext context = event.getBootstrapContext();
-        try {
-            WindConfigCenterProperties properties = new WindConfigCenterProperties();
-            Binder.get(environment).bind(WIND_SERVER_CONFIG_CENTER_PROPERTIES_PREFIX, Bindable.ofInstance(properties));
-            return new WindPropertySourceLoader(context.get(ConfigRepository.class), properties);
-        } catch (IllegalStateException e) {
-            log.info("unsupported config center");
-        }
-        return null;
+        loader.loadConfigs(environment);
     }
 
     @Override
     public int getOrder() {
-        return LoggingApplicationListener.DEFAULT_ORDER - 10;
+        return Ordered.HIGHEST_PRECEDENCE + 50;
     }
 }

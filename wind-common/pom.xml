@@ -14,8 +14,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
+            <groupId>com.wind.core</groupId>
+            <artifactId>wind-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

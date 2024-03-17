@@ -83,8 +83,9 @@ public abstract class KafkaAppenderConfig<E> extends UnsynchronizedAppenderBase<
 
     public void addProducerConfig(String keyValue) {
         String[] split = keyValue.split("=", 2);
-        if (split.length == 2)
+        if (split.length == 2) {
             addProducerConfigValue(split[0], split[1]);
+        }
     }
 
     public void addProducerConfigValue(String key, Object value) {

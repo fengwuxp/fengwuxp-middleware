@@ -15,8 +15,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.wind.common</groupId>
-            <artifactId>wind-common</artifactId>
+            <groupId>com.wind.core</groupId>
+            <artifactId>wind-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

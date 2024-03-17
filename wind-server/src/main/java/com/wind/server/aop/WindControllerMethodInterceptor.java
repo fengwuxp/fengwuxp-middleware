@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 @AllArgsConstructor
 public class WindControllerMethodInterceptor implements MethodInterceptor {
 
-    private final ScriptAuditLogRecorder auditLogBuilder;
+    private final ScriptAuditLogRecorder auditLogRecorder;
 
     private final MethodParameterInjector methodParameterInjector;
 
@@ -51,9 +51,9 @@ public class WindControllerMethodInterceptor implements MethodInterceptor {
     }
 
     private void recordOperationLog(MethodInvocation invocation, Object result, Throwable throwable) {
-        if (auditLogBuilder == null) {
+        if (auditLogRecorder == null) {
             return;
         }
-        auditLogBuilder.recordLog(invocation.getArguments(), result, invocation.getMethod(), throwable);
+        auditLogRecorder.recordLog(invocation.getArguments(), result, invocation.getMethod(), throwable);
     }
 }

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.wind.middleware</groupId>
+        <artifactId>wind-middleware</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <groupId>com.wind.client</groupId>
+    <artifactId>wind-client</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>wind-restful</module>
+        <module>wind-retrofit</module>
+    </modules>
+
+
+</project>

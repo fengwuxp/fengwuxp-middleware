@@ -1,7 +1,7 @@
 package com.wind.common.config;
 
 import com.wind.common.exception.AssertUtils;
-import com.wind.common.utils.StringJoinSplitUtils;
+import com.wind.common.util.StringJoinSplitUtils;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.lang.Nullable;
 
@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 /**
- * 系统配置
+ * 应用系统配置 Repository
  *
  * @author wuxp
  * @date 2023-11-15 09:36

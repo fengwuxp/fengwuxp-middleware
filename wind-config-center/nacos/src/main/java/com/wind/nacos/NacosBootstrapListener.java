@@ -47,6 +47,11 @@ public class NacosBootstrapListener implements ApplicationListener<ApplicationEn
 
     @Override
     public void onApplicationEvent(@Nonnull ApplicationEnvironmentPreparedEvent event) {
+        String enable = event.getEnvironment().getProperty(NacosConfigProperties.PREFIX + ".enabled");
+        if (Boolean.FALSE.toString().equals(enable)) {
+            log.info("un enable nacos");
+            return;
+        }
         if (CONFIG_SERVICE.get() == null) {
             log.info("init nacos bean on bootstrap");
             NacosConfigProperties properties = createNacosProperties(event.getEnvironment());

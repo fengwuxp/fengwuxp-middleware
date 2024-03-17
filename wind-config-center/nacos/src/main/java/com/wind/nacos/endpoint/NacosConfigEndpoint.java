@@ -40,17 +40,17 @@ import java.util.Map;
 @Endpoint(id = "nacosconfig")
 @AllArgsConstructor
 public class NacosConfigEndpoint {
+
     private static final ThreadLocal<DateFormat> DATE_FORMAT = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
     private final NacosConfigProperties properties;
 
     private final NacosRefreshHistory refreshHistory;
 
-
     @ReadOperation
     public Map<String, Object> invoke() {
         Map<String, Object> result = new HashMap<>(16);
-        result.put("NacosConfigProperties", properties);
+        result.put("properties", properties);
         List<NacosPropertySource> all = NacosPropertySourceRepository.getAll();
         List<Map<String, Object>> sources = new ArrayList<>();
         for (NacosPropertySource ps : all) {
@@ -59,9 +59,8 @@ public class NacosConfigEndpoint {
             source.put("lastSynced", DATE_FORMAT.get().format(ps.getTimestamp()));
             sources.add(source);
         }
-        result.put("Sources", sources);
-        result.put("RefreshHistory", refreshHistory.getRecords());
-
+        result.put("sources", sources);
+        result.put("refreshHistories", refreshHistory.getRecords());
         return result;
     }
 

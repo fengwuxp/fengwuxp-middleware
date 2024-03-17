@@ -11,12 +11,15 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
+import java.time.Duration;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
+ * 支持缓存以及定时刷新的 {@link SystemConfigRepository}
+ *
  * @author wuxp
  * @date 2023-11-15 09:47
  **/
@@ -34,14 +37,15 @@ public class WindSystemConfigRepository implements SystemConfigRepository {
     private final Cache<String, String> cache;
 
     public WindSystemConfigRepository(SystemConfigStorage delegate) {
-        this(delegate, 90, new DefaultConversionService());
+        // 默认不开启缓存
+        this(delegate, new DefaultConversionService(), null);
     }
 
-    public WindSystemConfigRepository(SystemConfigStorage delegate, int cacheSeconds, ConversionService conversionService) {
-        this.delegate = wrapper(delegate);
+    public WindSystemConfigRepository(SystemConfigStorage delegate, ConversionService conversionService, Duration duration) {
+        this.delegate = delegate(delegate);
         this.conversionService = conversionService;
-        this.cache = Caffeine.newBuilder()
-                .refreshAfterWrite(cacheSeconds, TimeUnit.SECONDS)
+        this.cache = (duration == null || duration.isZero()) ? null : Caffeine.newBuilder()
+                .refreshAfterWrite(duration)
                 .maximumSize(500)
                 .scheduler(Scheduler.forScheduledExecutorService(new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("system-config-refresh"))))
                 .build(this.delegate::getConfig);
@@ -57,8 +61,8 @@ public class WindSystemConfigRepository implements SystemConfigRepository {
     @Nullable
     @Override
     public String getConfig(String name) {
-        String result = cache.get(name, this.delegate::getConfig);
-        return MARK_NULL.equals(result) ? null : result;
+        String result = cache == null ? delegate.getConfig(name) : cache.get(name, this.delegate::getConfig);
+        return Objects.equals(MARK_NULL, result) ? null : result;
     }
 
     @Nullable
@@ -102,14 +106,13 @@ public class WindSystemConfigRepository implements SystemConfigRepository {
         return JSON.parseObject(json, targetType.getType());
     }
 
-    private SystemConfigStorage wrapper(SystemConfigStorage storage) {
+    private SystemConfigStorage delegate(SystemConfigStorage storage) {
         return new SystemConfigStorage() {
             @Override
             public void saveConfig(String name, String group, String value) {
                 storage.saveConfig(name, group, value);
             }
 
-            @Nullable
             @Override
             public String getConfig(String name) {
                 String result = storage.getConfig(name);

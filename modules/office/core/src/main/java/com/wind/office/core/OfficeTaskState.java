@@ -18,13 +18,15 @@ public enum OfficeTaskState implements DescriptiveEnum {
 
     EXECUTING("执行中"),
 
-    PART_SUCCESS("部分成功"),
-
     COMPLETED("处理成功"),
 
-    FAILURE("执行失败"),
+    FAILED("执行失败"),
 
-    INTERRUPT("执行被中断");
+    INTERRUPT("执行中断");
 
     private final String desc;
+
+    public static boolean isFinished(OfficeTaskState state) {
+        return state == COMPLETED || state == FAILED || state == INTERRUPT;
+    }
 }

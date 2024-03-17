@@ -4,7 +4,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
     <parent>
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies -->
         <groupId>org.springframework.boot</groupId>
@@ -19,6 +18,7 @@
 
     <modules>
         <module>wind-server</module>
+        <module>wind-core</module>
         <module>wind-common</module>
         <module>wind-security</module>
         <module>wind-config-center</module>
@@ -33,10 +33,18 @@
         <module>tools/mybatis-flex-processor</module>
         <module>modules/office</module>
         <module>tools/h2-functions-for-mysql</module>
+        <module>wind-elasticjob</module>
+        <module>wind-dependencies</module>
+        <module>wind-sentinel</module>
+        <module>wind-client</module>
+        <module>wind-archetype</module>
+        <module>modules/object-sensitive</module>
     </modules>
 
     <properties>
-        <revision>1.0.0-SNAPSHOT</revision>
+        <revision>1.0.1-SNAPSHOT</revision>
+        <!--   占位使用     -->
+        <jacoco-coverage-agent/>
 
         <!--1.8编译参数 保留方法名称-->
         <java.version>1.8</java.version>
@@ -46,7 +54,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven-source-plugin.attach>false</maven-source-plugin.attach>
 
-        <flatten-maven-plugin.version>1.5.0</flatten-maven-plugin.version>
+        <maven-flatten-plugin.version>1.5.0</maven-flatten-plugin.version>
         <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <maven-deploy-plugin.version>3.1.0</maven-deploy-plugin.version>
@@ -54,8 +62,9 @@
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
 
         <spring-boot.version>2.7.16</spring-boot.version>
-        <spring-commons.version>3.1.6</spring-commons.version>
+        <spring-cloud-commons.version>3.1.6</spring-cloud-commons.version>
         <spring-cloud-albaba.version>2021.0.5.0</spring-cloud-albaba.version>
+        <sentinel.version>1.8.7</sentinel.version>
         <mysql.version>8.0.33</mysql.version>
         <mybatis-flex.version>1.7.0</mybatis-flex.version>
         <commons-io.version>2.13.0</commons-io.version>
@@ -73,10 +82,18 @@
         <google-zxing.version>3.5.2</google-zxing.version>
         <freemarker.version>2.3.32</freemarker.version>
         <logback-encoder.version>7.4</logback-encoder.version>
+        <retrofit.version>2.9.0</retrofit.version>
 
         <alipay-sdk.version>4.38.90.ALL</alipay-sdk.version>
         <weixin-java-pay.version>4.5.0</weixin-java-pay.version>
         <easyexcel.version>3.3.2</easyexcel.version>
+        <swagger-openapiv3.version>2.2.9</swagger-openapiv3.version>
+        <springdoc-openapi-ui.version>1.7.0</springdoc-openapi-ui.version>
+        <googleauth.version>1.5.0</googleauth.version>
+        <jetbrains-annotations.version>24.1.0</jetbrains-annotations.version>
+        <podam.version>8.0.0.RELEASE</podam.version>
+        <awaitility.version>4.2.0</awaitility.version>
+        <junit-platform-surefire-provider.version>1.3.2</junit-platform-surefire-provider.version>
     </properties>
 
     <dependencies>
@@ -97,6 +114,15 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -105,7 +131,7 @@
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-commons-dependencies</artifactId>
-                <version>${spring-commons.version}</version>
+                <version>${spring-cloud-commons.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -124,6 +150,11 @@
                 <version>${spring-cloud-albaba.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.csp</groupId>
+                <artifactId>sentinel-prometheus-metric-exporter</artifactId>
+                <version>${sentinel.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mybatis</groupId>
@@ -161,8 +192,23 @@
                 <version>${revision}</version>
             </dependency>
             <dependency>
+                <groupId>com.wind.elasticjob</groupId>
+                <artifactId>wind-elasticjob</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.wind.script</groupId>
                 <artifactId>wind-script</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.office</groupId>
+                <artifactId>wind-office-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.office</groupId>
+                <artifactId>wind-office-excel</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -176,8 +222,18 @@
                 <version>${revision}</version>
             </dependency>
             <dependency>
+                <groupId>com.wind.core</groupId>
+                <artifactId>wind-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.wind.common</groupId>
                 <artifactId>wind-common</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.sensitive</groupId>
+                <artifactId>wind-object-sensitive</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -206,13 +262,33 @@
                 <version>${revision}</version>
             </dependency>
             <dependency>
+                <groupId>com.wind.security</groupId>
+                <artifactId>wind-security-mfa</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.wind.sequence</groupId>
                 <artifactId>wind-sequence-generate</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
+                <groupId>com.wind.client</groupId>
+                <artifactId>wind-restful</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.client</groupId>
+                <artifactId>wind-retrofit</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.wind.trace</groupId>
                 <artifactId>wind-tracer</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.sentinel</groupId>
+                <artifactId>wind-sentinel</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -223,11 +299,6 @@
             <dependency>
                 <groupId>com.wind.context.variable</groupId>
                 <artifactId>wind-context-injection</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.wind.office</groupId>
-                <artifactId>wind-office-core</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -347,6 +418,11 @@
                 <version>${elasticjob.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.jetbrains</groupId>
+                <artifactId>annotations</artifactId>
+                <version>${jetbrains-annotations.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.shardingsphere.elasticjob</groupId>
                 <artifactId>elasticjob-lite-spring-namespace</artifactId>
                 <version>${elasticjob.version}</version>
@@ -356,6 +432,50 @@
                 <groupId>org.dromara.dynamictp</groupId>
                 <artifactId>dynamic-tp-spring-cloud-starter-nacos</artifactId>
                 <version>${dynamic-tp.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.alibaba.csp/sentinel-core -->
+            <dependency>
+                <groupId>com.alibaba.csp</groupId>
+                <artifactId>sentinel-core</artifactId>
+                <version>${sentinel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.retrofit2</groupId>
+                <artifactId>retrofit</artifactId>
+                <version>${retrofit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.retrofit2</groupId>
+                <artifactId>converter-jackson</artifactId>
+                <version>${retrofit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.warrenstrange</groupId>
+                <artifactId>googleauth</artifactId>
+                <version>${googleauth.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger-openapiv3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-ui</artifactId>
+                <version>${springdoc-openapi-ui.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.co.jemos.podam</groupId>
+                <artifactId>podam</artifactId>
+                <version>${podam.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.awaitility/awaitility -->
+            <dependency>
+                <groupId>org.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>${awaitility.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -370,7 +490,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>flatten-maven-plugin</artifactId>
-                    <version>${flatten-maven-plugin.version}</version>
+                    <version>${maven-flatten-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -382,10 +502,118 @@
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco-maven-plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-report-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>${jacoco-coverage-agent}</argLine>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/Abstract*.java</exclude>
+                        <exclude>**/Base*.java</exclude>
+                    </excludes>
+                    <systemPropertyVariables>
+                        <property>
+                            <name>junit.jupiter.extensions.autodetection.enabled</name>
+                            <value>true</value>
+                        </property>
+                    </systemPropertyVariables>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.junit.jupiter</groupId>
+                        <artifactId>junit-jupiter-engine</artifactId>
+                        <version>${junit-jupiter.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- INTEGRATION test via 'mvn clean install -P integration-test -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>integration-tests</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                <include>**/*Test.java</include>
+                                <include>**/*Tests.java</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/Abstract*.java</exclude>
+                                <exclude>**/Base*.java</exclude>
+                            </excludes>
+                            <reuseForks>true</reuseForks>
+                            <!-- When running as a Maven plugin, the JaCoCo agent configuration is prepared by invoking the prepare-agent
+                            or prepare-agent-integration goals, before the actual tests are run. This sets a property named argLine which
+                            points to the JaCoCo agent, later passed as a JVM argument to the test runner -->
+                            <argLine>${jacoco-coverage-agent}</argLine>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- jacoco agent for code coverage -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prepare-unit-tests</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <!-- prepare agent before integration tests -->
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <phase>pre-integration-test</phase>
+                        <configuration>
+                            <propertyName>jacocoCoverageAgent</propertyName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
-
 
     <profiles>
         <profile>
@@ -397,6 +625,50 @@
                 <!--1.8编译参数-保留方法名称-->
                 <compilerArgument>-parameters</compilerArgument>
             </properties>
+        </profile>
+        <profile>
+            <id>测试覆盖率采集</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>report-aggregate</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>report-aggregate</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>target/site/jacoco</outputDirectory>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>merge-results</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>merge</goal>
+                                </goals>
+                                <configuration>
+                                    <fileSets>
+                                        <fileSet>
+                                            <directory>target/</directory>
+                                            <includes>
+                                                <include>**/target/jacoco.exec</include>
+                                            </includes>
+                                        </fileSet>
+                                    </fileSets>
+                                    <destFile>target/aggregate.exec</destFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
 
         <profile>
@@ -487,11 +759,50 @@
                         <artifactId>maven-dependency-plugin</artifactId>
                         <inherited>true</inherited>
                     </plugin>
+                    <plugin>
+                        <groupId>pl.project13.maven</groupId>
+                        <artifactId>git-commit-id-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>get-the-git-infos</id>
+                                <!-- 默认绑定阶段initialize -->
+                                <phase>initialize</phase>
+                                <goals>
+                                    <!-- 目标：revision -->
+                                    <goal>revision</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <!-- 检查的仓库根目录，${project.basedir}：项目根目录，即包含pom.xml文件的目录 -->
+                            <!-- 定义插件中所有时间格式，默认值：yyyy-MM-dd’T’HH:mm:ssZ -->
+                            <dateFormat>yyyy-MM-dd HH:mm:ss</dateFormat>
+                            <!-- 生成git属性文件，默认false：不生成 -->
+                            <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                            <!-- 生成git属性文件路径及文件名，默认${project.build.outputDirectory}/git.properties -->
+                            <generateGitPropertiesFilename>
+                                ${project.build.outputDirectory}/META-INF/${project.artifactId}/git.properties
+                            </generateGitPropertiesFilename>
+                            <includeOnlyProperties>
+                                <property>git.branch</property>
+                                <property>git.build.time</property>
+                                <property>git.build.version</property>
+                                <property>git.commit.id</property>
+                                <property>git.commit.id.abbrev</property>
+                                <property>git.commit.time</property>
+                            </includeOnlyProperties>
+                            <!-- 配置git-describe命令 -->
+                            <gitDescribe>
+                                <skip>false</skip>
+                                <always>false</always>
+                                <dirty>-dirty</dirty>
+                            </gitDescribe>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
     </profiles>
-
 
     <organization>
         <name>wupxp</name>
@@ -503,6 +814,5 @@
             <id>fengwuxp</id>
         </developer>
     </developers>
-
 
 </project>

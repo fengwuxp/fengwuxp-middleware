@@ -24,16 +24,18 @@ public interface ConfigRepository {
 
     PropertySourceLoader PROPERTY_SOURCE_LOADER = new PropertiesPropertySourceLoader();
 
-    String WIND_PROPERTY_SOURCE_NAME = "Nacos-Config";
+    /**
+     * 保存配置
+     *
+     * @param descriptor 配置描述
+     * @param content    配置内容
+     */
+    void saveTextConfig(ConfigDescriptor descriptor, String content);
 
     /**
-     * 配置来源名称
-     *
-     * @return 例如：Nacos-Config
+     * @return 配置来源名称
      */
-    default String getConfigSourceName() {
-        return WIND_PROPERTY_SOURCE_NAME;
-    }
+    String getConfigSourceName();
 
     /**
      * 获取文本格式的配置
@@ -63,9 +65,10 @@ public interface ConfigRepository {
      *
      * @param descriptor 配置描述符
      * @param listener   监听配置
+     * @return 配置订阅实例
      */
-    default void onChange(ConfigDescriptor descriptor, ConfigListener listener) {
-        throw new UnsupportedOperationException("un support config listener");
+    default ConfigSubscription onChange(ConfigDescriptor descriptor, ConfigListener listener) {
+        throw new UnsupportedOperationException("un support listen config");
     }
 
     interface ConfigListener {
@@ -75,6 +78,34 @@ public interface ConfigRepository {
 
         void change(List<PropertySource<?>> configs);
     }
+
+    /**
+     * 配置订阅
+     */
+    interface ConfigSubscription {
+
+        ConfigDescriptor getConfigDescriptor();
+
+        /**
+         * 取消订阅
+         */
+        void unsubscribe();
+
+        static ConfigSubscription empty(ConfigDescriptor descriptor) {
+            return new ConfigSubscription() {
+                @Override
+                public ConfigDescriptor getConfigDescriptor() {
+                    return descriptor;
+                }
+
+                @Override
+                public void unsubscribe() {
+
+                }
+            };
+        }
+    }
+
 
     interface ConfigDescriptor {
 
@@ -117,6 +148,11 @@ public interface ConfigRepository {
             return null;
         }
 
+        /**
+         * 是否可刷新
+         *
+         * @return if true 允许刷新
+         */
         default boolean isRefreshable() {
             return true;
         }

@@ -25,7 +25,7 @@ import java.util.Map;
  * @author wuxp
  * @date 2023-09-23 07:58
  **/
-public class SpringExpressionGeneratorTests {
+ class SpringExpressionGeneratorTests {
 
     private static final String EXPECTED_EXPRESSION = "#name == '张三' AND ({'dev','sit'}.contains(#env) AND ((#age >= 16 and #age <= 45) OR ({'杭州','上海'}.contains(#city) OR #tags['example'] != 'demo')))";
 
@@ -34,7 +34,7 @@ public class SpringExpressionGeneratorTests {
     @Test
     void generate() throws Exception {
         URI filepath = ResourceUtils.getURL("classpath:conditional-nodes.json").toURI();
-        String json = IOUtils.toString(Files.newInputStream(Paths.get(filepath)), StandardCharsets.UTF_8.name());
+        String json = IOUtils.toString(Files.newInputStream(Paths.get(filepath)), StandardCharsets.UTF_8);
         ConditionalNode conditionalNode = JSON.parseObject(json, ConditionalNode.class);
         String spel = SpringExpressionGenerator.generate(conditionalNode);
         Assertions.assertEquals(EXPECTED_EXPRESSION, spel);

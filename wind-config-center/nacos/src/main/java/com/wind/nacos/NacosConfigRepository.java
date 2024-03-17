@@ -31,11 +31,20 @@ public class NacosConfigRepository implements ConfigRepository {
     private final NacosConfigProperties properties;
 
     @Override
+    public void saveTextConfig(ConfigDescriptor descriptor, String content) {
+        try {
+            configService.publishConfig(descriptor.getConfigId(), descriptor.getGroup(), content, descriptor.getFileType().getFileExtension());
+        } catch (NacosException exception) {
+            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, String.format("save config：%s error", descriptor.getConfigId()), exception);
+        }
+    }
+
+    @Override
     public String getTextConfig(ConfigDescriptor descriptor) {
         try {
             return configService.getConfig(descriptor.getConfigId(), descriptor.getGroup(), properties.getTimeout());
         } catch (NacosException exception) {
-            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, String.format("load config：%s failure", descriptor.getConfigId()), exception);
+            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, String.format("load config：%s error", descriptor.getConfigId()), exception);
         }
     }
 
@@ -48,30 +57,48 @@ public class NacosConfigRepository implements ConfigRepository {
     }
 
     @Override
-    public void onChange(ConfigDescriptor descriptor, ConfigListener listener) {
-        if (descriptor.isRefreshable()) {
-            log.warn("config unsupported refresh = {}", descriptor);
-            return;
+    public ConfigSubscription onChange(ConfigDescriptor descriptor, ConfigListener listener) {
+        if (!descriptor.isRefreshable()) {
+            log.warn("config unsupported refresh, dataId = {}，group = {}", descriptor.getConfigId(), descriptor.getGroup());
+            return ConfigSubscription.empty(descriptor);
+
         }
+        final AbstractListener wrapperListener = new AbstractListener() {
+            @Override
+            public void receiveConfigInfo(String content) {
+                listener.change(content);
+                listener.change(getPropertySources(descriptor, content));
+            }
+        };
         try {
-            configService.addListener(descriptor.getConfigId(), descriptor.getGroup(), new AbstractListener() {
-                @Override
-                public void receiveConfigInfo(String content) {
-                    listener.change(content);
-                    List<PropertySource<?>> configs = getPropertySources(descriptor, content);
-                    listener.change(configs);
-                }
-            });
+            configService.addListener(descriptor.getConfigId(), descriptor.getGroup(), wrapperListener);
         } catch (NacosException exception) {
             throw new BaseException(DefaultExceptionCode.COMMON_ERROR, exception.getMessage(), exception);
         }
+        return new ConfigSubscription() {
+            @Override
+            public ConfigDescriptor getConfigDescriptor() {
+                return descriptor;
+            }
+
+            @Override
+            public void unsubscribe() {
+                // 移除订阅
+                configService.removeListener(descriptor.getConfigId(), descriptor.getGroup(), wrapperListener);
+            }
+        };
+    }
+
+    @Override
+    public String getConfigSourceName() {
+        return "Nacos-Config";
     }
 
     private List<PropertySource<?>> getPropertySources(ConfigDescriptor descriptor, String content) {
         try {
             return NacosDataParserHandler.getInstance().parseNacosData(descriptor.getConfigId(), content, descriptor.getFileType().getFileExtension());
         } catch (IOException exception) {
-            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, String.format("parse config：%s failure", descriptor.getConfigId()), exception);
+            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, String.format("parse config：%s error", descriptor.getConfigId()), exception);
         }
     }
 

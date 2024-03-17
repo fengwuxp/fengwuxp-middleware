@@ -1,5 +1,6 @@
 package com.wind.server.actuate.health;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
@@ -16,6 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author wuxp
  * @date 2023-10-08 13:42
  **/
+@Slf4j
 public class GracefulShutdownHealthIndicator implements HealthIndicator, DisposableBean {
 
     /**
@@ -37,6 +39,9 @@ public class GracefulShutdownHealthIndicator implements HealthIndicator, Disposa
                 health.set(!MARK_FILE.exists());
             } finally {
                 monitor();
+            }
+            if (!health.get()) {
+                log.info("health down");
             }
             // 每隔 3s 执行一次
         }, 3, TimeUnit.SECONDS);

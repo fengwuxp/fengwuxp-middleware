@@ -12,12 +12,16 @@ import java.util.Set;
  * @author wuxp
  * @date 2023-11-20 13:43
  **/
-public class H2MysqlFunctions {
+public final class H2MysqlFunctions {
 
     private static final Set<H2Function> DEFAULT_FUNCTIONS = new HashSet<>();
 
     static {
         DEFAULT_FUNCTIONS.add(new H2Function("FIND_IN_SET", "com.wind.tools.h2.mysql.H2MysqlFunctions.findInSet"));
+    }
+
+    private H2MysqlFunctions() {
+        throw new AssertionError();
     }
 
     /**
@@ -40,6 +44,5 @@ public class H2MysqlFunctions {
     public static Set<H2Function> getFunctions() {
         return DEFAULT_FUNCTIONS;
     }
-
 
 }
