@@ -3,6 +3,7 @@ package com.wind.common.util;
 
 import com.wind.common.WindConstants;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.Nullable;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -56,7 +57,6 @@ public final class IpAddressUtils {
      * @return 是否ipv6地址
      */
     public static boolean isIpV6(String ip) {
-
         if (ip == null || !ip.contains(":")) {
             return false;
         }
@@ -86,7 +86,6 @@ public final class IpAddressUtils {
             return true;
         }
 
-
         /**
          *   三、内嵌IPv4地址表示法
          *         为了实现IPv4 - IPv6互通，IPv4地址会嵌入IPv6地址中，此时地址常表示为：X:
@@ -99,26 +98,20 @@ public final class IpAddressUtils {
          *         压缩0位的方法依旧适用 '
          */
         String[] sections = ip.split(":");
-
         boolean hasIpV4 = ip.contains(".");
-
         if ((hasIpV4 && sections.length != 7)
                 || sections.length != 8) {
             return false;
         }
 
-
         for (String section : sections) {
             try {
-
                 if (section.contains(".") && isIpV4(section)) {
                     continue;
                 }
-
                 if (Integer.parseInt(section, 16) < 0) {
                     return false;
                 }
-
             } catch (Exception e) {
                 return false;
             }
@@ -128,17 +121,14 @@ public final class IpAddressUtils {
 
 
     public static boolean isIpV4(String ip) {
-
         if (ip == null || !ip.contains(".")) {
             return false;
         }
 
         String[] sections = ip.split("\\.");
-
         if (sections.length != 4) {
             return false;
         }
-
         for (String section : sections) {
             try {
                 if (Integer.parseInt(section) < 0) {
@@ -148,7 +138,6 @@ public final class IpAddressUtils {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -158,25 +147,38 @@ public final class IpAddressUtils {
      * @return 本机 host
      */
     public static String getLocalIpv4() {
+        InetAddress address = findFirstNonLoopbackAddress();
+        if (address == null) {
+            return WindConstants.UNKNOWN;
+        }
+        return address.getHostAddress();
+    }
+
+    /**
+     * 获取本机第一个非回环地址
+     *
+     * @return 本机 host
+     */
+    @Nullable
+    public static InetAddress findFirstNonLoopbackAddress() {
         try {
             for (Enumeration<NetworkInterface> network = NetworkInterface.getNetworkInterfaces(); network.hasMoreElements(); ) {
                 NetworkInterface item = network.nextElement();
+                if (item.isLoopback() || !item.isUp()) {
+                    continue;
+                }
                 for (InterfaceAddress address : item.getInterfaceAddresses()) {
-                    if (item.isLoopback() || !item.isUp()) {
-                        continue;
-                    }
-                    if (address.getAddress() instanceof Inet4Address) {
-                        Inet4Address inet4Address = (Inet4Address) address.getAddress();
-                        return inet4Address.getHostAddress();
+                    InetAddress inetAddress = address.getAddress();
+                    if (inetAddress instanceof Inet4Address && !inetAddress.isLoopbackAddress()) {
+                        return inetAddress;
                     }
                 }
             }
-            String result = InetAddress.getLocalHost().getHostAddress();
-            return result == null ? WindConstants.UNKNOWN : result;
+            return InetAddress.getLocalHost();
         } catch (SocketException | UnknownHostException exception) {
             log.warn("获取本机 host 失败", exception);
-            return WindConstants.UNKNOWN;
         }
+        return null;
     }
 
 }
