@@ -38,7 +38,7 @@ class SentinelWebInterceptorTests {
                 mockDegradeRule("GET /example/5qps", 5),
                 mockDegradeRule("GET /example/10qps", 10)
         ));
-        interceptor = new SentinelWebInterceptor(request -> createResource(String.format("%s %s", request.getMethod().toUpperCase(), request.getRequestURI())));
+        interceptor = SentinelWebInterceptor.defaults(request -> createResource(String.format("%s %s", request.getMethod().toUpperCase(), request.getRequestURI())));
     }
 
     @Test
@@ -68,11 +68,11 @@ class SentinelWebInterceptorTests {
         MockHttpServletResponse response = new MockHttpServletResponse();
         boolean b = interceptor.preHandle(request, response, new Object());
         if (b) {
-            Assertions.assertNotNull(request.getAttribute(SentinelWebInterceptor.SENTINEL_ENTRY_ATTRIBUTE_NAME));
+            Assertions.assertNotNull(request.getAttribute(SentinelWebInterceptor.DEFAULT_SENTINEL_ENTRY_ATTRIBUTE_NAME));
             interceptor.afterCompletion(request, response, new Object(), null);
-            Assertions.assertNull(request.getAttribute(SentinelWebInterceptor.SENTINEL_ENTRY_ATTRIBUTE_NAME));
-        }else {
-            Assertions.assertNull(request.getAttribute(SentinelWebInterceptor.SENTINEL_ENTRY_ATTRIBUTE_NAME));
+            Assertions.assertNull(request.getAttribute(SentinelWebInterceptor.DEFAULT_SENTINEL_ENTRY_ATTRIBUTE_NAME));
+        } else {
+            Assertions.assertNull(request.getAttribute(SentinelWebInterceptor.DEFAULT_SENTINEL_ENTRY_ATTRIBUTE_NAME));
         }
     }
 

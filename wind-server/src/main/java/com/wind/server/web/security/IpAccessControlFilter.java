@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import static com.wind.common.WindHttpConstants.HTTP_REQUEST_IP_ATTRIBUTE_NAME;
 
 /**
- * 请请求来源 ip 访问控制
+ * 请求来源 ip 访问控制
  *
  * @author wuxp
  * @date 2024-03-15 17:55
