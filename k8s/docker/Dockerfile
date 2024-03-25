@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-alpine
+FROM eclipse-temurin:8-jdk-alpine
 LABEL authors="wuxp"
 
 # 镜像默认识别此环境变量控制时区
