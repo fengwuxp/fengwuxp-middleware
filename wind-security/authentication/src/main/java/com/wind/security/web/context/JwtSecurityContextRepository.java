@@ -4,6 +4,8 @@ import com.wind.common.exception.BaseException;
 import com.wind.security.authentication.jwt.JwtToken;
 import com.wind.security.authentication.jwt.JwtTokenCodec;
 import com.wind.security.authentication.jwt.JwtUser;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
@@ -14,11 +16,8 @@ import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.SecurityContextRepository;
 
 import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.wind.security.WebSecurityConstants.LOGIN_JWT_TOKEN_INVALID;
@@ -64,11 +63,6 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
     @Override
     public boolean containsContext(HttpServletRequest request) {
         return request.getAttribute(SPRING_SECURITY_CONTEXT_KEY) != null;
-    }
-
-    @Override
-    public Supplier<SecurityContext> loadContext(HttpServletRequest request) {
-        return () -> getSecurityContext(request);
     }
 
     @Nonnull

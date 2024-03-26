@@ -2,7 +2,7 @@ package com.wind.security.core.rbac;
 
 import org.springframework.lang.Nullable;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;

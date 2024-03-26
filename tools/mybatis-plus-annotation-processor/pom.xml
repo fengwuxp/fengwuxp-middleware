@@ -16,13 +16,13 @@
     <packaging>jar</packaging>
 
     <properties>
-        <java.version>1.8</java.version>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
 
-        <javapoet.version>1.13.0</javapoet.version>
         <mybatis-plus.version>3.5.3.2</mybatis-plus.version>
-        <codegen.version>0.6.8</codegen.version>
+        <javapoet.version>1.13.0</javapoet.version>
+        <ecj.version>3.37.0</ecj.version>
     </properties>
 
     <dependencyManagement>
@@ -37,10 +37,11 @@
                 <artifactId>mybatis-plus-annotation</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/org.eclipse.jdt/ecj -->
             <dependency>
-                <groupId>com.mysema.codegen</groupId>
-                <artifactId>codegen</artifactId>
-                <version>${codegen.version}</version>
+                <groupId>org.eclipse.jdt</groupId>
+                <artifactId>ecj</artifactId>
+                <version>${ecj.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -60,13 +61,12 @@
             <artifactId>mybatis-plus-annotation</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.mysema.codegen</groupId>
-            <artifactId>codegen</artifactId>
-        </dependency>
-        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jdt</groupId>
+            <artifactId>ecj</artifactId>
         </dependency>
     </dependencies>
     <build>

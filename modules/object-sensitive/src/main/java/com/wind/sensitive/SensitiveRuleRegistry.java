@@ -2,7 +2,7 @@ package com.wind.sensitive;
 
 import com.wind.common.exception.AssertUtils;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;

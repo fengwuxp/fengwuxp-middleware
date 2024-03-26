@@ -74,8 +74,8 @@ class ApiSignatureRequestInterceptorTests {
         HttpHeaders httpHeaders = new HttpHeaders();
         return new HttpRequest() {
             @Override
-            public String getMethodValue() {
-                return HttpMethod.GET.name();
+            public HttpMethod getMethod() {
+                return HttpMethod.GET;
             }
 
             @Override

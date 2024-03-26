@@ -2,7 +2,7 @@ package com.wind.security.captcha;
 
 import org.springframework.lang.Nullable;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.Collection;
 
 /**

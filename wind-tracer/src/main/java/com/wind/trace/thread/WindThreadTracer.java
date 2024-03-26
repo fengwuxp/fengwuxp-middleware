@@ -8,7 +8,7 @@ import com.wind.trace.WindTracer;
 import org.slf4j.MDC;
 import org.springframework.util.StringUtils;
 
-import javax.validation.constraints.Null;
+import jakarta.validation.constraints.Null;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

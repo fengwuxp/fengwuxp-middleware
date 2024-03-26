@@ -2,6 +2,7 @@ package com.wind.nacos;
 
 import com.alibaba.spring.util.PropertySourcesUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,6 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.util.ObjectUtils;
 
-import javax.annotation.PostConstruct;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;

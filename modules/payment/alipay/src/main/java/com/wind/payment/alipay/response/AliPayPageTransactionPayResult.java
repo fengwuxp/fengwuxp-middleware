@@ -4,7 +4,7 @@ package com.wind.payment.alipay.response;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * web page 支付返回结果

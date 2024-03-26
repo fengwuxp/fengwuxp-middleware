@@ -2,7 +2,7 @@ package com.wind.trace;
 
 import org.springframework.lang.Nullable;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import java.util.Map;
 
 /**

@@ -1,6 +1,6 @@
 package com.wind.core.api.signature;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Api Signer

@@ -7,7 +7,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;

@@ -6,7 +6,7 @@ import com.wind.trace.WindTracer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.TaskDecorator;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * 用于在线程切换时，将线程上下文信息传递到新的线程中

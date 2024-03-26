@@ -3,7 +3,7 @@ package com.wind.payment.alipay.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * 二维码支付
