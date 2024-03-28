@@ -59,13 +59,11 @@ public class OkHttpApiSignatureRequestInterceptor implements Interceptor {
         ApiSecretAccount account = accountProvider.apply(request);
         AssertUtils.notNull(account, "ApiSecretAccount must not null");
         ApiSignatureRequest.ApiSignatureRequestBuilder builder = ApiSignatureRequest.builder();
-        String signVersion = "v2";
         builder.method(request.method())
                 .requestPath(request.url().encodedPath())
                 .nonce(SequenceGenerator.randomAlphanumeric(32))
                 .timestamp(String.valueOf(System.currentTimeMillis()))
-                .queryString(getQueryString(request.url()))
-                .version(signVersion);
+                .queryString(getQueryString(request.url()));
         RequestBody requestBody = request.body();
         if (signRequiredRequestBody(requestBody)) {
             Buffer buffer = new Buffer();
@@ -77,8 +75,6 @@ public class OkHttpApiSignatureRequestInterceptor implements Interceptor {
         requestBuilder.addHeader(headerNames.getAccessId(), account.getAccessId());
         requestBuilder.addHeader(headerNames.getTimestamp(), signatureRequest.getTimestamp());
         requestBuilder.addHeader(headerNames.getNonce(), signatureRequest.getNonce());
-        // TODO 待删除
-        requestBuilder.addHeader("Signature-Version", signVersion);
         String sign = account.getSignAlgorithm().sign(signatureRequest, account.getSecretKey());
         requestBuilder.addHeader(headerNames.getSign(), sign);
         log.debug("api sign object = {} , sign = {}", request, sign);

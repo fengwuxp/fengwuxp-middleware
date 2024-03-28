@@ -12,6 +12,13 @@ import com.wind.server.servlet.RepeatableReadRequestWrapper;
 import com.wind.server.web.filters.WindWebFilterOrdered;
 import com.wind.server.web.restful.RestfulApiRespFactory;
 import com.wind.web.util.HttpResponseMessageUtils;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
@@ -23,13 +30,6 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -78,9 +78,6 @@ public class RequestSignFilter implements Filter, Ordered {
         }
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String accessId = request.getHeader(headerNames.getAccessId());
-        if (!StringUtils.hasText(accessId)) {
-            accessId = request.getHeader(headerNames.getAccessKey());
-        }
         if (!StringUtils.hasLength(accessId)) {
             badRequest(response, "request access key must not empty");
             return;
@@ -138,9 +135,7 @@ public class RequestSignFilter implements Filter, Ordered {
                 // 仅在存在查询字符串时才设置，避免获取到表单参数
                 .method(request.getMethod().toUpperCase())
                 .nonce(request.getHeader(headerNames.getNonce()))
-                .timestamp(request.getHeader(headerNames.getTimestamp()))
-                // TODO 临时增加签名版本用于切换
-                .version(request.getHeader("Signature-Version"));
+                .timestamp(request.getHeader(headerNames.getTimestamp()));
         if (requiredBody) {
             result.requestBody(StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8));
         }

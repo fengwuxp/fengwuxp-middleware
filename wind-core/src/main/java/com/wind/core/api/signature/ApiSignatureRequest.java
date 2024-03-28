@@ -4,6 +4,7 @@ import com.wind.common.WindConstants;
 import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
@@ -13,7 +14,6 @@ import org.springframework.util.DigestUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import jakarta.validation.constraints.NotNull;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -69,14 +68,7 @@ public class ApiSignatureRequest {
      */
     private final String requestBody;
 
-    /**
-     * 签名版本 v2版本查询字符需要排序
-     * {@link #buildCanonicalizedQueryString}
-     */
-    @Deprecated
-    private final String version;
-
-    private ApiSignatureRequest(String method, String requestPath, String nonce, String timestamp, String decodeQueryString, String requestBody, String version) {
+    private ApiSignatureRequest(String method, String requestPath, String nonce, String timestamp, String queryString, String requestBody) {
         AssertUtils.hasText(method, "method must not empty");
         AssertUtils.hasText(requestPath, "requestPath must not empty");
         AssertUtils.hasText(nonce, "nonce must not empty");
@@ -85,10 +77,8 @@ public class ApiSignatureRequest {
         this.requestPath = requestPath;
         this.nonce = nonce;
         this.timestamp = timestamp;
-        // 如果是 v2 版本，则将查询字符串 key 按照字典序排序
-        this.queryString = Objects.equals(version, "v2") ? buildCanonicalizedQueryString(parseQueryParamsAsMap(decodeQueryString)) : decodeQueryString;
+        this.queryString = buildCanonicalizedQueryString(parseQueryParamsAsMap(queryString));
         this.requestBody = requestBody;
-        this.version = version;
     }
 
     /**
@@ -139,7 +129,7 @@ public class ApiSignatureRequest {
                 .stream()
                 .map(entry -> {
                     if (ObjectUtils.isEmpty(entry.getValue())) {
-                        return entry.getKey()+WindConstants.EQ;
+                        return entry.getKey() + WindConstants.EQ;
                     }
                     return entry.getValue()
                             .stream()
