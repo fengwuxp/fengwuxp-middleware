@@ -39,6 +39,7 @@
         <module>wind-client</module>
         <module>wind-archetype</module>
         <module>modules/object-sensitive</module>
+        <module>tests</module>
     </modules>
 
     <properties>
