@@ -1,4 +1,4 @@
-package com.wind.core.api.signature;
+package com.wind.api.core.signature;
 
 import com.wind.common.WindConstants;
 import lombok.AllArgsConstructor;

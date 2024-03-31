@@ -1,9 +1,9 @@
 package com.wind.client.rest;
 
 import com.wind.common.exception.AssertUtils;
-import com.wind.core.api.signature.ApiSecretAccount;
-import com.wind.core.api.signature.ApiSignatureRequest;
-import com.wind.core.api.signature.SignatureHttpHeaderNames;
+import com.wind.api.core.signature.ApiSecretAccount;
+import com.wind.api.core.signature.ApiSignatureRequest;
+import com.wind.api.core.signature.SignatureHttpHeaderNames;
 import com.wind.sequence.SequenceGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpRequest;

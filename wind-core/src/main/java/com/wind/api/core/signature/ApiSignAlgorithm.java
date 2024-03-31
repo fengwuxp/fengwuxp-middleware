@@ -1,7 +1,7 @@
-package com.wind.core.api.signature;
+package com.wind.api.core.signature;
 
-import com.wind.core.signature.HmacSHA256Signer;
-import com.wind.core.signature.Sha256WithRsaSigner;
+import com.wind.signature.algorithm.HmacSHA256Signer;
+import com.wind.signature.algorithm.Sha256WithRsaSigner;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

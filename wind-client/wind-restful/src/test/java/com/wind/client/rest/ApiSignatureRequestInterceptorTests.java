@@ -1,8 +1,8 @@
 package com.wind.client.rest;
 
-import com.wind.core.api.signature.ApiSecretAccount;
-import com.wind.core.api.signature.ApiSignAlgorithm;
-import com.wind.core.api.signature.SignatureHttpHeaderNames;
+import com.wind.api.core.signature.ApiSecretAccount;
+import com.wind.api.core.signature.ApiSignAlgorithm;
+import com.wind.api.core.signature.SignatureHttpHeaderNames;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,6 @@
 package com.wind.server.web.supports;
 
-import com.wind.core.api.ApiResponse;
+import com.wind.api.core.ApiResponse;
 import org.springframework.http.HttpStatus;
 
 import java.beans.Transient;

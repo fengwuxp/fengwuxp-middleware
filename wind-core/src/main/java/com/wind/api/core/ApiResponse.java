@@ -1,4 +1,4 @@
-package com.wind.core.api;
+package com.wind.api.core;
 
 import org.springframework.lang.Nullable;
 
