@@ -1,10 +1,13 @@
 package com.wind.office.core.formatter;
 
+import com.wind.common.WindDateFormatPatterns;
 import com.wind.common.exception.DefaultExceptionCode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.format.Formatter;
 
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAccessor;
 import java.util.Locale;
 
 /**
@@ -24,6 +27,12 @@ class DefaultFormatterFactoryTests {
     void testOfEnum() {
         Formatter<DefaultExceptionCode> formatter = DefaultFormatterFactory.ofEnum(DefaultExceptionCode.class);
         Assertions.assertEquals("请求不合法", formatter.print(DefaultExceptionCode.BAD_REQUEST, Locale.CHINA));
+    }
+
+    @Test
+    void testOfDateTime() {
+        Formatter<TemporalAccessor> formatter = DefaultFormatterFactory.ofDateTime(WindDateFormatPatterns.YYYY_MM_DD_HH_MM_SS);
+        Assertions.assertEquals("2007-12-03 10:15:30", formatter.print(LocalDateTime.parse( "2007-12-03T10:15:30"), Locale.CHINA));
     }
 
     @Test
