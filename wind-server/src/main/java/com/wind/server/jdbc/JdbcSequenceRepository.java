@@ -3,7 +3,9 @@ package com.wind.server.jdbc;
 import com.wind.common.exception.AssertUtils;
 import com.wind.sequence.SequenceGenerator;
 import com.wind.sequence.SequenceRepository;
+import lombok.Data;
 import lombok.Getter;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -24,8 +26,8 @@ public class JdbcSequenceRepository implements SequenceRepository {
     private static final SequenceSql DEFAULT_SQL = new SequenceSql(
             "insert into `%s`(`name`,`group_name`,`seq_value`,`step`) values (?, ?, 0, 1)",
             "select id from `%s` where name = ?",
-            "select seq_value from `%s` where id = ?",
-            "update `%s` set seq_value = seq_value + step, version = version + 1 where id = ? and version = version"
+            "select seq_value as sequenceValue, step as stepValue from `%s` where id = ?",
+            "update `%s` set seq_value = seq_value + step where id = ? and seq_value = ?"
     );
 
     private final SequenceSql sequenceSql;
@@ -114,11 +116,21 @@ public class JdbcSequenceRepository implements SequenceRepository {
         @Override
         public String next() {
             Integer next = transactionTemplate.execute(transactionStatus -> {
-                AssertUtils.isTrue(jdbcTemplate.update(sequenceSql.next, sequenceId) > 0, () -> String.format("update sequence name = %s error", sequenceName));
-                return jdbcTemplate.queryForObject(sequenceSql.querySequenceValue, Integer.class, sequenceId);
+                SequenceValue current = jdbcTemplate.queryForObject(sequenceSql.querySequenceValue, new BeanPropertyRowMapper<>(SequenceValue.class), sequenceId);
+                AssertUtils.notNull(current, () -> "not found current sequence value");
+                AssertUtils.isTrue(jdbcTemplate.update(sequenceSql.next, sequenceId, current.sequenceValue) > 0, () -> String.format("update sequence name = %s error", sequenceName));
+                return current.sequenceValue + current.stepValue;
             });
             AssertUtils.notNull(next, () -> String.format("get sequence name = %s error", sequenceName));
             return String.valueOf(next);
         }
+    }
+
+    @Data
+    static class SequenceValue {
+
+        private Integer sequenceValue;
+
+        private Integer stepValue;
     }
 }

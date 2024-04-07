@@ -13,11 +13,11 @@
  */
 package com.wuxp.mybatisplus.processor;
 
-import com.mysema.codegen.SimpleCompiler;
 import org.junit.jupiter.api.Assertions;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +29,7 @@ import java.util.Objects;
 
 public abstract class AbstractProcessorTest {
 
-    private final JavaCompiler compiler = new SimpleCompiler();
+    private final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
     protected static List<String> getFiles(String path) {
         List<String> classes = new ArrayList<>();
