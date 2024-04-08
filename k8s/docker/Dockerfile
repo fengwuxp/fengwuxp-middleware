@@ -19,7 +19,7 @@ EXPOSE ${EXPOSE_PORT}
 
 RUN set -ex \
     && sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories \
-    && apk update && apk add --no-cache ttf-dejavu fontconfig curl tzdata wget bash-completion busybox \
+    && apk add --update libstdc++ && apk add --no-cache ttf-dejavu fontconfig curl tzdata wget bash-completion busybox libc6-compat \
 	&& ln -s /bin/busybox /usr/local/bin/ip \
 	&& ln -s /bin/busybox /usr/local/bin/telnet \
 	&& ln -s /bin/busybox /usr/local/bin/ping \
