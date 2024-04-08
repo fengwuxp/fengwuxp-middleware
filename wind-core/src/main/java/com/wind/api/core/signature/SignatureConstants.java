@@ -28,13 +28,6 @@ final class SignatureConstants {
      * 请求头：访问标识
      * 用于交换签名秘钥
      */
-    @Deprecated
-    static final String ACCESS_KEY_HEADER_NAME = "Access-Key";
-
-    /**
-     * 请求头：访问标识
-     * 用于交换签名秘钥
-     */
     static final String ACCESS_ID_HEADER_NAME = "Access-Id";
 
     /**
