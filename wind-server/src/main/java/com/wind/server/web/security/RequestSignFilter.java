@@ -1,13 +1,13 @@
 package com.wind.server.web.security;
 
 
+import com.wind.api.core.signature.ApiSecretAccount;
+import com.wind.api.core.signature.ApiSignatureRequest;
+import com.wind.api.core.signature.SignatureHttpHeaderNames;
 import com.wind.client.rest.ApiSignatureRequestInterceptor;
 import com.wind.common.WindHttpConstants;
 import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.common.util.ServiceInfoUtils;
-import com.wind.core.api.signature.ApiSecretAccount;
-import com.wind.core.api.signature.ApiSignatureRequest;
-import com.wind.core.api.signature.SignatureHttpHeaderNames;
 import com.wind.server.servlet.RepeatableReadRequestWrapper;
 import com.wind.server.web.filters.WindWebFilterOrdered;
 import com.wind.server.web.restful.RestfulApiRespFactory;
@@ -76,11 +76,9 @@ public class RequestSignFilter implements Filter, Ordered {
             chain.doFilter(servletRequest, servletResponse);
             return;
         }
+
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String accessId = request.getHeader(headerNames.getAccessId());
-        if (!StringUtils.hasText(accessId)) {
-            accessId = request.getHeader(headerNames.getAccessKey());
-        }
         if (!StringUtils.hasLength(accessId)) {
             badRequest(response, "request access key must not empty");
             return;
@@ -138,9 +136,7 @@ public class RequestSignFilter implements Filter, Ordered {
                 // 仅在存在查询字符串时才设置，避免获取到表单参数
                 .method(request.getMethod().toUpperCase())
                 .nonce(request.getHeader(headerNames.getNonce()))
-                .timestamp(request.getHeader(headerNames.getTimestamp()))
-                // TODO 临时增加签名版本用于切换
-                .version(request.getHeader("Signature-Version"));
+                .timestamp(request.getHeader(headerNames.getTimestamp()));
         if (requiredBody) {
             result.requestBody(StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8));
         }

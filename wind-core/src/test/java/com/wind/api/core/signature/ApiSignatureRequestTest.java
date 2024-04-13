@@ -1,4 +1,4 @@
-package com.wind.core.api.signature;
+package com.wind.api.core.signature;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -58,7 +58,6 @@ class ApiSignatureRequestTest {
                 .requestBody(requestBody)
                 .timestamp("123456789")
                 .nonce("jlj3rn2930d-123210dq")
-                .version("v2")
                 .build();
     }
 }

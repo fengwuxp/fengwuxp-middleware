@@ -1,4 +1,4 @@
-package com.wind.core.api.signature;
+package com.wind.api.core.signature;
 
 /**
  * 签名相关常量
@@ -23,13 +23,6 @@ final class SignatureConstants {
      * 用于验证签名有效期
      */
     static final String TIMESTAMP_HEADER_NAME = "Timestamp";
-
-    /**
-     * 请求头：访问标识
-     * 用于交换签名秘钥
-     */
-    @Deprecated
-    static final String ACCESS_KEY_HEADER_NAME = "Access-Key";
 
     /**
      * 请求头：访问标识

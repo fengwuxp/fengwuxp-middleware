@@ -1,4 +1,4 @@
-package com.wind.core.signature;
+package com.wind.signature.algorithm;
 
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;

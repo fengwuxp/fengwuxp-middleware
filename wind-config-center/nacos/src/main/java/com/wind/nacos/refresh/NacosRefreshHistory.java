@@ -17,6 +17,7 @@
 package com.wind.nacos.refresh;
 
 import com.alibaba.cloud.commons.lang.StringUtils;
+import com.wind.common.WindDateFormatPatterns;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -35,15 +36,15 @@ import java.util.LinkedList;
  *
  * @author wuxp
  */
+@Getter
 @Slf4j
 public class NacosRefreshHistory {
 
     private static final ThreadLocal<DateFormat> DATE_FORMAT = ThreadLocal
-            .withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+            .withInitial(() -> new SimpleDateFormat(WindDateFormatPatterns.YYYY_MM_DD_HH_MM_SS));
 
     private static final int MAX_SIZE = 20;
 
-    @Getter
     private final LinkedList<Record> records = new LinkedList<>();
 
     public void addRefreshRecord(String dataId, String group, String data) {

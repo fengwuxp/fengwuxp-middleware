@@ -6,7 +6,6 @@ import org.springframework.format.Formatter;
 import org.springframework.lang.Nullable;
 
 import javax.annotation.Nonnull;
-import java.text.ParseException;
 import java.util.Locale;
 import java.util.Map;
 
@@ -16,33 +15,34 @@ import java.util.Map;
  * @author wuxp
  */
 @Slf4j
-public class MapFormatter implements Formatter<String> {
+public class MapFormatter<T> implements Formatter<T> {
 
-    private final Map<String, String> dataSource;
+    private final Map<String, Object> dataSource;
 
-    public MapFormatter(Map<String, String> source) {
+    public MapFormatter(Map<String, Object> source) {
         this.dataSource = source;
     }
 
     @Nonnull
+    @SuppressWarnings("unchecked")
     @Override
-    public String parse(@Nullable String text, @Nullable Locale locale) {
+    public T parse(@Nullable String text, @Nullable Locale locale) {
         if (text != null) {
-            for (Map.Entry<String, String> entry : this.dataSource.entrySet()) {
+            for (Map.Entry<String, Object> entry : this.dataSource.entrySet()) {
                 if (entry.getValue().equals(text)) {
-                    return entry.getKey();
+                    return (T) entry.getKey();
                 }
             }
         }
-        return WindConstants.EMPTY;
+        return (T) WindConstants.EMPTY;
     }
 
     @Nonnull
     @Override
-    public String print(@Nullable String text, @Nullable Locale locale) {
-        if (text == null) {
+    public String print(@Nullable T value, @Nullable Locale locale) {
+        if (value == null) {
             return "";
         }
-        return this.dataSource.get(text);
+        return (String) this.dataSource.get(String.valueOf(value));
     }
 }

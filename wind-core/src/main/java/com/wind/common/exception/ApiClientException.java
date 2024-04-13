@@ -1,6 +1,6 @@
 package com.wind.common.exception;
 
-import com.wind.core.api.ApiResponse;
+import com.wind.api.core.ApiResponse;
 import lombok.Getter;
 
 /**

@@ -1,4 +1,4 @@
-package com.wind.core.api.signature;
+package com.wind.api.core.signature;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;

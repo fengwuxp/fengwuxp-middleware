@@ -31,4 +31,12 @@ public class ExcelWriteHead {
      */
     @Nullable
     private final Formatter<?> formatter;
+
+    public static ExcelWriteHead of(String title, String expression) {
+        return of(title, expression, null);
+    }
+
+    public static ExcelWriteHead of(String title, String expression, Formatter<?> formatter) {
+        return new ExcelWriteHead(title, expression, formatter);
+    }
 }

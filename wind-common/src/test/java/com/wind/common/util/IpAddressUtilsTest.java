@@ -14,5 +14,8 @@ class IpAddressUtilsTest {
     void testGetLocalIpv4() {
         String host = IpAddressUtils.getLocalIpv4();
         Assertions.assertNotEquals("127.0.0.1", host);
+        Assertions.assertTrue(IpAddressUtils.isIpV4(host));
+        Assertions.assertFalse(IpAddressUtils.isIpV6(host));
+        Assertions.assertTrue(IpAddressUtils.isValidIp(host));
     }
 }

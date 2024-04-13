@@ -39,10 +39,11 @@
         <module>wind-client</module>
         <module>wind-archetype</module>
         <module>modules/object-sensitive</module>
+        <module>tests</module>
     </modules>
 
     <properties>
-        <revision>1.0.1-SNAPSHOT</revision>
+        <revision>1.0.2-SNAPSHOT</revision>
         <!--   占位使用     -->
         <jacoco-coverage-agent/>
 
@@ -90,6 +91,7 @@
         <swagger-openapiv3.version>2.2.9</swagger-openapiv3.version>
         <springdoc-openapi-ui.version>1.7.0</springdoc-openapi-ui.version>
         <googleauth.version>1.5.0</googleauth.version>
+        <bcprov.version>1.77</bcprov.version>
         <jetbrains-annotations.version>24.1.0</jetbrains-annotations.version>
         <podam.version>8.0.0.RELEASE</podam.version>
         <awaitility.version>4.2.0</awaitility.version>
@@ -463,6 +465,17 @@
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-ui</artifactId>
                 <version>${springdoc-openapi-ui.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bcprov.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-ext-jdk18on</artifactId>
+                <version>${bcprov.version}</version>
             </dependency>
             <dependency>
                 <groupId>uk.co.jemos.podam</groupId>

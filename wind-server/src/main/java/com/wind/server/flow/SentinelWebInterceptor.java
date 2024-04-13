@@ -36,7 +36,7 @@ import java.util.function.Function;
 public class SentinelWebInterceptor implements HandlerInterceptor {
 
     @VisibleForTesting
-    static final String SENTINEL_ENTRY_ATTRIBUTE_NAME = SentinelWebInterceptor.class.getName() + ".entry";
+    static final String DEFAULT_SENTINEL_ENTRY_ATTRIBUTE_NAME = SentinelWebInterceptor.class.getName() + ".entry";
 
     static {
         // 增加自定义的指标收集器
@@ -47,8 +47,25 @@ public class SentinelWebInterceptor implements HandlerInterceptor {
 
     private final SentinelBlockExceptionHandler blockExceptionHandler;
 
+    private final String entryAttributeName;
+
+    public SentinelWebInterceptor(Function<HttpServletRequest, SentinelResource> resourceProvider, String entryAttributeName) {
+        this(resourceProvider, SentinelWebInterceptor::defaultHandleBlockException, entryAttributeName);
+    }
+
     public SentinelWebInterceptor(Function<HttpServletRequest, SentinelResource> resourceProvider) {
-        this(resourceProvider, SentinelWebInterceptor::defaultHandleBlockException);
+        this(resourceProvider, DEFAULT_SENTINEL_ENTRY_ATTRIBUTE_NAME);
+    }
+
+    public static SentinelWebInterceptor defaults(Function<HttpServletRequest, SentinelResource> resourceProvider) {
+        return new SentinelWebInterceptor(resourceProvider);
+    }
+
+    /**
+     * 拦截所有资源请求
+     */
+    public static SentinelWebInterceptor all(Function<HttpServletRequest, SentinelResource> resourceProvider) {
+        return new SentinelWebInterceptor(resourceProvider, DEFAULT_SENTINEL_ENTRY_ATTRIBUTE_NAME + ".all");
     }
 
     @Override
@@ -61,7 +78,7 @@ public class SentinelWebInterceptor implements HandlerInterceptor {
         ContextUtil.enter(resource.getContextName(), resource.getOrigin());
         try {
             Entry entry = SphU.entry(resource.getName(), resource.getResourceType(), resource.getEntryType(), new Object[]{Tags.of(resource.getMetricsTags())});
-            request.setAttribute(SENTINEL_ENTRY_ATTRIBUTE_NAME, entry);
+            request.setAttribute(entryAttributeName, entry);
         } catch (BlockException exception) {
             try {
                 blockExceptionHandler.handle(request, response, exception);
@@ -75,14 +92,14 @@ public class SentinelWebInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler, Exception exception) {
-        Entry entry = HttpServletRequestUtils.getRequestAttribute(SENTINEL_ENTRY_ATTRIBUTE_NAME, request);
+        Entry entry = HttpServletRequestUtils.getRequestAttribute(entryAttributeName, request);
         if (entry == null) {
             // should not happen
-            log.warn("no entry found in request, key = {}", SENTINEL_ENTRY_ATTRIBUTE_NAME);
+            log.warn("no entry found in request, key = {}", entryAttributeName);
             return;
         }
         entry.exit();
-        request.removeAttribute(SENTINEL_ENTRY_ATTRIBUTE_NAME);
+        request.removeAttribute(entryAttributeName);
         if (exception != null) {
             Tracer.traceEntry(exception, entry);
         }

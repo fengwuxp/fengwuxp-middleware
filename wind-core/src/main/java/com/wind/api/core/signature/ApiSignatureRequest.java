@@ -1,4 +1,4 @@
-package com.wind.core.api.signature;
+package com.wind.api.core.signature;
 
 import com.wind.common.WindConstants;
 import com.wind.common.exception.AssertUtils;
@@ -69,14 +69,7 @@ public class ApiSignatureRequest {
      */
     private final String requestBody;
 
-    /**
-     * 签名版本 v2版本查询字符需要排序
-     * {@link #buildCanonicalizedQueryString}
-     */
-    @Deprecated
-    private final String version;
-
-    private ApiSignatureRequest(String method, String requestPath, String nonce, String timestamp, String decodeQueryString, String requestBody, String version) {
+    private ApiSignatureRequest(String method, String requestPath, String nonce, String timestamp, String queryString, String requestBody) {
         AssertUtils.hasText(method, "method must not empty");
         AssertUtils.hasText(requestPath, "requestPath must not empty");
         AssertUtils.hasText(nonce, "nonce must not empty");
@@ -85,10 +78,9 @@ public class ApiSignatureRequest {
         this.requestPath = requestPath;
         this.nonce = nonce;
         this.timestamp = timestamp;
-        // 如果是 v2 版本，则将查询字符串 key 按照字典序排序
-        this.queryString = Objects.equals(version, "v2") ? buildCanonicalizedQueryString(parseQueryParamsAsMap(decodeQueryString)) : decodeQueryString;
+        // 将查询字符串 key 按照字典序排序
+        this.queryString =  buildCanonicalizedQueryString(parseQueryParamsAsMap(queryString));
         this.requestBody = requestBody;
-        this.version = version;
     }
 
     /**

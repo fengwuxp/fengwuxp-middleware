@@ -1,4 +1,4 @@
-package com.wind.core.api.signature;
+package com.wind.api.core.signature;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
