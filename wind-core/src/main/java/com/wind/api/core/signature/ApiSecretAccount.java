@@ -30,7 +30,7 @@ public interface ApiSecretAccount {
      * @return 签名算法
      */
     @NotNull
-     ApiSignAlgorithm getSignAlgorithm();
+    ApiSignAlgorithm getSignAlgorithm();
 
     static ApiSecretAccount immutable(String accessId, String secretKey, ApiSignAlgorithm signer) {
         Objects.requireNonNull(accessId, "argument accessId must not null");

@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class CacheCaptchaStorage implements CaptchaStorage {
 
-
     private final CacheManager cacheManager;
 
     /**
