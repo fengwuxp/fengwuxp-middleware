@@ -72,7 +72,7 @@ public class WebRequestAuthorizationManager implements AuthorizationManager<Requ
         if (log.isDebugEnabled()) {
             log.debug("request resource ={} {}, required permissions = {}", context.getRequest().getMethod(), context.getRequest().getRequestURI(), permissions);
         }
-        Set<String> roles = getRolesByPermissionIds(permissions);
+        Set<String> roles = getRolesByPermissions(permissions);
         if (log.isDebugEnabled()) {
             log.debug("request resource ={} {}, required  has any role = {}", context.getRequest().getMethod(), context.getRequest().getRequestURI(), roles);
         }
@@ -91,7 +91,7 @@ public class WebRequestAuthorizationManager implements AuthorizationManager<Requ
         Set<String> result = new HashSet<>();
         for (Map.Entry<String, Set<RequestMatcher>> entry : getRequestPermissionMatchers().entrySet()) {
             if (RequestMatcherUtils.matches(entry.getValue(), request)) {
-                // 权限匹配
+                // 命中权限
                 result.add(entry.getKey());
                 if (!matchesRequestAllPermission) {
                     //非匹配所有权限模式， 匹配到了则返回
@@ -105,35 +105,26 @@ public class WebRequestAuthorizationManager implements AuthorizationManager<Requ
     /**
      * 通过权限标识查找权限
      *
-     * @param permissionIds 权限标识
+     * @param requirePermissions 权限标识
      * @return 有 {@param permissionIds} 权限的角色
      */
-    private Set<String> getRolesByPermissionIds(Set<String> permissionIds) {
+    private Set<String> getRolesByPermissions(Set<String> requirePermissions) {
         List<RbacResource.Role> roles = rbacResourceService.getAllRoles().stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        Set<String> result = permissionIds.stream()
-                .map(id -> findRoleByPermissionId(id, roles))
-                .filter(Objects::nonNull)
+        Set<String> result = roles.stream()
+                // 角色包含任一权限
+                .filter(role -> requirePermissions.stream().anyMatch(id -> role.getPermissions().contains(id)))
+                .map(RbacResource::getName)
                 .collect(Collectors.toSet());
         return Collections.unmodifiableSet(result);
-    }
-
-    @Nullable
-    private String findRoleByPermissionId(String permissionId, List<RbacResource.Role> roles) {
-        for (RbacResource.Role role : roles) {
-            if (role.getPermissions().contains(permissionId)) {
-                return role.getId();
-            }
-        }
-        return null;
     }
 
     private Map<String, Set<RequestMatcher>> getRequestPermissionMatchers() {
         Map<String, Set<RequestMatcher>> result = new HashMap<>();
         rbacResourceService.getAllPermissions().stream()
                 .filter(Objects::nonNull)
-                .forEach(permission -> result.put(permission.getId(), RequestMatcherUtils.convertMatchers(permission.getAttributes())));
+                .forEach(permission -> result.put(permission.getName(), RequestMatcherUtils.convertMatchers(permission.getAttributes())));
         return result;
     }
 }
