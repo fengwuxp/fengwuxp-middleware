@@ -93,7 +93,7 @@ public class WebRequestAuthorizationManager implements AuthorizationManager<Requ
             if (RequestMatcherUtils.matches(entry.getValue(), request)) {
                 // 权限匹配
                 result.add(entry.getKey());
-                if (matchesRequestAllPermission) {
+                if (!matchesRequestAllPermission) {
                     //非匹配所有权限模式， 匹配到了则返回
                     break;
                 }
