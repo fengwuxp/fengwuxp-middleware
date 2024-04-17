@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.wind.security.WebSecurityConstants.RBAC_PERMISSION_CACHE_NAME;
@@ -193,7 +194,7 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
         // 求差集
         keys.removeAll(rbacResources.stream().map(RbacResource::getId).collect(Collectors.toSet()));
         cache.removeAll(keys);
-        rbacResources.forEach(role -> cache.put(role.getId(), role));
+        cache.putAll(rbacResources.stream().collect(Collectors.toMap(RbacResource::getId, Function.identity())));
     }
 
     private void scheduleRefreshUserRoles() {

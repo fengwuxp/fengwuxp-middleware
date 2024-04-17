@@ -68,6 +68,13 @@ public interface RbacResourceCache<K, V> {
     void put(K key, V value);
 
     /**
+     * 添加值到缓存中
+     *
+     * @param cacheValues 缓存内容
+     */
+    void putAll(Map<K, V> cacheValues);
+
+    /**
      * 从缓存中批量移除值
      *
      * @param keys 缓存 key

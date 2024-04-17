@@ -62,6 +62,11 @@ public class CaffeineRbacResourceCacheSupplier implements RbacResourceCacheSuppl
         }
 
         @Override
+        public void putAll(Map<K, V> cacheValues) {
+            cache.putAll(cacheValues);
+        }
+
+        @Override
         public void remove(K key) {
             cache.invalidate(key);
         }
