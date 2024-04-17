@@ -81,5 +81,10 @@ public interface RbacResourceService {
     @NotEmpty()
     Set<RbacResource.Role> findRolesByUserId(String userId);
 
-
+    /**
+     * @return 获取已登录用户 id
+     */
+    default Set<String> getAuthenticatedUserIds() {
+        return Collections.emptySet();
+    }
 }

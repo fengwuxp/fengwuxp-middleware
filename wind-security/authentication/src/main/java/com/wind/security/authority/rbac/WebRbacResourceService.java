@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -118,6 +119,11 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     }
 
     @Override
+    public Set<String> getAuthenticatedUserIds() {
+        return delegate.getAuthenticatedUserIds();
+    }
+
+    @Override
     public void onApplicationEvent(@NonNull RbacResourceChangeEvent event) {
         log.info("refresh rbac cache , type = {} , ids = {}", event.getResourceType().getName(), event.getResourceIds());
         if (event.getResourceType() == RbacResource.Permission.class) {
@@ -152,13 +158,12 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
         getPermissionCache();
         getUserRoleCache();
         getUserRoleCache();
-
-        refreshRefresh();
+        refresh();
         schedule.execute(this::refreshUserRoles);
     }
 
     private void scheduleRefresh() {
-        schedule.schedule(this::refreshRefresh, randomDelay(cacheRefreshInterval.getSeconds()), TimeUnit.MILLISECONDS);
+        schedule.schedule(this::refresh, randomDelay(cacheRefreshInterval.getSeconds()), TimeUnit.MILLISECONDS);
     }
 
     private long randomDelay(long delaySeconds) {
@@ -166,13 +171,13 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
         return RandomUtils.nextLong(1000, 7500) + delaySeconds * 1000;
     }
 
-    private void refreshRefresh() {
+    private void refresh() {
         log.debug("begin refresh rbac resource");
         try {
             if (canRefreshRoleCaches(REFRESH_RBAC_CACHE_LOCK_KEY)) {
                 storeLastRefreshTime(REFRESH_RBAC_CACHE_LOCK_KEY);
-                delegate.getAllPermissions().forEach(this::putPermissionCaches);
-                delegate.getAllRoles().forEach(this::putRoleCaches);
+                refreshRbacCache(delegate.getAllPermissions(), getPermissionCache());
+                refreshRbacCache(delegate.getAllRoles(), getRoleCache());
             }
             log.debug("refresh rbac resource end");
         } catch (Exception exception) {
@@ -180,6 +185,15 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
         } finally {
             scheduleRefresh();
         }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void refreshRbacCache(Collection<? extends RbacResource<String>> rbacResources, RbacResourceCache cache) {
+        Collection<String> keys = new HashSet<>(cache.keys());
+        // 求差集
+        keys.removeAll(rbacResources.stream().map(RbacResource::getId).collect(Collectors.toSet()));
+        cache.removeAll(keys);
+        rbacResources.forEach(role -> cache.put(role.getId(), role));
     }
 
     private void scheduleRefreshUserRoles() {
@@ -190,7 +204,7 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
         try {
             if (canRefreshRoleCaches(REFRESH_USER_ROLE_CACHE_LOCK_KEY)) {
                 storeLastRefreshTime(REFRESH_USER_ROLE_CACHE_LOCK_KEY);
-                // 刷新在线用户角色缓存  TODO 待优化
+                // 刷新在线用户角色缓存
                 getUserRoleCache().keys().forEach(userId -> putUserRoleCaches(userId, delegate.findRolesByUserId(userId)));
             }
         } catch (Exception exception) {
@@ -261,8 +275,7 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
 
             @Override
             public Iterable<String> loadAllKeys() {
-                // 由于已登录用户数量不确定，返回空
-                return Collections.emptyList();
+                return delegate.getAuthenticatedUserIds();
             }
         });
     }
@@ -286,5 +299,4 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
             getUserRoleCache().put(userId, userRoles);
         }
     }
-
 }

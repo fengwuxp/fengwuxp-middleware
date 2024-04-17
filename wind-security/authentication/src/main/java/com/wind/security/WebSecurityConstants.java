@@ -14,7 +14,7 @@ public final class WebSecurityConstants {
     /**
      * 保存在请求上线文中，当前请求需要的权限
      */
-    public static final String REQUEST_REQUIRED_ROLES_ATTRIBUTE_NAME = "REQUEST_REQUIRED_ROLES";
+    public static final String REQUEST_REQUIRED_PERMISSIONS_ATTRIBUTE_NAME = "REQUEST_REQUIRED_PERMISSIONS";
 
     /**
      * rbac 权限缓存名称

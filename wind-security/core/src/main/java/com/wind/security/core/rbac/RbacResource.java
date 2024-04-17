@@ -34,11 +34,6 @@ public interface RbacResource<I extends Serializable> extends Serializable {
     interface Permission extends RbacResource<String> {
 
         /**
-         * @return 权限类型，例如：菜单、接口、数据
-         */
-        String getType();
-
-        /**
          * @return 权限内容
          */
         Set<String> getAttributes();
@@ -48,17 +43,16 @@ public interface RbacResource<I extends Serializable> extends Serializable {
          *
          * @param id    权限 id
          * @param name  权限名称
-         * @param type  权限类型
          * @param value 权限值，使用逗号分隔
          * @return 权限
          */
-        static Permission immutable(String id, String name, String type, String value) {
+        static Permission immutable(String id, String name, String value) {
             Set<String> attributes = StringUtils.hasLength(value) ? StringJoinSplitUtils.split(value) : Collections.emptySet();
-            return immutable(id, name, type, attributes);
+            return immutable(id, name, attributes);
         }
 
-        static Permission immutable(String id, String name, String type, Set<String> attributes) {
-            return new ImmutablePermission(id, name, type, attributes);
+        static Permission immutable(String id, String name, Set<String> attributes) {
+            return new ImmutablePermission(id, name, attributes);
         }
     }
 
@@ -112,11 +106,6 @@ public interface RbacResource<I extends Serializable> extends Serializable {
         private final String name;
 
         /**
-         * 权限类型
-         */
-        private final String type;
-
-        /**
          * 权限内容
          */
         private final Set<String> attributes;
@@ -125,7 +114,7 @@ public interface RbacResource<I extends Serializable> extends Serializable {
          * 为了给序列化框架使用，提供一个空构造
          */
         ImmutablePermission() {
-            this("", "", "", Collections.emptySet());
+            this("", "", Collections.emptySet());
         }
 
     }
