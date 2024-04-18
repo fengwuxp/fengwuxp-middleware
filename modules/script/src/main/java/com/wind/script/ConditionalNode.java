@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * 条件节点配置
+ * 条件节点
  *
  * @author wuxp
  * @date 2023-09-23 07:44
