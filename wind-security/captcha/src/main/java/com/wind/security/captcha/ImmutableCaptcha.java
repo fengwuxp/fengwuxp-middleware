@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.beans.Transient;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -54,7 +55,7 @@ public class ImmutableCaptcha implements Captcha {
     /**
      * 过期时间
      */
-    private final Date expireTime;
+    private final LocalDateTime expireTime;
 
     /**
      * 为了给序列化框架使用，提供一个空构造

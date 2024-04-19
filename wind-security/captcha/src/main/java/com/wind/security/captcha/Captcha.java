@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.beans.Transient;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -45,7 +46,7 @@ public interface Captcha extends CaptchaValue {
     /**
      * @return 验证码失效时间
      */
-    Date getExpireTime();
+    LocalDateTime getExpireTime();
 
     /**
      * 记录一次验证次数
@@ -65,7 +66,7 @@ public interface Captcha extends CaptchaValue {
         }
         // 验证次数小于允许验证次数 且 未过期
         return getVerificationCount() < getAllowVerificationTimes() &&
-                getExpireTime().getTime() > System.currentTimeMillis();
+                getExpireTime().isAfter(LocalDateTime.now());
     }
 
     /**
