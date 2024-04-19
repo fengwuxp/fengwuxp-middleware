@@ -21,7 +21,7 @@ import java.util.function.Function;
  * @date 2024-02-27 14:28
  **/
 @AllArgsConstructor
-public class DefaultResponseConverterFactory extends Converter.Factory {
+public class JacksonConverterFactory extends Converter.Factory {
 
     private final ObjectMapper objectMapper;
 
@@ -30,7 +30,7 @@ public class DefaultResponseConverterFactory extends Converter.Factory {
     @SuppressWarnings("rawtypes")
     private final Function responseExtractor;
 
-    public DefaultResponseConverterFactory(ObjectMapper objectMapper) {
+    public JacksonConverterFactory(ObjectMapper objectMapper) {
         this(objectMapper, null, o -> o);
     }
 

@@ -25,7 +25,7 @@ import java.util.function.Function;
  **/
 @AllArgsConstructor
 @Slf4j
-public class DefaultResponseCallAdapterFactory extends CallAdapter.Factory {
+public class JacksonResponseCallAdapterFactory extends CallAdapter.Factory {
 
     private final ObjectMapper objectMapper;
 
@@ -34,7 +34,7 @@ public class DefaultResponseCallAdapterFactory extends CallAdapter.Factory {
     @SuppressWarnings("rawtypes")
     private final Function responseExtractor;
 
-    public DefaultResponseCallAdapterFactory(ObjectMapper objectMapper) {
+    public JacksonResponseCallAdapterFactory(ObjectMapper objectMapper) {
         this(objectMapper, null, o -> o);
     }
 
