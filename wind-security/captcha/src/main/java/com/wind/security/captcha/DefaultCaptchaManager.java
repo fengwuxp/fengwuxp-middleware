@@ -1,5 +1,6 @@
 package com.wind.security.captcha;
 
+import com.google.common.collect.ImmutableSet;
 import com.wind.common.annotations.VisibleForTesting;
 import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.BaseException;
@@ -7,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * @author wuxp
@@ -14,6 +16,11 @@ import java.util.Collection;
  **/
 @AllArgsConstructor
 public class DefaultCaptchaManager implements CaptchaManager {
+
+    /**
+     * 生成时允许使用之前的值的验证码类型
+     */
+    private static final Set<Captcha.CaptchaType> ALLOW_USE_PREVIOUS_CAPTCHA_TYPES = ImmutableSet.of(SimpleCaptchaType.EMAIL, SimpleCaptchaType.MOBILE_PHONE);
 
     private final Collection<CaptchaContentProvider> delegates;
 
@@ -49,10 +56,13 @@ public class DefaultCaptchaManager implements CaptchaManager {
     public Captcha generate(Captcha.CaptchaType type, Captcha.CaptchaUseScene useScene, String owner) {
         // 检查是否允许生成验证码
         generateChecker.preCheck(owner, type);
-        Captcha prevCaptcha = captchaStorage.get(type, useScene, owner);
-        if (prevCaptcha != null && prevCaptcha.isAvailable()) {
-            // 验证码还有效
-            return prevCaptcha;
+        if (ALLOW_USE_PREVIOUS_CAPTCHA_TYPES.contains(type)) {
+            // 图片验证码每次都重新生成
+            Captcha prevCaptcha = captchaStorage.get(type, useScene, owner);
+            if (prevCaptcha != null && prevCaptcha.isAvailable()) {
+                // 验证码还有效
+                return prevCaptcha;
+            }
         }
         CaptchaContentProvider delegate = getDelegate(type, useScene);
         CaptchaValue captchaValue = delegate.getValue(owner, useScene);
