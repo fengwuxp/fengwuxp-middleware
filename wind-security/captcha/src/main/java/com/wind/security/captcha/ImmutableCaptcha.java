@@ -55,13 +55,13 @@ public class ImmutableCaptcha implements Captcha {
     /**
      * 过期时间
      */
-    private final LocalDateTime expireTime;
+    private final long expireTime;
 
     /**
      * 为了给序列化框架使用，提供一个空构造
      */
     ImmutableCaptcha() {
-        this(null, null, null, null, null, 0, 0, null);
+        this(null, null, null, null, null, 0, 0, 0);
     }
 
     /**

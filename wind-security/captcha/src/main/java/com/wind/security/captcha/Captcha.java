@@ -5,8 +5,6 @@ import lombok.Data;
 
 import java.beans.Transient;
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Date;
 
 /**
  * 验证码，在特定场景保证安全或验证身份
@@ -44,9 +42,9 @@ public interface Captcha extends CaptchaValue {
     int getAllowVerificationTimes();
 
     /**
-     * @return 验证码失效时间
+     * @return 验证码失效时间戳
      */
-    LocalDateTime getExpireTime();
+    long getExpireTime();
 
     /**
      * 记录一次验证次数
@@ -59,14 +57,14 @@ public interface Captcha extends CaptchaValue {
      * @return 是否有效
      */
     @Transient
-    default boolean isEffective() {
-        if (getExpireTime() == null) {
-            // 过期时间没有，表示已过期
+    default boolean isAvailable() {
+        if (getExpireTime() == 0L) {
+            // 过期时间没有，表示位过期
             return false;
         }
         // 验证次数小于允许验证次数 且 未过期
         return getVerificationCount() < getAllowVerificationTimes() &&
-                getExpireTime().isAfter(LocalDateTime.now());
+               getExpireTime() > System.currentTimeMillis();
     }
 
     /**

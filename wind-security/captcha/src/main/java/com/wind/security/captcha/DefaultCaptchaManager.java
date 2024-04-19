@@ -5,12 +5,8 @@ import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.BaseException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.apache.commons.lang3.time.DateUtils;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
-import java.util.Objects;
 
 /**
  * @author wuxp
@@ -54,7 +50,7 @@ public class DefaultCaptchaManager implements CaptchaManager {
         // 检查是否允许生成验证码
         generateChecker.preCheck(owner, type);
         Captcha prevCaptcha = captchaStorage.get(type, useScene, owner);
-        if (prevCaptcha != null && prevCaptcha.isEffective()) {
+        if (prevCaptcha != null && prevCaptcha.isAvailable()) {
             // 验证码还有效
             return prevCaptcha;
         }
@@ -66,7 +62,7 @@ public class DefaultCaptchaManager implements CaptchaManager {
                 .owner(owner)
                 .type(type)
                 .useScene(useScene)
-                .expireTime(LocalDateTime.now().plusMinutes(delegate.getEffectiveTime().toMinutes()))
+                .expireTime(System.currentTimeMillis() + delegate.getEffectiveTime().toMillis())
                 .verificationCount(0)
                 .allowVerificationTimes(delegate.getMaxAllowVerificationTimes())
                 .build();
@@ -86,7 +82,7 @@ public class DefaultCaptchaManager implements CaptchaManager {
     public void verify(String expected, Captcha.CaptchaType type, Captcha.CaptchaUseScene useScene, String owner) {
         Captcha captcha = captchaStorage.get(type, useScene, owner);
         AssertUtils.notNull(captcha, CaptchaI18nMessageKeys.CAPTCHA_NOT_EXIST_OR_EXPIRED);
-        if (!captcha.isEffective()) {
+        if (!captcha.isAvailable()) {
             // 验证码已失效，移除
             captchaStorage.remove(type, useScene, owner);
             throw BaseException.common(CaptchaI18nMessageKeys.CAPTCHA_NOT_EXIST_OR_EXPIRED);
@@ -97,7 +93,7 @@ public class DefaultCaptchaManager implements CaptchaManager {
             captchaStorage.remove(type, useScene, owner);
         } else {
             Captcha next = captcha.increase();
-            if (next.isEffective()) {
+            if (next.isAvailable()) {
                 // 还可以继续用于验证，更新验证码
                 captchaStorage.store(next);
             } else {
