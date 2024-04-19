@@ -13,6 +13,7 @@
     <artifactId>wind-tests</artifactId>
 
     <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
         <code.coverage.project.folder>${basedir}/../</code.coverage.project.folder>
         <code.coverage.overall.data.folder>${basedir}/target/</code.coverage.overall.data.folder>
     </properties>
