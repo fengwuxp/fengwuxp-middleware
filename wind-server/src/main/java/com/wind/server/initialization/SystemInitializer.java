@@ -20,7 +20,7 @@ public interface SystemInitializer extends Ordered {
      *
      * @return true 需要
      */
-    default boolean requiredInitialize() {
+    default boolean requireInitialize() {
         return true;
     }
 

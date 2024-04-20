@@ -60,7 +60,7 @@ public class ApiSignatureRequestInterceptor implements ClientHttpRequestIntercep
                 .nonce(SequenceGenerator.randomAlphanumeric(32))
                 .timestamp(String.valueOf(System.currentTimeMillis()))
                 .queryString(request.getURI().getQuery());
-        if (signRequiredRequestBody(request.getHeaders().getContentType())) {
+        if (signRequireRequestBody(request.getHeaders().getContentType())) {
             builder.requestBody(new String(body, StandardCharsets.UTF_8));
         }
         ApiSignatureRequest signatureRequest = builder.build();
@@ -76,7 +76,7 @@ public class ApiSignatureRequestInterceptor implements ClientHttpRequestIntercep
     }
 
     // TODO 暂时先放到这里，待重构
-    public static boolean signRequiredRequestBody(@Nullable MediaType contentType) {
+    public static boolean signRequireRequestBody(@Nullable MediaType contentType) {
         if (contentType == null) {
             return false;
         }

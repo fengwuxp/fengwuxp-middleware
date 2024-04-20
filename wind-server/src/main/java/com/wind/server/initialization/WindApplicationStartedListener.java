@@ -43,7 +43,7 @@ public class WindApplicationStartedListener implements ApplicationListener<Appli
                     .values());
             OrderComparator.sort(initializers);
             initializers.stream()
-                    .filter(SystemInitializer::requiredInitialize)
+                    .filter(SystemInitializer::requireInitialize)
                     .forEach(SystemInitializer::initialize);
         } catch (Exception exception) {
             log.error("execute SystemInitializer error", exception);

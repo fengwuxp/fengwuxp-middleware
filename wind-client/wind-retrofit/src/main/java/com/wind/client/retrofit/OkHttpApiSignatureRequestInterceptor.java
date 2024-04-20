@@ -65,7 +65,7 @@ public class OkHttpApiSignatureRequestInterceptor implements Interceptor {
                 .timestamp(String.valueOf(System.currentTimeMillis()))
                 .queryString(getQueryString(request.url()));
         RequestBody requestBody = request.body();
-        if (signRequiredRequestBody(requestBody)) {
+        if (signRequireRequestBody(requestBody)) {
             Buffer buffer = new Buffer();
             requestBody.writeTo(buffer);
             builder.requestBody(new String(buffer.readByteArray(), StandardCharsets.UTF_8));
@@ -91,7 +91,7 @@ public class OkHttpApiSignatureRequestInterceptor implements Interceptor {
         return StringUtils.hasText(queryString) ? queryString : null;
     }
 
-    private boolean signRequiredRequestBody(RequestBody requestBody) {
+    private boolean signRequireRequestBody(RequestBody requestBody) {
         if (requestBody == null) {
             return false;
         }

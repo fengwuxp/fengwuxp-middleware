@@ -85,9 +85,9 @@ public class RequestSignFilter implements Filter, Ordered {
         }
 
         MediaType contentType = StringUtils.hasLength(request.getContentType()) ? MediaType.parseMediaType(request.getContentType()) : null;
-        boolean signRequiredBody = ApiSignatureRequestInterceptor.signRequiredRequestBody(contentType);
-        HttpServletRequest httpRequest = signRequiredBody ? new RepeatableReadRequestWrapper(request) : request;
-        ApiSignatureRequest signatureRequest = buildSignatureRequest(httpRequest, signRequiredBody);
+        boolean signRequireBody = ApiSignatureRequestInterceptor.signRequireRequestBody(contentType);
+        HttpServletRequest httpRequest = signRequireBody ? new RepeatableReadRequestWrapper(request) : request;
+        ApiSignatureRequest signatureRequest = buildSignatureRequest(httpRequest, signRequireBody);
         String requestSign = request.getHeader(headerNames.getSign());
 
         // 使用访问标识和秘钥版本号加载秘钥账号

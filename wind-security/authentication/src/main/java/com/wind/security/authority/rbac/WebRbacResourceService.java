@@ -230,7 +230,7 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
 
     @NonNull
     @SuppressWarnings("unchecked")
-    private <T> RbacResourceCache<String, T> requiredCache(String cacheName, RbacResourceCache.CacheLoader<String, Object> loader) {
+    private <T> RbacResourceCache<String, T> requireCache(String cacheName, RbacResourceCache.CacheLoader<String, Object> loader) {
         RbacResourceCache<String, Object> result = cacheSupplier.apply(cacheName, loader);
         AssertUtils.notNull(result, String.format("获取 Cache 失败，CacheName = %s", cacheName));
         return (RbacResourceCache<String, T>) result;
@@ -238,7 +238,7 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
 
     @Nonnull
     private RbacResourceCache<String, RbacResource.Permission> getPermissionCache() {
-        return requiredCache(RBAC_PERMISSION_CACHE_NAME, new RbacResourceCache.CacheLoader<String, Object>() {
+        return requireCache(RBAC_PERMISSION_CACHE_NAME, new RbacResourceCache.CacheLoader<String, Object>() {
             @Override
             public Object load(String key) {
                 return delegate.findPermissionById(key);
@@ -253,7 +253,7 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
 
     @Nonnull
     private RbacResourceCache<String, RbacResource.Role> getRoleCache() {
-        return requiredCache(RBAC_ROLE_CACHE_NAME, new RbacResourceCache.CacheLoader<String, Object>() {
+        return requireCache(RBAC_ROLE_CACHE_NAME, new RbacResourceCache.CacheLoader<String, Object>() {
             @Override
             public Object load(String key) {
                 return delegate.findRoleById(key);
@@ -268,7 +268,7 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
 
     @Nonnull
     private RbacResourceCache<String, Set<RbacResource.Role>> getUserRoleCache() {
-        return requiredCache(RBAC_USER_ROLE_CACHE_NAME, new RbacResourceCache.CacheLoader<String, Object>() {
+        return requireCache(RBAC_USER_ROLE_CACHE_NAME, new RbacResourceCache.CacheLoader<String, Object>() {
             @Override
             public Object load(String key) {
                 return delegate.findRolesByUserId(key);

@@ -20,7 +20,7 @@ public final class HttpServletRequestUtils {
         throw new AssertionError();
     }
 
-    public static HttpServletRequest requiredContextRequest() {
+    public static HttpServletRequest requireContextRequest() {
         HttpServletRequest result = getContextRequestOfNullable();
         AssertUtils.notNull(result, "not currently in web servlet context");
         return result;
@@ -35,7 +35,7 @@ public final class HttpServletRequestUtils {
         return ((ServletRequestAttributes) requestAttributes).getRequest();
     }
 
-    public static <T> T requiredRequestAttribute(String name, HttpServletRequest request) {
+    public static <T> T requireRequestAttribute(String name, HttpServletRequest request) {
         T result = getRequestAttribute(name, request);
         AssertUtils.notNull(result, () -> String.format("attribute = %s must not null", name));
         return result;
