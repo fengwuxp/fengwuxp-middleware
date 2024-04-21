@@ -1,5 +1,6 @@
 package com.wind.trace;
 
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotBlank;
@@ -26,6 +27,7 @@ public interface WindTraceContext {
      *
      * @return 不可变的 Map 对象
      */
+    @NonNull
     Map<String, Object> asContextVariables();
 
     /**

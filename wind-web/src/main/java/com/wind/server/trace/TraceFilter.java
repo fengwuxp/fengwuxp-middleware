@@ -71,7 +71,7 @@ public class TraceFilter extends OncePerRequestFilter {
             log.error("request error, cause by = {}", throwable.getMessage(), throwable);
             HttpResponseMessageUtils.writeApiResp(response, RestfulApiRespFactory.withThrowable(throwable));
         } finally {
-            WindTracer.TRACER.clearTraceContext();
+            WindTracer.TRACER.clear();
         }
     }
 

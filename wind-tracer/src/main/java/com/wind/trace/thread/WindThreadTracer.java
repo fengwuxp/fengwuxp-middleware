@@ -6,12 +6,14 @@ import com.wind.sequence.SequenceGenerator;
 import com.wind.trace.WindTraceContext;
 import com.wind.trace.WindTracer;
 import org.slf4j.MDC;
+import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
 
-import javax.validation.constraints.Null;
+import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.wind.common.WindConstants.LOCAL_HOST_IP_V4;
 import static com.wind.common.WindConstants.TRACE_ID_NAME;
@@ -40,22 +42,23 @@ public final class WindThreadTracer implements WindTracer {
     }
 
     @Override
-    public void trace(String traceId, @Null Map<String, Object> contextVariables) {
-        // TODO 暂时使用 MDC 保存
+    public void trace(String traceId, @NotNull Map<String, Object> contextVariables) {
+        //  使用 MDC 保存
         MDC.put(TRACE_ID_NAME, StringUtils.hasText(traceId) ? traceId : TRACE_ID.next());
-        contextVariables.forEach((k, val) -> {
-            if (val instanceof String) {
-                MDC.put(k, (String) val);
-            }
-        });
         MDC.put(LOCAL_HOST_IP_V4, IpAddressUtils.getLocalIpv4());
+        Objects.requireNonNull(contextVariables, "argument contextVariables must not null")
+                .forEach((key, val) -> {
+                    if (val instanceof String) {
+                        MDC.put(key, (String) val);
+                    }
+                });
+
     }
 
     @Override
     public WindTraceContext getTraceContext() {
-        Map<String, Object> mdc = getMdcContext();
+        Map<String, Object> mdcContext = getMdcContext();
         return new WindTraceContext() {
-
             @Override
             public String getTraceId() {
                 String traceId = getContextVariable(TRACE_ID_NAME);
@@ -68,19 +71,20 @@ public final class WindThreadTracer implements WindTracer {
             }
 
             @Override
+            @NonNull
             public Map<String, Object> asContextVariables() {
-                return mdc;
+                return mdcContext;
             }
 
             @Override
             @SuppressWarnings("unchecked")
             public <T> T getContextVariable(String variableName) {
-                return (T) mdc.get(variableName);
+                return (T) mdcContext.get(variableName);
             }
         };
     }
 
-    @Null
+    @NonNull
     private static Map<String, Object> getMdcContext() {
         Map<String, String> context = MDC.getCopyOfContextMap();
         if (context == null) {
@@ -91,7 +95,7 @@ public final class WindThreadTracer implements WindTracer {
     }
 
     @Override
-    public void clearTraceContext() {
+    public void clear() {
         MDC.clear();
     }
 
