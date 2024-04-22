@@ -96,7 +96,7 @@ public class RequestSignFilter implements Filter, Ordered {
             badRequest(response, String.format("please check %s, %s request header", headerNames.getAccessId(), headerNames.getSecretVersion()));
             return;
         }
-        if (account.getSignAlgorithm().verify(signatureRequest, account.getSecretKey(), requestSign)) {
+        if (account.getSigner().verify(signatureRequest, account.getSecretKey(), requestSign)) {
             // 设置到签名认证账号到上下文中
             request.setAttribute(WindHttpConstants.API_SECRET_ACCOUNT_ATTRIBUTE_NAME, account);
             chain.doFilter(httpRequest, servletResponse);

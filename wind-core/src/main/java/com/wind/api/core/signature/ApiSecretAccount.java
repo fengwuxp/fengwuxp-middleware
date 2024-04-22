@@ -27,11 +27,41 @@ public interface ApiSecretAccount {
     String getSecretKey();
 
     /**
-     * @return 签名算法
+     * @return 签名算法实现
      */
     @NotNull
-    ApiSignAlgorithm getSignAlgorithm();
+    ApiSignAlgorithm getSigner();
 
+    /**
+     * 使用 HmacSHA256算法签名
+     *
+     * @param accessId  AccessKey or AppId
+     * @param secretKey 签名秘钥
+     * @return 不可变的 ApiSecretAccount 实例
+     */
+    static ApiSecretAccount hmacSha256(String accessId, String secretKey) {
+        return immutable(accessId, secretKey, ApiSignAlgorithm.HMAC_SHA256);
+    }
+
+    /**
+     * 使用 SHA256_WITH_RSA 算法签名
+     *
+     * @param accessId  AccessKey or AppId
+     * @param secretKey 签名秘钥
+     * @return 不可变的 ApiSecretAccount 实例
+     */
+    static ApiSecretAccount sha256WithRsa(String accessId, String secretKey) {
+        return immutable(accessId, secretKey, ApiSignAlgorithm.SHA256_WITH_RSA);
+    }
+
+    /**
+     * 创建一个 不可变的 ApiSecretAccount
+     *
+     * @param accessId  AccessKey or AppId
+     * @param secretKey 签名秘钥
+     * @param signer    签名算法实现
+     * @return 不可变的 ApiSecretAccount 实例
+     */
     static ApiSecretAccount immutable(String accessId, String secretKey, ApiSignAlgorithm signer) {
         Objects.requireNonNull(accessId, "argument accessId must not null");
         Objects.requireNonNull(secretKey, "argument secretKey must not null");
@@ -48,7 +78,7 @@ public interface ApiSecretAccount {
             }
 
             @Override
-            public ApiSignAlgorithm getSignAlgorithm() {
+            public ApiSignAlgorithm getSigner() {
                 return signer;
             }
         };
