@@ -11,6 +11,7 @@ import com.wind.script.spring.SpringExpressionEvaluator;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.format.Printer;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Nullable;
 import java.io.OutputStream;
@@ -84,7 +85,8 @@ public class DefaultEasyExcelDocumentWriter implements ExcelDocumentWriter {
         List<String> result = new ArrayList<>();
         EvaluationContext context = new StandardEvaluationContext(row);
         for (ExcelWriteHead writeHead : heads) {
-            Object val = SpringExpressionEvaluator.DEFAULT.eval(writeHead.getExpression(), context);
+            String expression = writeHead.getExpression();
+            Object val = StringUtils.hasText(expression) ? SpringExpressionEvaluator.DEFAULT.eval(expression, context) : row;
             result.add(formatCellValue(writeHead, val));
         }
         return result;

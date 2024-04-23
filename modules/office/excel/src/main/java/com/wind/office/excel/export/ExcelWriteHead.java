@@ -20,7 +20,7 @@ public class ExcelWriteHead {
     private final String title;
 
     /**
-     * 取值表达式
+     * 取值表达式，如果为 null,则传入整行数据
      * 默认使用 spring expression 表达式
      * {@link org.springframework.expression.spel.standard.SpelExpressionParser}
      */
