@@ -92,11 +92,11 @@ public class OkHttpApiSignatureRequestInterceptor implements Interceptor {
     }
 
     private boolean signRequireRequestBody(RequestBody requestBody) {
-        if (requestBody == null) {
+        if (requestBody == null || requestBody.contentType() == null) {
+            // 当 reqeustBody content 为空时，content-type 为空，不参与签名
             return false;
         }
         MediaType mediaType = requestBody.contentType();
-        AssertUtils.notNull(mediaType, "request body content type must not null");
         String[] parts = mediaType.toString().split(";");
         return SIGNE_CONTENT_TYPES.stream().anyMatch(type -> Objects.equals(parts[0], type));
     }
