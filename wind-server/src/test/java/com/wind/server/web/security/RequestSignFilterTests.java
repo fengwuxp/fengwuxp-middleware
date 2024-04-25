@@ -28,7 +28,7 @@ import java.util.Collections;
  **/
 class RequestSignFilterTests {
 
-    private final ApiSecretAccount secretAccount = ApiSecretAccount.immutable(RandomStringUtils.randomAlphabetic(12), RandomStringUtils.randomAlphabetic(32), ApiSignAlgorithm.HMAC_SHA256);
+    private final ApiSecretAccount secretAccount = ApiSecretAccount.immutable(RandomStringUtils.randomAlphabetic(12), RandomStringUtils.randomAlphabetic(32), null, ApiSignAlgorithm.HMAC_SHA256);
 
     private RequestSignFilter signFilter;
 

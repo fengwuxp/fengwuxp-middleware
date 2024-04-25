@@ -1,9 +1,9 @@
 package com.wind.client.rest;
 
-import com.wind.common.exception.AssertUtils;
 import com.wind.api.core.signature.ApiSecretAccount;
 import com.wind.api.core.signature.ApiSignatureRequest;
 import com.wind.api.core.signature.SignatureHttpHeaderNames;
+import com.wind.common.exception.AssertUtils;
 import com.wind.sequence.SequenceGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpRequest;
@@ -13,6 +13,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -65,6 +66,9 @@ public class ApiSignatureRequestInterceptor implements ClientHttpRequestIntercep
         }
         ApiSignatureRequest signatureRequest = builder.build();
         request.getHeaders().add(headerNames.getAccessId(), account.getAccessId());
+        if (StringUtils.hasText(account.getSecretKeyVersion())) {
+            request.getHeaders().add(headerNames.getSecretVersion(), account.getSecretKeyVersion());
+        }
         request.getHeaders().add(headerNames.getTimestamp(), signatureRequest.getTimestamp());
         request.getHeaders().add(headerNames.getNonce(), signatureRequest.getNonce());
         String sign = account.getSigner().sign(signatureRequest, account.getSecretKey());

@@ -25,7 +25,7 @@ import java.nio.charset.StandardCharsets;
  **/
 class ApiSignatureRequestInterceptorTests {
 
-    ApiSecretAccount secretAccount = ApiSecretAccount.immutable(RandomStringUtils.randomAlphabetic(12), RandomStringUtils.randomAlphabetic(32), ApiSignAlgorithm.HMAC_SHA256);
+    ApiSecretAccount secretAccount = ApiSecretAccount.immutable(RandomStringUtils.randomAlphabetic(12), RandomStringUtils.randomAlphabetic(32), null, ApiSignAlgorithm.HMAC_SHA256);
 
     @Test
     void testSha256() throws IOException {

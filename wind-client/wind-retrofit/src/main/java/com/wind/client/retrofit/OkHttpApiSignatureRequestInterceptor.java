@@ -73,6 +73,9 @@ public class OkHttpApiSignatureRequestInterceptor implements Interceptor {
         ApiSignatureRequest signatureRequest = builder.build();
         Request.Builder requestBuilder = request.newBuilder();
         requestBuilder.addHeader(headerNames.getAccessId(), account.getAccessId());
+        if (StringUtils.hasText(account.getSecretKeyVersion())) {
+            requestBuilder.addHeader(headerNames.getSecretVersion(), account.getSecretKeyVersion());
+        }
         requestBuilder.addHeader(headerNames.getTimestamp(), signatureRequest.getTimestamp());
         requestBuilder.addHeader(headerNames.getNonce(), signatureRequest.getNonce());
         String sign = account.getSigner().sign(signatureRequest, account.getSecretKey());
