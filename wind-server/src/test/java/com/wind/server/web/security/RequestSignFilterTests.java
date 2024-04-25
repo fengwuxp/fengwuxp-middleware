@@ -1,10 +1,9 @@
 package com.wind.server.web.security;
 
+import com.wind.api.core.signature.ApiSecretAccount;
 import com.wind.client.rest.ApiSignatureRequestInterceptor;
 import com.wind.common.WindConstants;
 import com.wind.common.WindHttpConstants;
-import com.wind.api.core.signature.ApiSecretAccount;
-import com.wind.api.core.signature.ApiSignAlgorithm;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +27,7 @@ import java.util.Collections;
  **/
 class RequestSignFilterTests {
 
-    private final ApiSecretAccount secretAccount = ApiSecretAccount.immutable(RandomStringUtils.randomAlphabetic(12), RandomStringUtils.randomAlphabetic(32), null, ApiSignAlgorithm.HMAC_SHA256);
+    private final ApiSecretAccount secretAccount = ApiSecretAccount.hmacSha256(RandomStringUtils.randomAlphabetic(12), RandomStringUtils.randomAlphabetic(32));
 
     private RequestSignFilter signFilter;
 

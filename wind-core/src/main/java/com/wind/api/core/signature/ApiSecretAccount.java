@@ -47,13 +47,16 @@ public interface ApiSecretAccount {
     /**
      * 使用 HmacSHA256算法签名
      *
-     * @param accessId         AccessKey or AppId
-     * @param secretKey        签名秘钥
-     * @param secretKeyVersion 签名秘钥版本
+     * @param accessId  AccessKey or AppId
+     * @param secretKey 签名秘钥
      * @return 不可变的 ApiSecretAccount 实例
      */
-    static ApiSecretAccount hmacSha256(String accessId, String secretKey, @Nullable String secretKeyVersion) {
-        return immutable(accessId, secretKey, secretKeyVersion, ApiSignAlgorithm.HMAC_SHA256);
+    static ApiSecretAccount hmacSha256(String accessId, String secretKey) {
+        return immutable(accessId, secretKey, null, ApiSignAlgorithm.HMAC_SHA256);
+    }
+
+    static ApiSecretAccount sha256WithRsa(String accessId, String secretKey) {
+        return sha256WithRsa(accessId, secretKey, null);
     }
 
     /**
