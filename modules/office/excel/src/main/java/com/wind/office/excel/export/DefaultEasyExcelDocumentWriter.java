@@ -3,10 +3,10 @@ package com.wind.office.excel.export;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.excel.write.builder.ExcelWriterSheetBuilder;
 import com.alibaba.excel.write.handler.WriteHandler;
-import com.alibaba.excel.write.style.column.SimpleColumnWidthStyleStrategy;
 import com.alibaba.excel.write.style.row.SimpleRowHeightStyleStrategy;
 import com.wind.common.WindConstants;
 import com.wind.office.excel.ExcelDocumentWriter;
+import com.wind.office.excel.metadata.ExcelCellDescriptor;
 import com.wind.script.spring.SpringExpressionEvaluator;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -35,25 +35,25 @@ public class DefaultEasyExcelDocumentWriter implements ExcelDocumentWriter {
 
     private final List<Object> rows;
 
-    private final List<ExcelWriteHead> heads;
+    private final List<ExcelCellDescriptor> heads;
 
     private final ExcelWriterSheetBuilder sheetBuilder;
 
-    private DefaultEasyExcelDocumentWriter(List<ExcelWriteHead> heads, ExcelWriterSheetBuilder sheetBuilder, int size) {
+    private DefaultEasyExcelDocumentWriter(List<ExcelCellDescriptor> heads, ExcelWriterSheetBuilder sheetBuilder, int size) {
         this.rows = new ArrayList<>(size);
         this.heads = heads;
         this.sheetBuilder = sheetBuilder;
     }
 
-    public static DefaultEasyExcelDocumentWriter simple(OutputStream output, List<ExcelWriteHead> heads) {
+    public static DefaultEasyExcelDocumentWriter simple(OutputStream output, List<ExcelCellDescriptor> heads) {
         List<WriteHandler> handlers = Arrays.asList(
-                new SimpleColumnWidthStyleStrategy(25),
+                new CustomHeadColumnWidthStyleStrategy(heads),
                 new SimpleRowHeightStyleStrategy((short) 25, (short) 25));
         return of(output, heads, handlers);
     }
 
-    public static DefaultEasyExcelDocumentWriter of(OutputStream output, List<ExcelWriteHead> heads, Collection<WriteHandler> handlers) {
-        List<String> titles = heads.stream().map(ExcelWriteHead::getTitle).collect(Collectors.toList());
+    public static DefaultEasyExcelDocumentWriter of(OutputStream output, List<ExcelCellDescriptor> heads, Collection<WriteHandler> handlers) {
+        List<String> titles = heads.stream().map(ExcelCellDescriptor::getTitle).collect(Collectors.toList());
         ExcelWriterBuilder builder = new ExcelWriterBuilder();
         builder.file(output)
                 .head(titles.stream().map(Collections::singletonList).collect(Collectors.toList()))
@@ -84,7 +84,7 @@ public class DefaultEasyExcelDocumentWriter implements ExcelDocumentWriter {
     private List<String> format(Object row) {
         List<String> result = new ArrayList<>();
         EvaluationContext context = new StandardEvaluationContext(row);
-        for (ExcelWriteHead writeHead : heads) {
+        for (ExcelCellDescriptor writeHead : heads) {
             String expression = writeHead.getExpression();
             Object val = StringUtils.hasText(expression) ? SpringExpressionEvaluator.DEFAULT.eval(expression, context) : row;
             result.add(formatCellValue(writeHead, val));
@@ -92,13 +92,10 @@ public class DefaultEasyExcelDocumentWriter implements ExcelDocumentWriter {
         return result;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    @Nullable
-    private String formatCellValue(ExcelWriteHead writeHead, Object val) {
+    private String formatCellValue(ExcelCellDescriptor descriptor, Object val) {
         if (val == null) {
             return WindConstants.EMPTY;
         }
-        Printer formatter = writeHead.getFormatter();
-        return formatter == null ? String.valueOf(val) : formatter.print(val, Locale.getDefault());
+        return descriptor.getPrinter().print(val, Locale.getDefault());
     }
 }

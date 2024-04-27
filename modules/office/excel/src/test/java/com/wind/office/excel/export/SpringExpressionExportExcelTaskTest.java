@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.wind.office.core.OfficeTaskState;
 import com.wind.office.excel.ExcelDocumentWriter;
 import com.wind.office.excel.ExportExcelDataFetcher;
+import com.wind.office.excel.metadata.ExcelCellDescriptor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,10 +25,10 @@ class SpringExpressionExportExcelTaskTest {
 
     @BeforeEach
     void setup() throws Exception {
-        List<ExcelWriteHead> heads = Arrays.asList(
-                mockExcelHead("name"),
-                mockExcelHead("age"),
-                mockExcelHead("sex")
+        List<ExcelCellDescriptor> heads = Arrays.asList(
+                mockExcelHead("name", 25),
+                mockExcelHead("age", 10),
+                mockExcelHead("sex", 5)
         );
         Path filepath = Paths.get(Objects.requireNonNull(SpringExpressionExportExcelTaskTest.class.getResource("/")).getPath(), "test.xlsx");
         Files.deleteIfExists(filepath);
@@ -59,8 +60,11 @@ class SpringExpressionExportExcelTaskTest {
                 "age", RandomStringUtils.randomNumeric(2));
     }
 
-    private ExcelWriteHead mockExcelHead(String name) {
-        return new ExcelWriteHead(name, String.format("['%s']", name), null);
+    private ExcelCellDescriptor mockExcelHead(String name, int width) {
+        return ExcelCellDescriptor.builder(name, String.format("['%s']", name))
+                .width(width)
+                .printer((val, locale) -> String.valueOf(val))
+                .build();
     }
 
 }
