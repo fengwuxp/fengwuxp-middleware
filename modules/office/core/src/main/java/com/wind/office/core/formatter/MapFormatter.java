@@ -23,7 +23,7 @@ public class MapFormatter<T> implements Formatter<T> {
         this.dataSource = source;
     }
 
-    @Nonnull
+    @Nullable
     @SuppressWarnings("unchecked")
     @Override
     public T parse(@Nullable String text, @Nullable Locale locale) {
@@ -34,14 +34,14 @@ public class MapFormatter<T> implements Formatter<T> {
                 }
             }
         }
-        return (T) WindConstants.EMPTY;
+        return null;
     }
 
     @Nonnull
     @Override
     public String print(@Nullable T value, @Nullable Locale locale) {
         if (value == null) {
-            return "";
+            return WindConstants.EMPTY;
         }
         return (String) this.dataSource.get(String.valueOf(value));
     }

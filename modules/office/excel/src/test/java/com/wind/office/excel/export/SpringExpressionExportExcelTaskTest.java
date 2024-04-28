@@ -32,7 +32,7 @@ class SpringExpressionExportExcelTaskTest {
         );
         Path filepath = Paths.get(Objects.requireNonNull(SpringExpressionExportExcelTaskTest.class.getResource("/")).getPath(), "test.xlsx");
         Files.deleteIfExists(filepath);
-        ExcelDocumentWriter writer = DefaultEasyExcelDocumentWriter.simple(Files.newOutputStream(filepath), heads);
+        ExcelDocumentWriter writer = DefaultEasyExcelDocumentWriter.of(Files.newOutputStream(filepath), heads);
         task = new SpringExpressionExportExcelTask(ExportExcelTaskInfo.of("test", writer), mockExcelDataFetcher());
     }
 

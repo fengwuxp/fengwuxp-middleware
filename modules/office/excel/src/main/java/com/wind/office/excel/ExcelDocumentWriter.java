@@ -1,6 +1,7 @@
 package com.wind.office.excel;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * excel writer
@@ -15,11 +16,16 @@ public interface ExcelDocumentWriter {
      *
      * @param row 行数据
      */
-    void write(Object row);
-
-    default void write(Collection<Object> rows) {
-        rows.forEach(this::write);
+    default void write(Object row) {
+        write(Collections.singletonList(row));
     }
+
+    /**
+     * 批量写入数据
+     *
+     * @param rows 行数据列表
+     */
+    void write(Collection<Object> rows);
 
     /**
      * 写入完成
