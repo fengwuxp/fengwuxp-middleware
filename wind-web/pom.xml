@@ -9,16 +9,15 @@
         <version>${revision}</version>
     </parent>
 
-    <groupId>com.wind.web</groupId>
     <artifactId>wind-web</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>com.wind.common</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.trace</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-tracer</artifactId>
         </dependency>
         <dependency>

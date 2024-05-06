@@ -9,12 +9,11 @@
         <version>${revision}</version>
     </parent>
 
-    <groupId>com.wind.security.core</groupId>
     <artifactId>wind-security-core</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>com.wind.common</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-common</artifactId>
         </dependency>
     </dependencies>

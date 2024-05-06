@@ -10,16 +10,15 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <groupId>com.wind.sensitive</groupId>
     <artifactId>wind-object-sensitive</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>com.wind.core</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.common</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-common</artifactId>
         </dependency>
     </dependencies>

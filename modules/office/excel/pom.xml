@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.wind.office</groupId>
+        <groupId>com.wind.middleware</groupId>
         <artifactId>wind-office</artifactId>
         <version>${revision}</version>
     </parent>
@@ -13,17 +13,17 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>easyexcel</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.wind.office</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-office-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.script</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-script</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>easyexcel</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 

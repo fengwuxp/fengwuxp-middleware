@@ -9,7 +9,6 @@
         <version>${revision}</version>
     </parent>
 
-    <groupId>com.wind.moddleware</groupId>
     <artifactId>wind-tests</artifactId>
 
     <properties>
@@ -28,63 +27,63 @@
             <artifactId>wind-mybatis-flex-processor</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.loggin.logback</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>logback-kafka-appender</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.configcenter</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-config-center-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.configcenter</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-nacos-spring-cloud-config-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.elasticjob</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-elasticjob</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.script</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-script</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.office</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-office-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.office</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-office-excel</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.payment</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-payment-plugin-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.payment</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-payment-plugin-alipay</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.core</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.common</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.sensitive</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-object-sensitive</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.server</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-server</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.web</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.security.core</groupId>
+            <groupId>com.wind.security</groupId>
             <artifactId>wind-security-core</artifactId>
         </dependency>
         <dependency>
@@ -100,31 +99,31 @@
             <artifactId>wind-security-mfa</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.sequence</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-sequence-generate</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.client</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-restful</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.client</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-retrofit</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.trace</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-tracer</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.sentinel</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-sentinel</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.context.variable</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-context-annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.context.variable</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-context-injection</artifactId>
         </dependency>
         <dependency>
@@ -133,7 +132,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.wind.tools.h2</groupId>
+            <groupId>com.wind.tools</groupId>
             <artifactId>h2-functions-for-mysql</artifactId>
             <scope>test</scope>
         </dependency>

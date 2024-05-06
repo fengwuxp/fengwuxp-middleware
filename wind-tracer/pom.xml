@@ -9,13 +9,12 @@
         <version>${revision}</version>
     </parent>
 
-    <groupId>com.wind.trace</groupId>
-    <artifactId>wind-tracer</artifactId>
 
+    <artifactId>wind-tracer</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>com.wind.sequence</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-sequence-generate</artifactId>
         </dependency>
     </dependencies>

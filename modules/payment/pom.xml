@@ -10,7 +10,6 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <groupId>com.wind.payment</groupId>
     <artifactId>wind-payment-plugin</artifactId>
     <packaging>pom</packaging>
 

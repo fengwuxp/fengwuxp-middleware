@@ -9,10 +9,18 @@
         <version>${revision}</version>
     </parent>
 
-    <groupId>com.wind.sentinel</groupId>
     <artifactId>wind-sentinel</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>com.wind.middleware</groupId>
+            <artifactId>wind-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.wind.middleware</groupId>
+            <artifactId>wind-config-center-core</artifactId>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>com.alibaba.csp</groupId>
             <artifactId>sentinel-core</artifactId>
@@ -32,15 +40,6 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.wind.core</groupId>
-            <artifactId>wind-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.wind.configcenter</groupId>
-            <artifactId>wind-config-center-core</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.awaitility</groupId>

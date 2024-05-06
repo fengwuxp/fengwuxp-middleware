@@ -13,16 +13,24 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.wind.middleware</groupId>
+            <artifactId>wind-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.wind.middleware</groupId>
+            <artifactId>wind-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.wind.security</groupId>
+            <artifactId>wind-security-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-jose</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.wind.common</groupId>
-            <artifactId>wind-common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
@@ -35,14 +43,6 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.wind.web</groupId>
-            <artifactId>wind-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.wind.security.core</groupId>
-            <artifactId>wind-security-core</artifactId>
         </dependency>
     </dependencies>
 

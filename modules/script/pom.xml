@@ -10,12 +10,11 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <groupId>com.wind.script</groupId>
     <artifactId>wind-script</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>com.wind.common</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-common</artifactId>
         </dependency>
         <dependency>

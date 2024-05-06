@@ -7,8 +7,18 @@
         <groupId>com.wind.middleware</groupId>
         <artifactId>wind-middleware</artifactId>
         <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>wind-elasticjob</artifactId>
+    <groupId>com.wind.tools</groupId>
+    <artifactId>wind-tools</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>h2-functions-for-mysql</module>
+        <module>mybatis-flex-processor</module>
+        <module>mybatis-plus-annotation-processor</module>
+    </modules>
+
 
 </project>

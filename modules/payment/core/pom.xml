@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.wind.payment</groupId>
+        <groupId>com.wind.middleware</groupId>
         <artifactId>wind-payment-plugin</artifactId>
         <version>${revision}</version>
     </parent>
@@ -13,12 +13,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
+            <groupId>com.wind.middleware</groupId>
+            <artifactId>wind-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.common</groupId>
-            <artifactId>wind-common</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
         </dependency>
     </dependencies>
 

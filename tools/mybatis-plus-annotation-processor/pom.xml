@@ -5,13 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.wind.middleware</groupId>
-        <artifactId>wind-middleware</artifactId>
+        <groupId>com.wind.tools</groupId>
+        <artifactId>wind-tools</artifactId>
         <version>${revision}</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>com.wind.tools</groupId>
     <artifactId>mybatis-plus-annotation-processor</artifactId>
     <packaging>jar</packaging>
 
