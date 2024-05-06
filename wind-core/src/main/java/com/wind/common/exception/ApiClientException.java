@@ -4,7 +4,7 @@ import com.wind.api.core.ApiResponse;
 import lombok.Getter;
 
 /**
- * Api 客户端异常
+ * Api Client Exeception
  *
  * @author wuxp
  * @date 2024-02-28 17:34
@@ -17,5 +17,13 @@ public class ApiClientException extends BaseException {
     public ApiClientException(ApiResponse<?> response, String message) {
         super(message);
         this.response = response;
+    }
+
+    public String getTraceId() {
+        return response.getTraceId();
+    }
+
+    public String getErrorCode() {
+        return response.getErrorCode();
     }
 }
