@@ -76,6 +76,10 @@ public final class ExcelCellDescriptor {
         return Optional.ofNullable(result);
     }
 
+    public static ExcelCellDescriptorBuilder builder(String title) {
+        return builder(title, null);
+    }
+
     public static ExcelCellDescriptorBuilder builder(String title, String expression) {
         return new ExcelCellDescriptorBuilder(title, expression);
     }

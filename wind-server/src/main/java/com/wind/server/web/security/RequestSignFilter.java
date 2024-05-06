@@ -91,7 +91,7 @@ public class RequestSignFilter implements Filter, Ordered {
         String requestSign = request.getHeader(headerNames.getSign());
 
         // 使用访问标识和秘钥版本号加载秘钥账号
-        ApiSecretAccount account = apiSecretAccountProvider.apply(accessId, headerNames.getSecretVersion());
+        ApiSecretAccount account = apiSecretAccountProvider.apply(accessId, request.getHeader(headerNames.getSecretVersion()));
         if (account == null) {
             badRequest(response, String.format("please check %s, %s request header", headerNames.getAccessId(), headerNames.getSecretVersion()));
             return;
