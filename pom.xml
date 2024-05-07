@@ -76,7 +76,7 @@
         <elasticjob.version>3.0.2</elasticjob.version>
         <dynamic-tp.version>1.1.5</dynamic-tp.version>
         <guava.version>32.0.1-jre</guava.version>
-        <fastjson.version>2.0.40</fastjson.version>
+        <fastjson2.version>2.0.49</fastjson2.version>
         <j2v8.version>4.6.0</j2v8.version>
         <google-zxing.version>3.5.2</google-zxing.version>
         <freemarker.version>2.3.32</freemarker.version>
@@ -367,9 +367,9 @@
                 <version>${google-zxing.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>fastjson</artifactId>
-                <version>${fastjson.version}</version>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastjson2.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.eclipsesource.j2v8</groupId>

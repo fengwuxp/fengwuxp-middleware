@@ -1,6 +1,6 @@
 package com.wind.web.util;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.server.web.supports.ApiResp;
