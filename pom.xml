@@ -202,23 +202,28 @@
                 <version>${revision}</version>
             </dependency>
             <dependency>
-                <groupId>com.wind.middleware</groupId>
+                <groupId>com.wind.office</groupId>
                 <artifactId>wind-office-core</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
-                <groupId>com.wind.middleware</groupId>
+                <groupId>com.wind.office</groupId>
                 <artifactId>wind-office-excel</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
-                <groupId>com.wind.middleware</groupId>
+                <groupId>com.wind.payment</groupId>
                 <artifactId>wind-payment-plugin-core</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
-                <groupId>com.wind.middleware</groupId>
+                <groupId>com.wind.payment</groupId>
                 <artifactId>wind-payment-plugin-alipay</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.payment</groupId>
+                <artifactId>wind-payment-plugin-wechat</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

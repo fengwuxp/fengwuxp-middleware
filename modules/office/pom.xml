@@ -10,6 +10,7 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
+    <groupId>com.wind.office</groupId>
     <artifactId>wind-office</artifactId>
     <packaging>pom</packaging>
 
