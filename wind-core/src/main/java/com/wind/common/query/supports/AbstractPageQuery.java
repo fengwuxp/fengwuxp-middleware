@@ -5,6 +5,7 @@ import com.wind.common.exception.AssertUtils;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.beans.Transient;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -78,7 +79,8 @@ public abstract class AbstractPageQuery<F extends QueryOrderField> {
     /**
      * @return 查询大小最大值
      */
-    public static int getMaxQuerySize() {
+    @Transient
+    public int getMaxQuerySize() {
         return MAX_QUERY_SIZE.get();
     }
 
