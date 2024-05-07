@@ -33,7 +33,7 @@
             <artifactId>wind-context-injection</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.middleware</groupId>
+            <groupId>com.wind.client</groupId>
             <artifactId>wind-restful</artifactId>
         </dependency>
         <dependency>

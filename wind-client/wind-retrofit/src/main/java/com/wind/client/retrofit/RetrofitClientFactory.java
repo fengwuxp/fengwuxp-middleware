@@ -11,10 +11,12 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import com.wind.api.core.ApiResponse;
 import com.wind.api.core.ImmutableApiResponse;
+import com.wind.api.core.signature.ApiSecretAccount;
 import com.wind.client.retrofit.converter.JacksonConverterFactory;
 import com.wind.client.retrofit.converter.JacksonResponseCallAdapterFactory;
 import com.wind.common.exception.ApiClientException;
 import com.wind.common.exception.AssertUtils;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import org.jetbrains.annotations.NotNull;
 import retrofit2.Retrofit;
@@ -23,6 +25,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.wind.common.WindDateFormatPatterns.HH_MM_SS;
@@ -35,16 +39,18 @@ import static com.wind.common.WindDateFormatPatterns.YYYY_MM_DD_HH_MM_SS;
  * <p>For example,
  *
  * <pre><code>
- *   OkHttpClient.Builder clientBuilder = RetrofitClientFactory.httpClientBuilder()
- *           .addInterceptor(new XxxInterceptor());
- *    RetrofitClientFactory factory = RetrofitClientFactory.restful("you api base address", clientBuilder);
+ *   RetrofitClientFactory factory = RetrofitClientFactory.builder()
+ *                  .baseUrl("You Api Server Address")
+ *                  .authenticationHeaderPrefix("Wind")
+ *                  .account(ApiSecretAccount.sha256WithRsa("example", "test"))
+ *                  .restful();
  *    ExampleRetrofitClient exampleRetrofitClient = factory.create(ExampleRetrofitClient.class);
  * </code></pre>
  *
  * @author wuxp
  * @date 2024-02-27 11:32
  **/
-public class RetrofitClientFactory {
+public final class RetrofitClientFactory {
 
     private final Retrofit retrofit;
 
@@ -56,129 +62,166 @@ public class RetrofitClientFactory {
         return retrofit.create(apiClientClass);
     }
 
-    public static RetrofitClientFactory of(Retrofit retrofit) {
-        return new RetrofitClientFactory(retrofit);
+    public static RetrofitClientFactoryBuilder builder() {
+        return new RetrofitClientFactoryBuilder();
     }
 
-    public static OkHttpClient.Builder httpClientBuilder() {
-        // 设置超时时间，这里以秒为单位
-        return new OkHttpClient.Builder()
-                .readTimeout(15, TimeUnit.SECONDS)
-                .writeTimeout(10, TimeUnit.SECONDS)
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .retryOnConnectionFailure(true);
-    }
+    public static class RetrofitClientFactoryBuilder {
 
-    /**
-     * 创建默认风格 API RetrofitClientFactory
-     *
-     * @param baseUrl 请求接口根路径
-     * @param builder okhttp 客户端 builder
-     * @return 工厂实例
-     */
-    public static RetrofitClientFactory defaults(String baseUrl, OkHttpClient.Builder builder) {
-        return defaults(baseUrl, builder.build(), buildObjectMapper());
-    }
+        /**
+         * api base url
+         */
+        private String baseUrl;
 
-    /**
-     * 创建默认风格 API RetrofitClientFactory
-     *
-     * @param baseUrl 请求接口根路径
-     * @param client  okhttp 客户端
-     * @param objectMapper jackson objectMapper
-     * @return 工厂实例
-     */
-    private static RetrofitClientFactory defaults(String baseUrl, OkHttpClient client, ObjectMapper objectMapper) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(baseUrl)
-                .client(client)
-                .addCallAdapterFactory(new JacksonResponseCallAdapterFactory(objectMapper))
-                .addConverterFactory(new JacksonConverterFactory(objectMapper))
-                .build();
-        return of(retrofit);
-    }
+        /**
+         * 认证相关请求头前缀
+         */
+        private String authenticationHeaderPrefix;
 
-    /**
-     * 创建 restful 风格 API RetrofitClientFactory
-     *
-     * @param baseUrl 请求接口根路径
-     * @param builder okhttp 客户端 builder
-     * @return 工厂实例
-     */
-    public static RetrofitClientFactory restful(String baseUrl, OkHttpClient.Builder builder) {
-        return restful(baseUrl, builder.build());
-    }
+        /**
+         * Api 认证服务账号，如果不为空，则自动添加 {@link OkHttpApiSignatureRequestInterceptor}
+         */
+        private ApiSecretAccount account;
 
-    /**
-     * 创建 restful 风格 API RetrofitClientFactory
-     *
-     * @param baseUrl      请求接口根路径
-     * @param builder      okhttp 客户端 builder
-     * @param objectMapper jackson objectMapper
-     * @return 工厂实例
-     */
-    public static RetrofitClientFactory restful(String baseUrl, OkHttpClient.Builder builder, ObjectMapper objectMapper) {
-        return restful(baseUrl, builder.build(), objectMapper);
-    }
+        /**
+         * 自定义的 ObjectMapper
+         *
+         * @see #buildObjectMapper()
+         */
+        private ObjectMapper objectMapper;
 
-    /**
-     * 创建 restful 风格 API RetrofitClientFactory
-     *
-     * @param baseUrl 请求接口根路径
-     * @param client  okhttp 客户端
-     * @return 工厂实例
-     */
-    private static RetrofitClientFactory restful(String baseUrl, OkHttpClient client) {
-        return restful(baseUrl, client, buildObjectMapper());
-    }
+        /**
+         * 自定义的拦截器，当自定义了 {@link #httpClient}，则不会处理该字段
+         *
+         * @see OkHttpApiSignatureRequestInterceptor
+         */
+        private List<Interceptor> httpClientInterceptors;
 
-    /**
-     * 创建 restful 风格 API RetrofitClientFactory
-     *
-     * @param baseUrl      请求接口根路径
-     * @param client       okhttp 客户端
-     * @param objectMapper jackson objectMapper
-     * @return 工厂实例
-     */
-    private static RetrofitClientFactory restful(String baseUrl, OkHttpClient client, ObjectMapper objectMapper) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(baseUrl)
-                .client(client)
-                .addCallAdapterFactory(new JacksonResponseCallAdapterFactory(objectMapper, ImmutableApiResponse.class, RetrofitClientFactory::defaultResponseExtractor))
-                .addConverterFactory(new JacksonConverterFactory(objectMapper, ImmutableApiResponse.class, RetrofitClientFactory::defaultResponseExtractor))
-                .build();
-        return of(retrofit);
-    }
+        /**
+         * 自定义的 OkHttpClient，若设置需要自行配置超时时间，请求认证相关等配置
+         *
+         * @see OkHttpApiSignatureRequestInterceptor
+         * @see #detaultClientBuilder()
+         */
+        private OkHttpClient httpClient;
 
-    @NotNull
-    private static ObjectMapper buildObjectMapper() {
-        ObjectMapper result = new ObjectMapper();
-        // 配置忽略未知属性
-        result.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        result.registerModule(buildJavaTimeModule());
-        return result;
-    }
-
-    @NotNull
-    private static JavaTimeModule buildJavaTimeModule() {
-        JavaTimeModule result = new JavaTimeModule();
-        result.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS)));
-        result.addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern(YYYY_MM_DD)));
-        result.addSerializer(LocalTime.class, new LocalTimeSerializer(DateTimeFormatter.ofPattern(HH_MM_SS)));
-        result.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS)));
-        result.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern(YYYY_MM_DD)));
-        result.addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeFormatter.ofPattern(HH_MM_SS)));
-        return result;
-    }
-
-    @NotNull
-    private static Object defaultResponseExtractor(Object data) {
-        if (data instanceof ApiResponse) {
-            ApiResponse<?> response = (ApiResponse<?>) data;
-            AssertUtils.state(response.isSuccess(), () -> new ApiClientException(response, response.getErrorMessage()));
-            return response.getData();
+        public RetrofitClientFactoryBuilder baseUrl(String baseUrl) {
+            this.baseUrl = baseUrl;
+            return this;
         }
-        return data;
-    }
 
+        public RetrofitClientFactoryBuilder authenticationHeaderPrefix(String authenticationHeaderPrefix) {
+            this.authenticationHeaderPrefix = authenticationHeaderPrefix;
+            return this;
+        }
+
+        public RetrofitClientFactoryBuilder account(ApiSecretAccount account) {
+            this.account = account;
+            return this;
+        }
+
+        public RetrofitClientFactoryBuilder interceptors(Interceptor... interceptors) {
+            this.httpClientInterceptors = Arrays.asList(interceptors);
+            return this;
+        }
+
+
+        public RetrofitClientFactoryBuilder objectMapper(ObjectMapper objectMapper) {
+            this.objectMapper = objectMapper;
+            return this;
+        }
+
+        public RetrofitClientFactoryBuilder httpClient(OkHttpClient client) {
+            this.httpClient = client;
+            return this;
+        }
+
+        /**
+         * 创建默认风格 API RetrofitClientFactory
+         *
+         * @return 工厂实例
+         */
+        public RetrofitClientFactory defaults() {
+            checkAndUseDefaultConfig();
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(baseUrl)
+                    .client(httpClient)
+                    .addCallAdapterFactory(new JacksonResponseCallAdapterFactory(objectMapper))
+                    .addConverterFactory(new JacksonConverterFactory(objectMapper))
+                    .build();
+            return new RetrofitClientFactory(retrofit);
+        }
+
+        /**
+         * 创建 restful 风格 API RetrofitClientFactory
+         *
+         * @return 工厂实例
+         */
+        public RetrofitClientFactory restful() {
+            checkAndUseDefaultConfig();
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(baseUrl)
+                    .client(httpClient)
+                    .addCallAdapterFactory(new JacksonResponseCallAdapterFactory(objectMapper, ImmutableApiResponse.class, RetrofitClientFactoryBuilder::defaultResponseExtractor))
+                    .addConverterFactory(new JacksonConverterFactory(objectMapper, ImmutableApiResponse.class, RetrofitClientFactoryBuilder::defaultResponseExtractor))
+                    .build();
+            return new RetrofitClientFactory(retrofit);
+        }
+
+        private void checkAndUseDefaultConfig() {
+            if (httpClient == null) {
+                AssertUtils.notNull(account, "api authentication account must not null");
+                OkHttpClient.Builder builder = detaultClientBuilder()
+                        .addInterceptor(new OkHttpApiSignatureRequestInterceptor(key -> account, authenticationHeaderPrefix));
+                if (httpClientInterceptors != null) {
+                    // 添加自定义拦截器
+                    builder.interceptors().addAll(httpClientInterceptors);
+                }
+                httpClient = builder.build();
+            }
+            if (objectMapper == null) {
+                objectMapper = buildObjectMapper();
+            }
+        }
+
+        private static OkHttpClient.Builder detaultClientBuilder() {
+            // 设置超时时间，这里以秒为单位
+            return new OkHttpClient.Builder()
+                    .readTimeout(15, TimeUnit.SECONDS)
+                    .writeTimeout(15, TimeUnit.SECONDS)
+                    .connectTimeout(5, TimeUnit.SECONDS)
+                    .retryOnConnectionFailure(true);
+        }
+
+        @NotNull
+        private static ObjectMapper buildObjectMapper() {
+            ObjectMapper result = new ObjectMapper();
+            // 配置忽略未知属性
+            result.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            result.registerModule(buildJavaTimeModule());
+            return result;
+        }
+
+        @NotNull
+        private static JavaTimeModule buildJavaTimeModule() {
+            JavaTimeModule result = new JavaTimeModule();
+            result.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS)));
+            result.addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern(YYYY_MM_DD)));
+            result.addSerializer(LocalTime.class, new LocalTimeSerializer(DateTimeFormatter.ofPattern(HH_MM_SS)));
+            result.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS)));
+            result.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern(YYYY_MM_DD)));
+            result.addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeFormatter.ofPattern(HH_MM_SS)));
+            return result;
+        }
+
+        @NotNull
+        private static Object defaultResponseExtractor(Object data) {
+            if (data instanceof ApiResponse) {
+                ApiResponse<?> response = (ApiResponse<?>) data;
+                AssertUtils.state(response.isSuccess(), () -> new ApiClientException(response, response.getErrorMessage()));
+                return response.getData();
+            }
+            return data;
+        }
+    }
 }

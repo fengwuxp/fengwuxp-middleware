@@ -9,6 +9,7 @@
         <version>${revision}</version>
     </parent>
 
+    <groupId>com.wind.client</groupId>
     <artifactId>wind-client</artifactId>
     <packaging>pom</packaging>
 

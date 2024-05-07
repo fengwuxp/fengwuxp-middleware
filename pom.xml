@@ -272,12 +272,12 @@
                 <version>${revision}</version>
             </dependency>
             <dependency>
-                <groupId>com.wind.middleware</groupId>
+                <groupId>com.wind.client</groupId>
                 <artifactId>wind-restful</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
-                <groupId>com.wind.middleware</groupId>
+                <groupId>com.wind.client</groupId>
                 <artifactId>wind-retrofit</artifactId>
                 <version>${revision}</version>
             </dependency>
