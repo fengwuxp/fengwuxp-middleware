@@ -173,6 +173,11 @@
             </dependency>
             <dependency>
                 <groupId>com.wind.tools</groupId>
+                <artifactId>mybatis-flex-codegen</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.tools</groupId>
                 <artifactId>h2-functions-for-mysql</artifactId>
                 <version>${revision}</version>
             </dependency>

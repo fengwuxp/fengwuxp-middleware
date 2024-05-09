@@ -16,9 +16,17 @@
 
     <modules>
         <module>h2-functions-for-mysql</module>
+        <module>mybatis-flex-codegen</module>
         <module>mybatis-flex-processor</module>
         <module>mybatis-plus-annotation-processor</module>
     </modules>
 
+    <properties>
+        <wuxp-codegen.version>1.0.0-SNAPSHOT</wuxp-codegen.version>
+    </properties>
+
+    <dependencyManagement>
+
+    </dependencyManagement>
 
 </project>
