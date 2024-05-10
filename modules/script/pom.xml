@@ -48,6 +48,11 @@
             <artifactId>j2v8_macosx_x86_64</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
 </project>

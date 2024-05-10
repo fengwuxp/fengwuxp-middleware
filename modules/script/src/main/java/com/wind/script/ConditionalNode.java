@@ -1,9 +1,9 @@
 package com.wind.script;
 
+import com.wind.script.expression.Operand;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -124,45 +124,4 @@ public class ConditionalNode {
      * 子节点
      */
     private List<ConditionalNode> children;
-
-    /**
-     * 操作数来源
-     */
-    public enum OperandSource {
-
-        /**
-         * 上下文变量
-         */
-        CONTEXT_VARIABLE,
-
-        /**
-         * 常量(字面量)
-         */
-        CONSTANT,
-
-        /**
-         * 脚本调用或执行
-         */
-        SCRIPT
-    }
-
-    /**
-     * 操作数
-     */
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Operand {
-
-        /**
-         * 操作数的值
-         */
-        private Object value;
-
-        /**
-         * 操作数来源
-         */
-        private OperandSource source;
-
-    }
 }
