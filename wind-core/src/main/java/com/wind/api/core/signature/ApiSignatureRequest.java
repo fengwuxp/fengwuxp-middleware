@@ -76,7 +76,7 @@ public class ApiSignatureRequest {
 
     private ApiSignatureRequest(String method, String requestPath, String nonce, String timestamp, String queryString, String requestBody) {
         AssertUtils.hasText(method, "method must not empty");
-        AssertUtils.hasText(requestPath, "requestPath must not empty");
+        AssertUtils.notNull(requestPath, "requestPath must not null");
         AssertUtils.hasText(nonce, "nonce must not empty");
         AssertUtils.hasText(timestamp, "timestamp must not empty");
         this.method = method.toUpperCase();
