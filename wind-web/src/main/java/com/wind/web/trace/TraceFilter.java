@@ -1,4 +1,4 @@
-package com.wind.server.trace;
+package com.wind.web.trace;
 
 import com.google.common.collect.ImmutableSet;
 import com.wind.common.WindConstants;
@@ -38,7 +38,7 @@ import static com.wind.common.WindHttpConstants.HTTP_USER_AGENT_HEADER_NAME;
 public class TraceFilter extends OncePerRequestFilter {
 
     /**
-     * 线下环境给 client 响应真实的服务 IP
+     * 线下环境给 client 响应服务端真实 IP 方便定位问题
      */
     private static final String REAL_SERVER_IP = "Real-Server-Ip";
 

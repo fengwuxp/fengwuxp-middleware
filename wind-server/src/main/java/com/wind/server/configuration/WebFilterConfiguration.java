@@ -1,6 +1,6 @@
 package com.wind.server.configuration;
 
-import com.wind.server.trace.TraceFilter;
+import com.wind.web.trace.TraceFilter;
 import com.wind.server.web.filters.IndexHtmlResourcesFilter;
 import com.wind.server.web.filters.WindWebFilterOrdered;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
