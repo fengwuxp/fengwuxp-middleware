@@ -79,11 +79,10 @@ public class ApiSignatureRequestInterceptor implements ClientHttpRequestIntercep
         return execution.execute(request, body);
     }
 
-    // TODO 暂时先放到这里，待重构
-    public static boolean signRequireRequestBody(@Nullable MediaType contentType) {
+    private static boolean signRequireRequestBody(@Nullable MediaType contentType) {
         if (contentType == null) {
             return false;
         }
-        return SIGNE_CONTENT_TYPES.stream().anyMatch(mediaType -> mediaType.includes(contentType));
+       return ApiSignatureRequest.signRequireRequestBody(contentType.toString());
     }
 }

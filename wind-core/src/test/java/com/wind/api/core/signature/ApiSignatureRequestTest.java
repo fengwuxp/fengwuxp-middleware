@@ -50,6 +50,18 @@ class ApiSignatureRequestTest {
                 "{}\n", request.getSignTextForSha256WithRsa());
     }
 
+    @Test
+    void testSignRequireRequestBody() {
+        Assertions.assertFalse(ApiSignatureRequest.signRequireRequestBody(null));
+        Assertions.assertFalse(ApiSignatureRequest.signRequireRequestBody(""));
+        Assertions.assertFalse(ApiSignatureRequest.signRequireRequestBody("text/html"));
+        Assertions.assertFalse(ApiSignatureRequest.signRequireRequestBody("application/xml"));
+        Assertions.assertTrue(ApiSignatureRequest.signRequireRequestBody("application/json"));
+        Assertions.assertTrue(ApiSignatureRequest.signRequireRequestBody("application/json;chart=UTF-8"));
+        Assertions.assertTrue(ApiSignatureRequest.signRequireRequestBody("application/x-www-form-urlencoded"));
+        Assertions.assertTrue(ApiSignatureRequest.signRequireRequestBody("application/x-www-form-urlencoded;chart=UTF-8"));
+    }
+
     private static ApiSignatureRequest buildRequest(String queryString, String requestBody) {
         return ApiSignatureRequest.builder()
                 .method(requestBody == null ? "GET" : "POST")

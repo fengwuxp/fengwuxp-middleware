@@ -18,9 +18,6 @@ import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -32,11 +29,6 @@ import java.util.function.Function;
  **/
 @Slf4j
 public class OkHttpApiSignatureRequestInterceptor implements Interceptor {
-
-    /**
-     * 需要 requestBody 参与签名的 Content-Type
-     */
-    private static final List<String> SIGNE_CONTENT_TYPES = Arrays.asList("application/json", "application/x-www-form-urlencoded");
 
     private final Function<Request, ApiSecretAccount> accountProvider;
 
@@ -101,6 +93,6 @@ public class OkHttpApiSignatureRequestInterceptor implements Interceptor {
         }
         MediaType mediaType = requestBody.contentType();
         String[] parts = mediaType.toString().split(";");
-        return SIGNE_CONTENT_TYPES.stream().anyMatch(type -> Objects.equals(parts[0], type));
+        return ApiSignatureRequest.signRequireRequestBody(parts[0]);
     }
 }

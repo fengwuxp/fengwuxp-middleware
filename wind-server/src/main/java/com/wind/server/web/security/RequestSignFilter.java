@@ -4,7 +4,6 @@ package com.wind.server.web.security;
 import com.wind.api.core.signature.ApiSecretAccount;
 import com.wind.api.core.signature.ApiSignatureRequest;
 import com.wind.api.core.signature.SignatureHttpHeaderNames;
-import com.wind.client.rest.ApiSignatureRequestInterceptor;
 import com.wind.common.WindHttpConstants;
 import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.common.util.ServiceInfoUtils;
@@ -17,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.StreamUtils;
@@ -84,8 +82,7 @@ public class RequestSignFilter implements Filter, Ordered {
             return;
         }
 
-        MediaType contentType = StringUtils.hasLength(request.getContentType()) ? MediaType.parseMediaType(request.getContentType()) : null;
-        boolean signRequireBody = ApiSignatureRequestInterceptor.signRequireRequestBody(contentType);
+        boolean signRequireBody = ApiSignatureRequest.signRequireRequestBody(request.getContentType());
         HttpServletRequest httpRequest = signRequireBody ? new RepeatableReadRequestWrapper(request) : request;
         ApiSignatureRequest signatureRequest = buildSignatureRequest(httpRequest, signRequireBody);
         String requestSign = request.getHeader(headerNames.getSign());
