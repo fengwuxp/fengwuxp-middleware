@@ -5,13 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
+ * Seq 时间范围类型
  * @author wuxp
  * @date 2023-10-17 13:52
  **/
 @AllArgsConstructor
 @Getter
 public enum SequenceTimeScopeType implements DescriptiveEnum {
-
 
     /**
      * 按年区分
@@ -29,19 +29,19 @@ public enum SequenceTimeScopeType implements DescriptiveEnum {
     DAY("天", "yyyyMMdd"),
 
     /**
-     * 按天区分
+     * 按小时区分
      */
     HOUR("小时", "yyyyMMddHH"),
 
     /**
-     * 按天区分
+     * 按分钟区分
      */
     MINUTE("分钟", "yyyyMMddHHmm"),
 
     /**
-     * 按天区分
+     * 按秒区分
      */
-    SECONDS("小时", "yyyyMMddHHmmss");
+    SECONDS("秒", "yyyyMMddHHmmss");
 
     private final String desc;
 
