@@ -26,17 +26,18 @@
         <module>wind-tracer</module>
         <module>context-variable</module>
         <module>logback-kafka-appender</module>
-        <module>modules/payment</module>
-        <module>modules/script</module>
-        <module>modules/sequence-generate</module>
-        <module>modules/office</module>
-        <module>modules/object-sensitive</module>
+        <module>modules/transaction</module>
         <module>wind-elasticjob</module>
         <module>wind-dependencies</module>
         <module>wind-sentinel</module>
         <module>wind-client</module>
         <module>wind-archetype</module>
-        <module>tools/</module>
+        <module>tools</module>
+        <module>modules/office</module>
+        <module>modules/object-sensitive</module>
+        <module>modules/payment</module>
+        <module>modules/script</module>
+        <module>modules/sequence-generate</module>
         <module>tests</module>
     </modules>
 
