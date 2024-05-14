@@ -50,6 +50,11 @@ public class GenCodeInfo {
     private List<FieldInfo> fields;
 
     /**
+     * 有乐观锁字段
+     */
+    private boolean existsVersionField;
+
+    /**
      * 额外属性
      */
     private Map<String, Object> extraProps;
@@ -80,6 +85,13 @@ public class GenCodeInfo {
                 .setComment(this.getComment())
                 .setFields(new ArrayList<>(this.getFields()))
                 .setExtraProps(getExtraProps());
+    }
+
+    /**
+     * @return 是否使用了乐观锁
+     */
+    public boolean isExistsVersionField() {
+        return fields.stream().anyMatch(field -> Objects.equals("version", field.getName()) && field.getClassType() == Integer.class);
     }
 
     /**

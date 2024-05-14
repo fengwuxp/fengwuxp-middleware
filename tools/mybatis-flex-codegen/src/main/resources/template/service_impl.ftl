@@ -48,6 +48,11 @@ public class ${javaClassName} implements ${name}Service {
     @Override
     public void update${name}(Update${name}Request request){
        ${name} entity = find${name}(request.getId());
+       <#if existsVersionField>
+         if (request.getVersion() == null) {
+           request.setVersion(entity.getVersion());
+          }
+       </#if>
         entity = ${name}Converter.INSTANCE.convertTo${name}(request);
        AssertUtils.isTrue( ${firstLowName}Mapper.update(entity) == 1, "更新${comment}信息失败");
     }
