@@ -1,13 +1,15 @@
 package com.wind.security.core.rbac;
 
+import com.google.common.collect.ImmutableSet;
 import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * rbac 资源操作
@@ -38,48 +40,56 @@ public interface RbacResourceService {
      * @return 权限
      */
     @Nullable
-    RbacResource.Permission findPermissionById(String permissionId);
+    default RbacResource.Permission findPermissionById(String permissionId) {
+        Iterator<RbacResource.Permission> iterator = findPermissionByIds(Collections.singletonList(permissionId)).iterator();
+        return iterator.hasNext() ? iterator.next() : null;
+    }
 
     /**
      * @param permissionIds 权限 id 集合
      * @return 权限集合
      */
-    @NotEmpty()
-    default List<RbacResource.Permission> findPermissionByIds(Collection<String> permissionIds) {
-        if (permissionIds == null) {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(permissionIds.stream().map(this::findPermissionById).collect(Collectors.toList()));
-    }
+    @NotNull
+    List<RbacResource.Permission> findPermissionByIds(Collection<String> permissionIds);
 
     /**
      * @param roleId 角色 id
      * @return 角色
      */
     @Nullable
-    RbacResource.Role findRoleById(String roleId);
+    default RbacResource.Role findRoleById(String roleId) {
+        Iterator<RbacResource.Role> iterator = findRoleByIds(Collections.singletonList(roleId)).iterator();
+        return iterator.hasNext() ? iterator.next() : null;
+    }
 
     /**
      * @param roleIds 角色 ids
      * @return 角色
      */
-    @NotEmpty()
-    default List<RbacResource.Role> findRoleByIds(Collection<String> roleIds) {
-        if (roleIds == null) {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(roleIds.stream().map(this::findRoleById).collect(Collectors.toList()));
-    }
+    @NotNull
+    List<RbacResource.Role> findRoleByIds(Collection<String> roleIds);
+
+    /**
+     * 获取用户拥有的角色标识
+     * 如果系统中有多种类型的用户 {@param userId}，可以使用 {type}_{id} 组合
+     *
+     * @param userId 用户唯一标识
+     * @return 角色标识列表
+     */
+    @NotNull
+    Set<String> finUserOwnerRoleIds(String userId);
 
     /**
      * 获取用户拥有的角色
      * 如果系统中有多种类型的用户 {@param userId}，可以使用 {type}_{id} 组合
      *
      * @param userId 用户唯一标识
-     * @return 角色唯一标识
+     * @return 角色列表
      */
-    @NotEmpty()
-    Set<RbacResource.Role> findRolesByUserId(String userId);
+    @NotNull
+    default Set<RbacResource.Role> finUserOwnerRoles(String userId) {
+        return ImmutableSet.copyOf(findRoleByIds(finUserOwnerRoleIds(userId)));
+    }
 
     /**
      * @return 获取已登录用户 id

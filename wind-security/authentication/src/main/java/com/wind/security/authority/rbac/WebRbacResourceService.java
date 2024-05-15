@@ -114,8 +114,8 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     }
 
     @Override
-    public Set<RbacResource.Role> findRolesByUserId(String userId) {
-        Set<RbacResource.Role> result = getUserRoleCache().computeIfAbsent(userId, delegate::findRolesByUserId);
+    public Set<String> finUserOwnerRoleIds(String userId) {
+        Set<String> result = getUserRoleCache().computeIfAbsent(userId, delegate::finUserOwnerRoleIds);
         return result == null ? Collections.emptySet() : result;
     }
 
@@ -149,7 +149,7 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
 
         if (event.getResourceType() == RbacResource.User.class) {
             // 用户角色内容变更
-            event.getResourceIds().forEach(userId -> putUserRoleCaches(userId, delegate.findRolesByUserId(userId)));
+            event.getResourceIds().forEach(userId -> putUserRoleCaches(userId, delegate.finUserOwnerRoleIds(userId)));
         }
     }
 
@@ -206,7 +206,7 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
             if (canRefreshRoleCaches(REFRESH_USER_ROLE_CACHE_LOCK_KEY)) {
                 storeLastRefreshTime(REFRESH_USER_ROLE_CACHE_LOCK_KEY);
                 // 刷新在线用户角色缓存
-                getUserRoleCache().keys().forEach(userId -> putUserRoleCaches(userId, delegate.findRolesByUserId(userId)));
+                getUserRoleCache().keys().forEach(userId -> putUserRoleCaches(userId, delegate.finUserOwnerRoleIds(userId)));
             }
         } catch (Exception exception) {
             log.error("refresh user roles error, message = {}", exception.getMessage(), exception);
@@ -251,6 +251,9 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
         });
     }
 
+    /**
+     * @return 角色缓存，且维护角色权限之间的关系
+     */
     @Nonnull
     private RbacResourceCache<String, RbacResource.Role> getRoleCache() {
         return requireCache(RBAC_ROLE_CACHE_NAME, new RbacResourceCache.CacheLoader<String, Object>() {
@@ -266,12 +269,15 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
         });
     }
 
+    /**
+     * 用户拥有的角色缓存
+     */
     @Nonnull
-    private RbacResourceCache<String, Set<RbacResource.Role>> getUserRoleCache() {
+    private RbacResourceCache<String, Set<String>> getUserRoleCache() {
         return requireCache(RBAC_USER_ROLE_CACHE_NAME, new RbacResourceCache.CacheLoader<String, Object>() {
             @Override
             public Object load(String key) {
-                return delegate.findRolesByUserId(key);
+                return delegate.finUserOwnerRoleIds(key);
             }
 
             @Override
@@ -293,7 +299,7 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
         }
     }
 
-    private void putUserRoleCaches(String userId, Set<RbacResource.Role> userRoles) {
+    private void putUserRoleCaches(String userId, Set<String> userRoles) {
         if (ObjectUtils.isEmpty(userRoles)) {
             getRoleCache().remove(userId);
         } else {
