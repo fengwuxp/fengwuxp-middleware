@@ -95,7 +95,7 @@ public class WebRequestAuthorizationManager implements AuthorizationManager<Requ
 
     private Map<String, Set<RequestMatcher>> getRequestPermissionMatchers() {
         Map<String, Set<RequestMatcher>> result = new HashMap<>();
-        rbacResourceService.getAllPermissions().stream()
+        rbacResourceService.getPermissions().stream()
                 .filter(Objects::nonNull)
                 .forEach(permission -> result.put(permission.getId(), RequestMatcherUtils.convertMatchers(permission.getAttributes())));
         return result;

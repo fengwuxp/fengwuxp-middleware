@@ -1,16 +1,17 @@
 package com.wind.security.configuration;
 
-import com.wind.common.config.SystemConfigRepository;
+import com.wind.common.locks.JdkLockFactory;
+import com.wind.common.locks.LockFactory;
 import com.wind.security.authentication.WindAuthenticationProperties;
 import com.wind.security.authentication.jwt.JwtProperties;
 import com.wind.security.authentication.jwt.JwtTokenCodec;
-import com.wind.security.authority.rbac.CaffeineRbacResourceCacheSupplier;
+import com.wind.security.authority.rbac.CacheRbacResourceService;
+import com.wind.security.authority.rbac.CaffeineRbacResourceCacheManager;
 import com.wind.security.authority.rbac.SimpleSecurityAccessOperations;
-import com.wind.security.authority.rbac.WebRbacResourceService;
 import com.wind.security.authority.rbac.WebRequestAuthorizationManager;
 import com.wind.security.authority.rbac.WindSecurityRbacProperties;
 import com.wind.security.core.SecurityAccessOperations;
-import com.wind.security.core.rbac.RbacResourceCacheSupplier;
+import com.wind.security.core.rbac.RbacResourceCacheManager;
 import com.wind.security.core.rbac.RbacResourceService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -62,7 +63,6 @@ public class WindSecurityAutoConfiguration {
     }
 
     @Bean
-//    @ConditionalOnProperty(prefix = AUTHENTICATION_PREFIX, name = ENABLED_NAME, havingValue = TRUE)
     @ConfigurationProperties(prefix = AUTHENTICATION_PREFIX)
     public WindAuthenticationProperties windAuthenticationProperties() {
         return new WindAuthenticationProperties();
@@ -75,18 +75,24 @@ public class WindSecurityAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(RbacResourceCacheSupplier.class)
-    public CaffeineRbacResourceCacheSupplier caffeineRbacResourceCacheSupplier(WindSecurityRbacProperties properties) {
-        return new CaffeineRbacResourceCacheSupplier(properties.getCacheEffectiveTime());
+    @ConditionalOnMissingBean(RbacResourceCacheManager.class)
+    public CaffeineRbacResourceCacheManager caffeineRbacResourceCacheSupplier(WindSecurityRbacProperties properties) {
+        return new CaffeineRbacResourceCacheManager(properties.getCacheEffectiveTime());
     }
 
     @Bean
-    @ConditionalOnBean({WindSecurityRbacProperties.class, RbacResourceCacheSupplier.class, RbacResourceService.class, SystemConfigRepository.class})
+    @ConditionalOnMissingBean(LockFactory.class)
+    public LockFactory jdkLockFactory() {
+        return new JdkLockFactory();
+    }
+
+    @Bean
     @Primary
-    public WebRbacResourceService webRbacResourceService(RbacResourceCacheSupplier cacheSupplier, RbacResourceService delegate,
-                                                         WindSecurityRbacProperties properties,
-                                                         SystemConfigRepository repository) {
-        return new WebRbacResourceService(cacheSupplier, delegate, properties.getCacheEffectiveTime(), repository);
+    @ConditionalOnProperty(prefix = RBAC_PREFIX + ".cache", name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
+    @ConditionalOnBean({WindSecurityRbacProperties.class, RbacResourceCacheManager.class, RbacResourceService.class, LockFactory.class})
+    public CacheRbacResourceService cacheRbacResourceService(RbacResourceService delegate, RbacResourceCacheManager cacheManager,
+                                                             LockFactory lockFactory, WindSecurityRbacProperties properties) {
+        return new CacheRbacResourceService(delegate, cacheManager, lockFactory, properties.getCacheEffectiveTime());
     }
 
     @Bean

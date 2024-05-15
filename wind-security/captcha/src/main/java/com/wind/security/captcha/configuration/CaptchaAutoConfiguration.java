@@ -78,12 +78,6 @@ public class CaptchaAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(LockFactory.class)
-    public LockFactory simpleLockFactory() {
-        return new JdkLockFactory();
-    }
-
-    @Bean
     @ConditionalOnBean(LockFactory.class)
     @ConditionalOnMissingBean({CaptchaGenerateChecker.class})
     public SimpleCaptchaGenerateChecker simpleCaptchaGenerateChecker(CacheManager cacheManager, CaptchaProperties properties, LockFactory lockFactory) {

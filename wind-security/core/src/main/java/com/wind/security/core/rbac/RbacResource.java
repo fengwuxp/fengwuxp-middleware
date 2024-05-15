@@ -17,12 +17,12 @@ import java.util.Set;
  * @author wuxp
  * @date 2023-09-26 07:41
  **/
-public interface RbacResource<I extends Serializable> extends Serializable {
+public interface RbacResource extends Serializable {
 
     /**
      * @return 唯一标识
      */
-    I getId();
+    String getId();
 
     /**
      * @return 用于展示的名称
@@ -32,7 +32,7 @@ public interface RbacResource<I extends Serializable> extends Serializable {
     /**
      * rbac 权限资源
      */
-    interface Permission extends RbacResource<String> {
+    interface Permission extends RbacResource {
 
         /**
          * @return 权限内容
@@ -60,7 +60,7 @@ public interface RbacResource<I extends Serializable> extends Serializable {
     /**
      * rbac 角色资源
      */
-    interface Role extends RbacResource<String> {
+    interface Role extends RbacResource {
 
 
         /**
@@ -86,7 +86,7 @@ public interface RbacResource<I extends Serializable> extends Serializable {
     /**
      * rbac 用户资源
      */
-    interface User extends RbacResource<String> {
+    interface User extends RbacResource {
 
     }
 

@@ -21,15 +21,9 @@ public class RbacResourceChangeEvent extends ApplicationEvent {
 
     private final Class<?> resourceType;
 
-    /**
-     * 删除操作
-     */
-    private final boolean deleted;
-
-    private RbacResourceChangeEvent(Collection<String> ids, Class<?> resourceType, boolean deleted) {
+    private RbacResourceChangeEvent(Collection<String> ids, Class<?> resourceType) {
         super(ids == null ? Collections.emptyList() : Collections.unmodifiableCollection(ids));
         this.resourceType = resourceType;
-        this.deleted = deleted;
     }
 
     /**
@@ -68,54 +62,15 @@ public class RbacResourceChangeEvent extends ApplicationEvent {
     }
 
     public static void refreshPermissionTextIds(Collection<String> ids) {
-        publish(new RbacResourceChangeEvent(ids, RbacResource.Permission.class, false));
+        publish(new RbacResourceChangeEvent(ids, RbacResource.Permission.class));
     }
 
     public static void refreshRoleTextIds(Collection<String> ids) {
-        publish(new RbacResourceChangeEvent(ids, RbacResource.Role.class, false));
+        publish(new RbacResourceChangeEvent(ids, RbacResource.Role.class));
     }
 
     public static void refreshUserRoleTextIds(Collection<String> ids) {
-        publish(new RbacResourceChangeEvent(ids, RbacResource.User.class, false));
-    }
-
-    /**
-     * 删除权限
-     *
-     * @param permissionIds 权限 id
-     */
-    public static void removePermissions(Collection<Long> permissionIds) {
-        removePermissionTextIds(idAsText(permissionIds));
-    }
-
-    /**
-     * 删除角色
-     *
-     * @param roleIds 角色 id
-     */
-    public static void removeRoles(Collection<Long> roleIds) {
-        removeRoleTextIds(idAsText(roleIds));
-    }
-
-    /**
-     * 删除用户关联的角色
-     *
-     * @param userIds 用户 id
-     */
-    public static void removeUserRoles(Collection<Long> userIds) {
-        removeUserRoleTextIds(idAsText(userIds));
-    }
-
-    public static void removePermissionTextIds(Collection<String> ids) {
-        publish(new RbacResourceChangeEvent(ids, RbacResource.Permission.class, true));
-    }
-
-    public static void removeRoleTextIds(Collection<String> ids) {
-        publish(new RbacResourceChangeEvent(ids, RbacResource.Role.class, true));
-    }
-
-    public static void removeUserRoleTextIds(Collection<String> ids) {
-        publish(new RbacResourceChangeEvent(ids, RbacResource.User.class, true));
+        publish(new RbacResourceChangeEvent(ids, RbacResource.User.class));
     }
 
     private static void publish(RbacResourceChangeEvent event) {
