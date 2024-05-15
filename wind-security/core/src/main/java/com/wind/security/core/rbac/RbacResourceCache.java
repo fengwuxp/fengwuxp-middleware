@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -36,8 +37,8 @@ public interface RbacResourceCache<K, V> {
      * @param keys key 列表
      * @return 结果集
      */
-    default List<V> getAll(Collection<K> keys) {
-        return getAllAsMap(keys).values().stream().filter(Objects::nonNull).collect(Collectors.toList());
+    default Set<V> getAll(Collection<K> keys) {
+        return getAllAsMap(keys).values().stream().filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     /**

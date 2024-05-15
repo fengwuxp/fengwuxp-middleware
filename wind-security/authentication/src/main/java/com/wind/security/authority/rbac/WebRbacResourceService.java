@@ -22,7 +22,6 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
@@ -77,15 +76,15 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     }
 
     @Override
-    public List<RbacResource.Permission> getAllPermissions() {
+    public Set<RbacResource.Permission> getAllPermissions() {
         Collection<RbacResource.Permission> result = getPermissionCache().values();
-        return result == null ? Collections.emptyList() : result.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        return result == null ? Collections.emptySet() : result.stream().filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     @Override
-    public List<RbacResource.Role> getAllRoles() {
+    public Set<RbacResource.Role> getAllRoles() {
         Collection<RbacResource.Role> result = getRoleCache().values();
-        return result == null ? Collections.emptyList() : result.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        return result == null ? Collections.emptySet() : result.stream().filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     @Nullable
@@ -95,9 +94,9 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
     }
 
     @Override
-    public List<RbacResource.Permission> findPermissionByIds(Collection<String> permissionIds) {
-        List<RbacResource.Permission> result = getPermissionCache().getAll(permissionIds);
-        return result == null ? Collections.emptyList() : result;
+    public Set<RbacResource.Permission> findPermissionByIds(Collection<String> permissionIds) {
+        Set<RbacResource.Permission> result = getPermissionCache().getAll(permissionIds);
+        return result == null ? Collections.emptySet() : result;
     }
 
     @Nullable
@@ -106,11 +105,10 @@ public class WebRbacResourceService implements RbacResourceService, ApplicationL
         return getRoleCache().computeIfAbsent(roleId, delegate::findRoleById);
     }
 
-    @Nullable
     @Override
-    public List<RbacResource.Role> findRoleByIds(Collection<String> roleIds) {
-        List<RbacResource.Role> result = getRoleCache().getAll(roleIds);
-        return result == null ? Collections.emptyList() : result;
+    public Set<RbacResource.Role> findRoleByIds(Collection<String> roleIds) {
+        Set<RbacResource.Role> result = getRoleCache().getAll(roleIds);
+        return result == null ? Collections.emptySet() : result;
     }
 
     @Override

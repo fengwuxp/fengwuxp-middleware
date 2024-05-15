@@ -2,6 +2,7 @@ package com.wind.security.core.rbac;
 
 import com.wind.common.util.StringJoinSplitUtils;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.springframework.util.StringUtils;
 
@@ -91,6 +92,7 @@ public interface RbacResource<I extends Serializable> extends Serializable {
 
     @AllArgsConstructor
     @Getter
+    @EqualsAndHashCode(of = "id")
     class ImmutablePermission implements RbacResource.Permission {
 
         private static final long serialVersionUID = 6255678473411919964L;
@@ -121,6 +123,7 @@ public interface RbacResource<I extends Serializable> extends Serializable {
 
     @AllArgsConstructor
     @Getter
+    @EqualsAndHashCode(of = "id")
     class ImmutableRole implements RbacResource.Role {
 
         private static final long serialVersionUID = -6791142921724321619L;

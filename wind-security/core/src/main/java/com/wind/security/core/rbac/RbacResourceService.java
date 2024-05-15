@@ -25,7 +25,7 @@ public interface RbacResourceService {
      * @value 权限内容
      */
     @NotEmpty
-    List<RbacResource.Permission> getAllPermissions();
+    Set<RbacResource.Permission> getAllPermissions();
 
     /**
      * @return 获取所有的 rbac 角色
@@ -33,7 +33,7 @@ public interface RbacResourceService {
      * @value 权限内容
      */
     @NotEmpty
-    List<RbacResource.Role> getAllRoles();
+    Set<RbacResource.Role> getAllRoles();
 
     /**
      * @param permissionId 权限 id
@@ -50,7 +50,7 @@ public interface RbacResourceService {
      * @return 权限集合
      */
     @NotNull
-    List<RbacResource.Permission> findPermissionByIds(Collection<String> permissionIds);
+    Set<RbacResource.Permission> findPermissionByIds(Collection<String> permissionIds);
 
     /**
      * @param roleId 角色 id
@@ -67,7 +67,7 @@ public interface RbacResourceService {
      * @return 角色
      */
     @NotNull
-    List<RbacResource.Role> findRoleByIds(Collection<String> roleIds);
+    Set<RbacResource.Role> findRoleByIds(Collection<String> roleIds);
 
     /**
      * 获取用户拥有的角色标识
