@@ -9,17 +9,14 @@ import com.wind.security.core.rbac.RbacResourceChangeEvent;
 import com.wind.security.core.rbac.RbacResourceService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -40,7 +37,7 @@ import static com.wind.security.WebSecurityConstants.RBAC_USER_ROLE_CACHE_NAME;
  **/
 @AllArgsConstructor
 @Slf4j
-public class CacheRbacResourceService implements RbacResourceService, ApplicationListener<RbacResourceChangeEvent>, InitializingBean {
+public class CacheRbacResourceService implements RbacResourceService, ApplicationListener<RbacResourceChangeEvent>, DisposableBean {
 
     private static final String REFRESH_RBAC_CACHE_LOCK_KEY = "REFRESH_RBAC_CACHE_LOCK";
 
@@ -68,23 +65,6 @@ public class CacheRbacResourceService implements RbacResourceService, Applicatio
     }
 
     @Override
-    public Set<RbacResource.Permission> findPermissionsByRoleIds(Collection<String> roleIds) {
-        Set<String> permissionIds = getRoles().stream()
-                .filter(role -> roleIds.contains(role.getId()))
-                .map(RbacResource.Role::getPermissions)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-        if (permissionIds.isEmpty()) {
-            return Collections.emptySet();
-        }
-        Map<String, RbacResource.Permission> permissionCache = getPermissionCache();
-        return permissionIds.stream()
-                .map(permissionCache::get)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-    }
-
-    @Override
     public Set<RbacResource.Role> getRoles() {
         Map<String, RbacResource.Role> result = getRoleCache();
         return result.isEmpty() ? delegate.getRoles() : ImmutableSet.copyOf(result.values());
@@ -95,9 +75,14 @@ public class CacheRbacResourceService implements RbacResourceService, Applicatio
         return getUserRoleCache();
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    public void startScheduleRefreshCache() {
+        log.info("start schedule refresh cache task");
         refresh();
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        schedule.shutdown();
     }
 
     @Override

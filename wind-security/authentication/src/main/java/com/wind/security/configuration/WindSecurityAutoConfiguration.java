@@ -92,7 +92,11 @@ public class WindSecurityAutoConfiguration {
     @ConditionalOnBean({WindSecurityRbacProperties.class, RbacResourceCacheManager.class, RbacResourceService.class, LockFactory.class})
     public CacheRbacResourceService cacheRbacResourceService(RbacResourceService delegate, RbacResourceCacheManager cacheManager,
                                                              LockFactory lockFactory, WindSecurityRbacProperties properties) {
-        return new CacheRbacResourceService(delegate, cacheManager, lockFactory, properties.getCacheEffectiveTime());
+        CacheRbacResourceService result = new CacheRbacResourceService(delegate, cacheManager, lockFactory, properties.getCacheEffectiveTime());
+        if (properties.isEnableRefreshCache()) {
+            result.startScheduleRefreshCache();
+        }
+        return result;
     }
 
     @Bean

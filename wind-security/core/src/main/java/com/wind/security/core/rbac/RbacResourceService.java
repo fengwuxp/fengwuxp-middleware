@@ -2,7 +2,6 @@ package com.wind.security.core.rbac;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -23,15 +22,6 @@ public interface RbacResourceService {
     Set<RbacResource.Permission> getPermissions();
 
     /**
-     * 通过角色 id 获取权限列表
-     *
-     * @param roleIds 角色id列表
-     * @return 权限集合
-     */
-    @NotNull
-    Set<RbacResource.Permission> findPermissionsByRoleIds(Collection<String> roleIds);
-
-    /**
      * @return 获取所有的 rbac 角色
      */
     @NotEmpty
@@ -50,7 +40,7 @@ public interface RbacResourceService {
      * @return 角色标识集合
      */
     @NotNull
-   default Set<String> findOwnerRoleIds(String userId){
+    default Set<String> findOwnerRoleIds(String userId) {
         return getUserRoles().getOrDefault(userId, Collections.emptySet());
     }
 
