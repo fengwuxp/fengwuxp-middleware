@@ -45,6 +45,8 @@
         <revision>1.0.7-SNAPSHOT</revision>
         <!--   占位使用     -->
         <jacoco-coverage-agent/>
+        <tests.fork.count/>
+        <tests.reuse.forks/>
 
         <!--1.8编译参数 保留方法名称-->
         <java.version>1.8</java.version>
@@ -436,7 +438,7 @@
             <dependency>
                 <groupId>org.apache.shardingsphere.elasticjob</groupId>
                 <artifactId>elasticjob-lite-spring-namespace</artifactId>
-                <version>${elasticjob.version}</version>
+                <version>    ${elasticjob.version}</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/org.dromara.dynamictp/dynamic-tp-adapter-common -->
             <dependency>
@@ -559,6 +561,7 @@
                             <value>true</value>
                         </property>
                     </systemPropertyVariables>
+                    <forkCount>${tests.fork.count}</forkCount>
                 </configuration>
                 <dependencies>
                     <dependency>
@@ -581,7 +584,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- INTEGRATION test via 'mvn clean install -P integration-test -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -693,6 +695,18 @@
             </build>
         </profile>
 
+        <profile>
+            <id>Surefire-Tests-2c</id>
+            <properties>
+                <tests.fork.count>2C</tests.fork.count>
+            </properties>
+        </profile>
+        <profile>
+            <id>Surefire-Tests-Default</id>
+            <properties>
+                <tests.fork.count>1</tests.fork.count>
+            </properties>
+        </profile>
         <profile>
             <id>跳过测试</id>
             <activation>
