@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
@@ -13,7 +14,6 @@ import java.util.Set;
 /**
  * rbac 资源定义
  *
- * @param <I> id 类型
  * @author wuxp
  * @date 2023-09-26 07:41
  **/
@@ -62,7 +62,6 @@ public interface RbacResource extends Serializable {
      */
     interface Role extends RbacResource {
 
-
         /**
          * 角色关联的权限
          *
@@ -80,6 +79,40 @@ public interface RbacResource extends Serializable {
          */
         static Role immutable(String id, String name, Set<String> permissions) {
             return new ImmutableRole(id, name, permissions);
+        }
+    }
+
+    /**
+     * 用户角色
+     */
+    @AllArgsConstructor
+    @Getter
+    class UserRole {
+
+        /**
+         * 角色 id
+         */
+        private final String roleId;
+
+        /**
+         * 过期时间戳，为空表示不过期
+         */
+        @Nullable
+        private final Long expireTime;
+
+        /**
+         * 为了给序列化框架使用，提供一个空构造
+         */
+        public UserRole() {
+            this("", null);
+        }
+
+       public static UserRole immutable(String roleId, Long expireTime) {
+            return new UserRole(roleId, expireTime);
+        }
+
+        public static UserRole immutable(String roleId) {
+            return immutable(roleId, null);
         }
     }
 

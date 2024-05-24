@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,7 +31,8 @@ class SpringExpressionExportExcelTaskTest {
                 mockExcelHead("age", 10),
                 mockExcelHead("sex", 5)
         );
-        Path filepath = Paths.get(Objects.requireNonNull(SpringExpressionExportExcelTaskTest.class.getResource("/")).getPath(), "test.xlsx");
+        URL baseUrl = Objects.requireNonNull(SpringExpressionExportExcelTaskTest.class.getResource("/"));
+        Path filepath = Paths.get(Paths.get(baseUrl.toURI()).toString(), "test.xlsx");
         Files.deleteIfExists(filepath);
         ExcelDocumentWriter writer = DefaultEasyExcelDocumentWriter.of(Files.newOutputStream(filepath), heads);
         task = new SpringExpressionExportExcelTask(ExportExcelTaskInfo.of("test", writer), mockExcelDataFetcher());

@@ -71,7 +71,7 @@ public class CacheRbacResourceService implements RbacResourceService, Applicatio
     }
 
     @Override
-    public Map<String, Set<String>> getUserRoles() {
+    public Map<String, Set<RbacResource.UserRole>> getUserRoles() {
         return getUserRoleCache();
     }
 
@@ -163,7 +163,7 @@ public class CacheRbacResourceService implements RbacResourceService, Applicatio
      * 用户拥有的角色缓存
      */
     @Nonnull
-    private Map<String, Set<String>> getUserRoleCache() {
+    private Map<String, Set<RbacResource.UserRole>> getUserRoleCache() {
         return requireCache(RBAC_USER_ROLE_CACHE_NAME);
     }
 

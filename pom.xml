@@ -42,7 +42,7 @@
     </modules>
 
     <properties>
-        <revision>1.0.7-SNAPSHOT</revision>
+        <revision>1.0.8-SNAPSHOT</revision>
         <!--   占位使用     -->
         <jacoco-coverage-agent/>
         <tests.fork.count/>
@@ -540,6 +540,7 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
             <plugin>

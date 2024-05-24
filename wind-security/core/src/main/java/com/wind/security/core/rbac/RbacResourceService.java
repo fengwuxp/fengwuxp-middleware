@@ -31,7 +31,7 @@ public interface RbacResourceService {
      * @return 获取所有的用户角缓存
      */
     @NotEmpty
-    Map<String, Set<String>> getUserRoles();
+    Map<String, Set<RbacResource.UserRole>> getUserRoles();
 
     /**
      * 通过角色 id 获取权限列表
@@ -41,7 +41,13 @@ public interface RbacResourceService {
      */
     @NotNull
     default Set<String> findOwnerRoleIds(String userId) {
-        return getUserRoles().getOrDefault(userId, Collections.emptySet());
+        long currentTimeMillis = System.currentTimeMillis();
+        return getUserRoles().getOrDefault(userId, Collections.emptySet())
+                .stream()
+                // 按照授权过期时间过滤数据
+                .filter(userRole -> userRole.getExpireTime() == null || userRole.getExpireTime() > currentTimeMillis)
+                .map(RbacResource.UserRole::getRoleId)
+                .collect(Collectors.toSet());
     }
 
     /**
