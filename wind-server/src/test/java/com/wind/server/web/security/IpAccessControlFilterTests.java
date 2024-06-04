@@ -18,7 +18,6 @@ import static com.wind.common.WindHttpConstants.HTTP_REQUEST_IP_ATTRIBUTE_NAME;
  **/
 class IpAccessControlFilterTests {
 
-
     @Test
     void testUnknownIpAllowed() throws Exception {
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -44,6 +43,13 @@ class IpAccessControlFilterTests {
     void testMatchWhitelistAllowed() throws Exception {
         MockHttpServletResponse response = new MockHttpServletResponse();
         getFilter("192.168.0.0/16", WindConstants.EMPTY).doFilter(mockHttpRequest(), response, new MockFilterChain());
+        Assertions.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    void testAllowMatches() throws Exception {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        getFilter("0.0.0.0/0", WindConstants.EMPTY).doFilter(mockHttpRequest(), response, new MockFilterChain());
         Assertions.assertEquals(200, response.getStatus());
     }
 
