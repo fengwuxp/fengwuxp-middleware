@@ -1,6 +1,7 @@
 package com.wind.office.excel.metadata;
 
 import com.wind.common.exception.AssertUtils;
+import com.wind.common.i18n.SpringI18nMessageUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.format.Parser;
@@ -81,7 +82,7 @@ public final class ExcelCellDescriptor {
     }
 
     public static ExcelCellDescriptorBuilder builder(String title, String expression) {
-        return new ExcelCellDescriptorBuilder(title, expression);
+        return new ExcelCellDescriptorBuilder(SpringI18nMessageUtils.getMessage(title, title), expression);
     }
 
     public static ExcelCellDescriptor of(String title, String expression) {
