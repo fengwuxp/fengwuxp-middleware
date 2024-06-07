@@ -1,4 +1,4 @@
-package com.wind.script.j2v8;
+package com.wind.script.javet;
 
 import com.alibaba.fastjson2.JSON;
 import com.google.common.collect.ImmutableMap;
@@ -16,9 +16,12 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-// https://github.com/caoccao/Javet
-class JavaScriptExecutorTest {
 
+/**
+ * @author wuxp
+ * @date 2024-06-07 17:41
+ **/
+class JavaScriptExecutorTests {
 
     @BeforeEach
     public void setup() {
@@ -72,10 +75,10 @@ class JavaScriptExecutorTest {
         map.put("age", 22);
         Map<String, Object> result = JavaScriptExecutor.executeFunctionUseClosure(functionCode, map, 22);
         Assertions.assertNotNull(result);
-        UserDemo userDemo = JavaScriptExecutor.executeFunctionUseClosure(functionCode, UserDemo.class, map, 22);
+        JavaScriptExecutorTests.UserDemo userDemo = JavaScriptExecutor.executeFunctionUseClosure(functionCode, JavaScriptExecutorTests.UserDemo.class, map, 22);
         Assertions.assertNotNull(userDemo);
         Assertions.assertEquals("测试_张三_22", userDemo.name);
-        userDemo = JavaScriptExecutor.executeFunctionUseClosure(functionCode, new ParameterizedTypeReference<UserDemo>() {
+        userDemo = JavaScriptExecutor.executeFunctionUseClosure(functionCode, new ParameterizedTypeReference<JavaScriptExecutorTests.UserDemo>() {
         }, map, 22);
         Assertions.assertNotNull(userDemo);
         Assertions.assertEquals("测试_张三_22", userDemo.name);

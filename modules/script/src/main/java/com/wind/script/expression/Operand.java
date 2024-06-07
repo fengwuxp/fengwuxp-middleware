@@ -23,7 +23,12 @@ public interface Operand {
      */
     OperandSource getSource();
 
-
+    /**
+     * 生成一个常量操作数
+     *
+     * @param value 常量值
+     * @return Operand 实例
+     */
     static Operand ofConst(Object value) {
         return immutable(value, OperandSource.CONSTANT);
     }

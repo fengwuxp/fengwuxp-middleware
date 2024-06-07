@@ -1,4 +1,4 @@
-package com.wind.script.j2v8;
+package com.wind.script.javet;
 
 import com.alibaba.fastjson2.JSON;
 import com.wind.common.exception.AssertUtils;

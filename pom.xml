@@ -80,7 +80,7 @@
         <dynamic-tp.version>1.1.5</dynamic-tp.version>
         <guava.version>32.0.1-jre</guava.version>
         <fastjson2.version>2.0.49</fastjson2.version>
-        <j2v8.version>4.6.0</j2v8.version>
+        <javet.version>3.1.2</javet.version>
         <google-zxing.version>3.5.2</google-zxing.version>
         <freemarker.version>2.3.32</freemarker.version>
         <logback-encoder.version>7.4</logback-encoder.version>
@@ -379,22 +379,25 @@
                 <artifactId>fastjson2</artifactId>
                 <version>${fastjson2.version}</version>
             </dependency>
+            <!-- Linux and Windows (x86_64) -->
             <dependency>
-                <groupId>com.eclipsesource.j2v8</groupId>
-                <artifactId>j2v8_linux_x86_64</artifactId>
-                <version>${j2v8.version}</version>
+                <groupId>com.caoccao.javet</groupId>
+                <artifactId>javet</artifactId>
+                <version>${javet.version}</version>
                 <optional>true</optional>
             </dependency>
+            <!-- Linux (arm64) -->
             <dependency>
-                <groupId>com.eclipsesource.j2v8</groupId>
-                <artifactId>j2v8_win32_x86_64</artifactId>
-                <version>${j2v8.version}</version>
+                <groupId>com.caoccao.javet</groupId>
+                <artifactId>javet-linux-arm64</artifactId>
+                <version>${javet.version}</version>
                 <optional>true</optional>
             </dependency>
+            <!-- Mac OS (x86_64 and arm64) -->
             <dependency>
-                <groupId>com.eclipsesource.j2v8</groupId>
-                <artifactId>j2v8_macosx_x86_64</artifactId>
-                <version>${j2v8.version}</version>
+                <groupId>com.caoccao.javet</groupId>
+                <artifactId>javet-macos</artifactId>
+                <version>${javet.version}</version>
                 <optional>true</optional>
             </dependency>
             <!-- https://mvnrepository.com/artifact/com.alipay.sdk/alipay-sdk-java -->
