@@ -33,6 +33,14 @@ spec:
           image: ${IMAGE}
           imagePullPolicy: IfNotPresent
           env:
+            - name: POD_NAME  # pod name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP   # pod ip
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
             - name: SPRING_APPLICATION_NAME     # 应用名称
               value: "${SPRING_APPLICATION_NAME}"
             - name: SPRING_PROFILES_ACTIVE       # 指定激活环境
