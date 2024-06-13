@@ -94,7 +94,7 @@
         <googleauth.version>1.5.0</googleauth.version>
         <bcprov.version>1.77</bcprov.version>
         <jetbrains-annotations.version>24.1.0</jetbrains-annotations.version>
-        <podam.version>8.0.0.RELEASE</podam.version>
+        <podam.version>7.2.11.RELEASE</podam.version>
         <awaitility.version>4.2.0</awaitility.version>
         <junit-platform-surefire-provider.version>1.3.2</junit-platform-surefire-provider.version>
     </properties>
