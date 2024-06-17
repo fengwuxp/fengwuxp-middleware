@@ -39,10 +39,11 @@
         <module>modules/script</module>
         <module>modules/sequence-generate</module>
         <module>tests</module>
+        <module>wind-rocketmq</module>
     </modules>
 
     <properties>
-        <revision>1.0.8-SNAPSHOT</revision>
+        <revision>1.0.9-SNAPSHOT</revision>
         <!--   占位使用     -->
         <jacoco-coverage-agent/>
         <tests.fork.count/>
@@ -66,6 +67,7 @@
         <spring-boot.version>2.7.16</spring-boot.version>
         <spring-cloud-commons.version>3.1.6</spring-cloud-commons.version>
         <spring-cloud-albaba.version>2021.0.5.0</spring-cloud-albaba.version>
+        <rocketmq-spring-boot-starter.version>2.3.0</rocketmq-spring-boot-starter.version>
         <sentinel.version>1.8.7</sentinel.version>
         <mysql.version>8.0.33</mysql.version>
         <mybatis-flex.version>1.7.0</mybatis-flex.version>
@@ -153,6 +155,12 @@
                 <version>${spring-cloud-albaba.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.rocketmq/rocketmq-spring-boot-starter -->
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-spring-boot-starter</artifactId>
+                <version>${rocketmq-spring-boot-starter.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba.csp</groupId>
@@ -302,6 +310,11 @@
             <dependency>
                 <groupId>com.wind.middleware</groupId>
                 <artifactId>wind-sentinel</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.middleware</groupId>
+                <artifactId>wind-rocketmq</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

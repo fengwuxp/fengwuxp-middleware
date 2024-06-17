@@ -30,6 +30,16 @@ public class SpringApplicationContextUtils implements ApplicationContextAware {
         return requireApplicationContext().getEnvironment().getProperty(key, String.class);
     }
 
+    /**
+     * Resolve ${...} placeholders in the given text.
+     *
+     * @param text placeholder expression
+     * @return the resolved String (never {@code null})
+     */
+    public static String resolvePlaceholders(String text) {
+        return requireApplicationContext().getEnvironment().resolvePlaceholders(text);
+    }
+
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         AssertUtils.notNull(applicationContext, "argument applicationContext must not null");

@@ -5,6 +5,19 @@ import org.junit.jupiter.api.Test;
 
 class ApiSignatureRequestTest {
 
+
+    @Test
+    void testTetSignTextSpecialSymbols() {
+        // a=1&b=2&c=a&,cd
+        ApiSignatureRequest request = buildRequest("a=1&b=2&c=a%2526,cd", "{}");
+        Assertions.assertEquals("method=POST&requestPath=/api/v1/example/users&nonce=jlj3rn2930d-123210dq&timestamp=123456789&queryStringMd5=4d168edee991968e65e879a3746aefc0&requestBodyMd5=99914b932bd37a50b983c5e7c90ae93b", request.getSignTextForDigest());
+        Assertions.assertEquals("POST /api/v1/example/users\n" +
+                "123456789\n" +
+                "jlj3rn2930d-123210dq\n" +
+                "a=1&b=2&c=a%26,cd\n" +
+                "{}\n", request.getSignTextForSha256WithRsa());
+    }
+
     @Test
     void testTetSignText() {
         ApiSignatureRequest request = buildRequest("a=1&b=2&c=b,cd", "{}");
