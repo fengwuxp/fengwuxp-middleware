@@ -126,6 +126,11 @@ public final class WindConstants {
     public static final String WIND_ROCKETMQ_NAME = "wind.rocketmq.name";
 
     /**
+     * sentinel 配置名称
+     */
+    public static final String WIND_SENTINEL_NAME = "wind.sentinel.name";
+
+    /**
      * elastic-job 名称
      */
     public static final String WIND_ELASTIC_JOB_NAME = "wind.elastic-job.name";

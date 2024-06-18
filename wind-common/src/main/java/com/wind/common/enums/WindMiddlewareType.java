@@ -10,6 +10,7 @@ import static com.wind.common.WindConstants.WIND_MYSQL_NAME;
 import static com.wind.common.WindConstants.WIND_OSS_NAME;
 import static com.wind.common.WindConstants.WIND_REDIS_NAME;
 import static com.wind.common.WindConstants.WIND_ROCKETMQ_NAME;
+import static com.wind.common.WindConstants.WIND_SENTINEL_NAME;
 
 /**
  * 中间件类型
@@ -46,6 +47,12 @@ public enum WindMiddlewareType implements DescriptiveEnum {
      * https://rocketmq.apache.org/zh/
      */
     ROCKETMQ(WIND_ROCKETMQ_NAME, "ROCKETMQ"),
+
+    /**
+     * sentinel
+     * https://github.com/alibaba/Sentinel
+     */
+    SENTINEL(WIND_SENTINEL_NAME, "SENTINEL"),
 
     /**
      * 分布式定时任务调度

@@ -3,9 +3,11 @@ package com.wind.sentinel.metrics;
 
 import com.alibaba.csp.sentinel.metric.extension.MetricExtension;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
+import com.wind.common.WindConstants;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
+import lombok.AllArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
  * @date 2024-03-13 11:16
  * @see com.alibaba.csp.sentinel.metric.extension.MetricExtensionProvider
  */
+@AllArgsConstructor
 public class SentinelMetricsCollector implements MetricExtension {
 
     /**
@@ -73,9 +76,18 @@ public class SentinelMetricsCollector implements MetricExtension {
 
     private static final Map<String, AtomicLong> RESOURCE_THREAD_COUNTERS = new ConcurrentHashMap<>();
 
+    /**
+     * 资源类型
+     */
+    private final String resourceType;
+
+    public SentinelMetricsCollector() {
+        this(WindConstants.EMPTY);
+    }
+
     @Override
     public void addPass(String resource, int n, Object... args) {
-        Metrics.counter(PASS_REQUESTS_TOTAL, getResourceTags(resource, args)).increment(n);
+        Metrics.counter(resourceType + PASS_REQUESTS_TOTAL, getResourceTags(resource, args)).increment(n);
     }
 
     @Override
@@ -87,35 +99,34 @@ public class SentinelMetricsCollector implements MetricExtension {
                 Tag.of(APP_TAG_NAME, ex.getRuleLimitApp()),
                 Tag.of(ORIGIN_TAG_NAME, origin)
         ));
-        Metrics.counter(BLOCK_REQUESTS_TOTAL, tags).increment(n);
+        Metrics.counter(resourceType + BLOCK_REQUESTS_TOTAL, tags).increment(n);
     }
 
     @Override
     public void addSuccess(String resource, int n, Object... args) {
-        Metrics.counter(SUCCESS_REQUESTS_TOTAL, getResourceTags(resource, args)).increment(n);
+        Metrics.counter(resourceType + SUCCESS_REQUESTS_TOTAL, getResourceTags(resource, args)).increment(n);
     }
 
     @Override
     public void addException(String resource, int n, Throwable throwable) {
         Tags tags = Tags.of(RESOURCE_TAG_NAME, resource, EXCEPTION_TAG_NAME, throwable.getClass().getSimpleName());
-        Metrics.counter(EXCEPTION_REQUESTS_TOTAL, tags).increment(n);
+        Metrics.counter(resourceType + EXCEPTION_REQUESTS_TOTAL, tags).increment(n);
     }
 
     @Override
     public void addRt(String resource, long rt, Object... args) {
-        Metrics.timer(REQUESTS_LATENCY_SECONDS, getResourceTags(resource, args)).record(rt, TimeUnit.MICROSECONDS);
+        Metrics.timer(resourceType + REQUESTS_LATENCY_SECONDS, getResourceTags(resource, args)).record(rt, TimeUnit.MICROSECONDS);
     }
 
     @Override
     public void increaseThreadNum(String resource, Object... args) {
-        Metrics.gauge(CURRENT_THREADS, getResourceTags(resource, args), getThreadCounter(resource), AtomicLong::incrementAndGet);
+        Metrics.gauge(resourceType + CURRENT_THREADS, getResourceTags(resource, args), getThreadCounter(resource), AtomicLong::incrementAndGet);
     }
 
     @Override
     public void decreaseThreadNum(String resource, Object... args) {
-        Metrics.gauge(CURRENT_THREADS, getResourceTags(resource, args), getThreadCounter(resource), AtomicLong::decrementAndGet);
+        Metrics.gauge(resourceType + CURRENT_THREADS, getResourceTags(resource, args), getThreadCounter(resource), AtomicLong::decrementAndGet);
     }
-
 
     private AtomicLong getThreadCounter(String resource) {
         return RESOURCE_THREAD_COUNTERS.computeIfAbsent(resource, k -> new AtomicLong(0));

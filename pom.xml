@@ -314,7 +314,7 @@
             </dependency>
             <dependency>
                 <groupId>com.wind.middleware</groupId>
-                <artifactId>wind-rocketmq</artifactId>
+                <artifactId>wind-rocketmq-spring-boot-starter</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
