@@ -1,11 +1,12 @@
-package com.wind.nacos;
+package com.alibaba.cloud.nacos;
 
+
+import com.alibaba.cloud.nacos.refresh.NacosContextRefresher;
+import com.alibaba.cloud.nacos.refresh.NacosRefreshHistory;
+import com.alibaba.cloud.nacos.refresh.SmartConfigurationPropertiesRebinder;
+import com.alibaba.cloud.nacos.refresh.condition.ConditionalOnNonDefaultBehavior;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.wind.configcenter.core.ConfigRepository;
-import com.wind.nacos.refresh.NacosContextRefresher;
-import com.wind.nacos.refresh.NacosRefreshHistory;
-import com.wind.nacos.refresh.SmartConfigurationPropertiesRebinder;
-import com.wind.nacos.refresh.condition.ConditionalOnNonDefaultBehavior;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -37,13 +38,13 @@ public class NacosConfigAutoConfiguration {
     @ConditionalOnMissingBean
     public ConfigService configService() {
         // 使用同一个实例
-        return NacosBootstrapListener.CONFIG_SERVICE.get();
+        return WindNacosBootstrapListener.CONFIG_SERVICE.get();
     }
 
     @Bean
     @ConditionalOnMissingBean
     public ConfigRepository nacosConfigRepository() {
-        return NacosBootstrapListener.CONFIG_REPOSITORY.get();
+        return WindNacosBootstrapListener.CONFIG_REPOSITORY.get();
     }
 
     @Bean
@@ -52,11 +53,11 @@ public class NacosConfigAutoConfiguration {
     }
 
     @Bean
-    public NacosContextRefresher nacosContextRefresher(NacosConfigProperties properties, ConfigService configService, NacosRefreshHistory nacosRefreshHistory) {
+    public NacosContextRefresher nacosContextRefresher(NacosConfigManager nacosConfigManager, NacosRefreshHistory nacosRefreshHistory) {
         // Consider that it is not necessary to be compatible with the previous
         // configuration
         // and use the new configuration if necessary.
-        return new NacosContextRefresher(properties, configService, nacosRefreshHistory);
+        return new NacosContextRefresher(nacosConfigManager, nacosRefreshHistory);
     }
 
     @Bean

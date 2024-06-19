@@ -1,4 +1,4 @@
-package com.wind.nacos;
+package com.alibaba.cloud.nacos;
 
 
 import com.alibaba.nacos.api.NacosFactory;
@@ -10,6 +10,7 @@ import com.google.common.base.CaseFormat;
 import com.wind.common.WindConstants;
 import com.wind.common.exception.AssertUtils;
 import com.wind.configcenter.core.ConfigRepository;
+import com.wind.nacos.NacosConfigRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.boot.ConfigurableBootstrapContext;
@@ -39,7 +40,7 @@ import static org.springframework.core.env.StandardEnvironment.SYSTEM_PROPERTIES
  * @date 2023-10-18 13:16
  **/
 @Slf4j
-public class NacosBootstrapListener implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
+public class WindNacosBootstrapListener implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
 
     static final AtomicReference<ConfigService> CONFIG_SERVICE = new AtomicReference<>();
 

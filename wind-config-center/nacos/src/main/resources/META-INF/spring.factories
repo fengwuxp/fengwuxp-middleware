@@ -1,20 +1,28 @@
 # Application Listener
 org.springframework.context.ApplicationListener=\
-com.wind.nacos.NacosBootstrapListener
+com.alibaba.cloud.nacos.WindNacosBootstrapListener
 # Auto Configuration
+org.springframework.cloud.bootstrap.BootstrapConfiguration=\
+com.alibaba.cloud.nacos.NacosConfigBootstrapConfiguration
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.wind.nacos.NacosConfigAutoConfiguration,\
-com.wind.nacos.endpoint.NacosConfigEndpointAutoConfiguration
+com.alibaba.cloud.nacos.NacosConfigAutoConfiguration,\
+com.alibaba.cloud.nacos.endpoint.NacosConfigEndpointAutoConfiguration
 org.springframework.boot.diagnostics.FailureAnalyzer=\
-com.wind.nacos.diagnostics.analyzer.NacosConnectionFailureAnalyzer 
+com.alibaba.cloud.nacos.diagnostics.analyzer.NacosConnectionFailureAnalyzer,\
+com.alibaba.cloud.nacos.configdata.NacosConfigDataMissingEnvironmentPostProcessor.ImportExceptionFailureAnalyzer
 org.springframework.boot.env.PropertySourceLoader=\
-com.wind.nacos.parser.NacosJsonPropertySourceLoader,\
-com.wind.nacos.parser.NacosXmlPropertySourceLoader
+com.alibaba.cloud.nacos.parser.NacosJsonPropertySourceLoader,\
+com.alibaba.cloud.nacos.parser.NacosXmlPropertySourceLoader
 org.springframework.boot.SpringApplicationRunListener=\
-com.wind.nacos.logging.NacosLoggingAppRunListener
+com.alibaba.cloud.nacos.logging.NacosLoggingAppRunListener
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.alibaba.cloud.nacos.configdata.NacosConfigDataMissingEnvironmentPostProcessor
+
 # ConfigData Location Resolvers
 org.springframework.boot.context.config.ConfigDataLocationResolver=\
-com.wind.nacos.configdata.NacosConfigDataLocationResolver
+com.alibaba.cloud.nacos.configdata.NacosConfigDataLocationResolver
+
 # ConfigData Loaders
 org.springframework.boot.context.config.ConfigDataLoader=\
-com.wind.nacos.configdata.NacosConfigDataLoader
+com.alibaba.cloud.nacos.configdata.NacosConfigDataLoader
+
