@@ -19,7 +19,9 @@ package org.apache.rocketmq.spring.support;
 
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.wind.common.WindConstants;
-import com.wind.rocketmq.sentinel.SentinelFlowMessageListenLimiter;
+import com.wind.sentinel.SentinelResource;
+import com.wind.sentinel.SentinelResourceBuilder;
+import com.wind.sentinel.util.SentinelFlowLimitUtils;
 import com.wind.trace.WindTracer;
 import lombok.Data;
 import org.apache.rocketmq.client.AccessChannel;
@@ -45,7 +47,6 @@ import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.annotation.SelectorType;
-import org.apache.rocketmq.spring.autoconfigure.RocketMQProperties;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
 import org.apache.rocketmq.spring.core.RocketMQReplyListener;
@@ -243,7 +244,6 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.enableFlowControl = this.applicationContext.getBean(RocketMQProperties.class).isEnableFlowControl();
         initRocketMQPushConsumer();
 
         this.messageType = getMessageType();
@@ -312,7 +312,12 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     private void tryFlowControl(MessageExt messageExt) throws BlockException, MQClientException, RemotingException, InterruptedException {
         if (enableFlowControl) {
-            Consumer<Exception> exceptionConsumer = SentinelFlowMessageListenLimiter.flowControl(consumerGroup, messageExt);
+            SentinelResource resource = SentinelResourceBuilder.rocketConsumer()
+                    .groupName(consumerGroup)
+                    .topic(topic)
+                    .tag(messageExt.getTags())
+                    .build();
+            Consumer<Exception> exceptionConsumer = SentinelFlowLimitUtils.flowControl(resource);
             Exception exception = null;
             try {
                 dispatchMessage(messageExt);

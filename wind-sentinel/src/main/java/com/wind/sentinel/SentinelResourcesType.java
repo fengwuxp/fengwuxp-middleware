@@ -14,7 +14,7 @@ public enum SentinelResourcesType implements DescriptiveEnum {
 
     HTTP_API(0, "http.api", "http 接口"),
 
-    ROCKETMQ_CONSUMER(61, "rocketmq.consumer", "RocketMq consumer");
+    ROCKETMQ_CONSUMER(61, "rocketmq.consumer", "RocketMq Consumer");
 
     private final int code;
 
