@@ -47,6 +47,7 @@ import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.annotation.SelectorType;
+import org.apache.rocketmq.spring.autoconfigure.RocketMQProperties;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
 import org.apache.rocketmq.spring.core.RocketMQReplyListener;
@@ -244,6 +245,7 @@ public class DefaultRocketMQListenerContainer implements InitializingBean,
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        this.enableFlowControl = applicationContext.getBean(RocketMQProperties.class).isEnabledFlowControl();
         initRocketMQPushConsumer();
 
         this.messageType = getMessageType();

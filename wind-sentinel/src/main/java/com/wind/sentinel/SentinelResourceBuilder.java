@@ -22,6 +22,15 @@ public final class SentinelResourceBuilder {
     }
 
     /**
+     * http api 资源构建者
+     *
+     * @return 资源构建者
+     */
+    public static HttpApiResourceBuilder httpApi() {
+        return new HttpApiResourceBuilder();
+    }
+
+    /**
      * rocket mq resource 资源构建者
      *
      * @return 资源构建者
@@ -31,6 +40,58 @@ public final class SentinelResourceBuilder {
     }
 
 
+    /**
+     * http api 资源构建者
+     */
+    public final static class HttpApiResourceBuilder {
+
+        /**
+         * 接口路径 pattern
+         */
+        private String urlPattern;
+
+        /**
+         * url 归属的应用名称
+         */
+        private String appName;
+
+        private Iterable<Tag> metricsTags = Collections.emptyList();
+
+
+        public HttpApiResourceBuilder urlPattern(String urlPattern) {
+            AssertUtils.hasText(urlPattern, "urlPattern must not empty");
+            this.urlPattern = urlPattern;
+            return this;
+        }
+
+        public HttpApiResourceBuilder appName(String appName) {
+            AssertUtils.hasText(appName, "appName must not empty");
+            this.appName = appName;
+            return this;
+        }
+
+        public HttpApiResourceBuilder metricsTags(Iterable<Tag> metricsTags) {
+            AssertUtils.notNull(metricsTags, "metricsTags must not null");
+            this.metricsTags = metricsTags;
+            return this;
+        }
+
+        public SentinelResource build() {
+            DefaultSentinelResource result = new DefaultSentinelResource();
+            result.setName(urlPattern);
+            result.setResourceType(SentinelResourcesType.HTTP_API.getCode());
+            result.setEntryType(EntryType.IN);
+            result.setOrigin(appName);
+            result.setContextName(ServiceInfoUtils.getApplicationName());
+            result.setMetricsTags(metricsTags);
+            return result;
+        }
+    }
+
+
+    /**
+     * rocket mq resource 资源构建者
+     */
     public final static class RocketMqConsumerResourceBuilder {
 
         private String groupName;

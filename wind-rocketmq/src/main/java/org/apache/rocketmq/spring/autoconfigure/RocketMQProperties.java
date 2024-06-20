@@ -59,6 +59,11 @@ public class RocketMQProperties {
      */
     private PushConsumer consumer = new PushConsumer();
 
+    /**
+     * enable flow control
+     */
+    private boolean enabledFlowControl;
+
     @Data
     public static class Producer {
 
