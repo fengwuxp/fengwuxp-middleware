@@ -1,7 +1,7 @@
 package com.wind.common.spring.event;
 
 /**
- * 在事务中多次发送同一事件，只会发送一次
+ * 用于在事务中发送事件，在事务中多次发送同一事件，只会发送一次（避免事件处理者感知到事务中的多少次变化）
  * {@link com.wind.common.spring.SpringEventPublishUtils#publishEventIfInTransaction(Object)}
  *
  * @author wuxp

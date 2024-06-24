@@ -66,6 +66,8 @@ public class SpringApplicationContextUtils implements ApplicationContextAware {
         STARTED.set(true);
     }
 
+    //  TODO 下一个版本将会移除
+    @Deprecated
     public static void publishEvent(ApplicationEvent event) {
         requireApplicationContext().publishEvent(event);
     }
