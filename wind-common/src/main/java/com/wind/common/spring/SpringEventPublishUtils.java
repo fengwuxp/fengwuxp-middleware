@@ -64,8 +64,8 @@ public final class SpringEventPublishUtils {
                 String eventId = ((SpringTransactionEvent) event).getEventId();
                 Set<String> eventIds = TRANSACTION_EVENT_IDS.get();
                 if (CollectionUtils.isEmpty(eventIds) && eventIds.contains(eventId)) {
-                    // 如果该事件已注册，clear 已注册的事件
-                    TransactionSynchronizationManager.clearSynchronization();
+                    // 如果该事件已注册，则不重复注册
+                  return;
                 }
                 eventIds.add(eventId);
             }
