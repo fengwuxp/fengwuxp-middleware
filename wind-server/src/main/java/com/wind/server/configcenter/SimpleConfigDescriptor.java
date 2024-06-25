@@ -25,16 +25,19 @@ public class SimpleConfigDescriptor implements ConfigRepository.ConfigDescriptor
     private boolean refreshable;
 
     public static SimpleConfigDescriptor of(String name, String group) {
-        SimpleConfigDescriptor result = new SimpleConfigDescriptor();
-        result.setGroup(group);
         ConfigFileType configFileType = ConfigFileType.parse(name);
         if (configFileType == null) {
-            result.setName(name);
-            result.setFileType(ConfigFileType.PROPERTIES);
+            return of(name, group, ConfigFileType.PROPERTIES);
         } else {
-            result.setName(name.substring(0, name.indexOf(configFileType.getFileExtension()) - 1));
-            result.setFileType(configFileType);
+            return of(name.substring(0, name.indexOf(configFileType.getFileExtension()) - 1), group, configFileType);
         }
+    }
+
+    public static SimpleConfigDescriptor of(String name, String group, ConfigFileType fileType) {
+        SimpleConfigDescriptor result = new SimpleConfigDescriptor();
+        result.setGroup(group);
+        result.setName(name);
+        result.setFileType(fileType);
         return result;
     }
 
