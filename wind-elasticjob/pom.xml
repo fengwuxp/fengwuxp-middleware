@@ -11,4 +11,14 @@
 
     <artifactId>wind-elasticjob</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.shardingsphere.elasticjob</groupId>
+            <artifactId>elasticjob-infra-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.wind.middleware</groupId>
+            <artifactId>wind-tracer</artifactId>
+        </dependency>
+    </dependencies>
 </project>

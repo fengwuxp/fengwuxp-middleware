@@ -447,15 +447,21 @@
                 <version>${elasticjob.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.shardingsphere.elasticjob</groupId>
+                <artifactId>elasticjob-lite-spring-namespace</artifactId>
+                <version>${elasticjob.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.shardingsphere.elasticjob</groupId>
+                <artifactId>elasticjob-infra-common</artifactId>
+                <version>${elasticjob.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.jetbrains</groupId>
                 <artifactId>annotations</artifactId>
                 <version>${jetbrains-annotations.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.apache.shardingsphere.elasticjob</groupId>
-                <artifactId>elasticjob-lite-spring-namespace</artifactId>
-                <version>    ${elasticjob.version}</version>
-            </dependency>
+
             <!-- https://mvnrepository.com/artifact/org.dromara.dynamictp/dynamic-tp-adapter-common -->
             <dependency>
                 <groupId>org.dromara.dynamictp</groupId>
