@@ -21,16 +21,25 @@ import java.util.stream.Stream;
 @Slf4j
 public final class WindDynamicTpConfigDescriptorDetector {
 
+    /**
+     * web server type
+     */
     private static final String webServerType;
 
+    /**
+     * mq type
+     */
     private static final String mqType;
 
-    private static final String platform;
+    /**
+     * 告警平台配置
+     */
+    private static final String alertPlatform;
 
     static {
         webServerType = getWebServerType();
         mqType = getMqType();
-        platform = getPlatform();
+        alertPlatform = getPlatform();
     }
 
     private WindDynamicTpConfigDescriptorDetector() {
@@ -44,9 +53,14 @@ public final class WindDynamicTpConfigDescriptorDetector {
      * @return 配置文件列表
      */
     public static List<ConfigRepository.ConfigDescriptor> getConfigDescriptors(String appName) {
-        return Stream.of(webServerType, mqType, platform)
+        return Stream.of(webServerType, mqType, alertPlatform)
                 .filter(StringUtils::hasText)
-                .map(name -> SimpleConfigDescriptor.of(appName + WindConstants.DASHED + webServerType, WindMiddlewareType.DYNAMIC_TP.name(), ConfigFileType.YAML))
+                .map(name -> {
+                    SimpleConfigDescriptor result = SimpleConfigDescriptor.of(String.format("%s-dynamictp-%s", appName, name), WindMiddlewareType.DYNAMIC_TP.name(), ConfigFileType.YAML);
+                    // 支持动态监听
+                    result.setRefreshable(true);
+                    return result;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -75,7 +89,7 @@ public final class WindDynamicTpConfigDescriptorDetector {
 
     private static String getPlatform() {
         if (ClassDetectionUtils.isPresent("org.dromara.dynamictp.starter.cloud.nacos.autoconfigure.DtpCloudNacosAutoConfiguration")) {
-            return ClassDetectionUtils.isPresent("com.wind.nacos.NacosConfigRepository") ? "platform" : WindConstants.EMPTY;
+            return ClassDetectionUtils.isPresent("com.wind.nacos.NacosConfigRepository") ? "alert" : WindConstants.EMPTY;
         }
         return WindConstants.EMPTY;
     }
