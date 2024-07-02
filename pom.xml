@@ -70,11 +70,11 @@
         <rocketmq-spring-boot-starter.version>2.3.0</rocketmq-spring-boot-starter.version>
         <sentinel.version>1.8.7</sentinel.version>
         <mysql.version>8.0.33</mysql.version>
-        <mybatis-flex.version>1.7.0</mybatis-flex.version>
+        <mybatis-flex.version>1.9.3</mybatis-flex.version>
+        <mybatis.version>3.5.15</mybatis.version>
         <commons-io.version>2.13.0</commons-io.version>
         <commons-lang3.version>3.10</commons-lang3.version>
         <commons-text.version>1.10.0</commons-text.version>
-        <mybatis.version>3.5.13</mybatis.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <redisson.version>3.18.0</redisson.version>
         <kryo.version>5.3.0</kryo.version>
