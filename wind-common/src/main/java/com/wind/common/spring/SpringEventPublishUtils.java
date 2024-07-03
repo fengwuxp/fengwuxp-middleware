@@ -1,8 +1,10 @@
 package com.wind.common.spring;
 
+import com.wind.common.exception.AssertUtils;
 import com.wind.common.spring.event.SpringTransactionEvent;
 import com.wind.common.util.ExecutorServiceUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
@@ -10,6 +12,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * spring event {@link org.springframework.context.ApplicationEvent} publish utils
@@ -22,6 +25,8 @@ public final class SpringEventPublishUtils {
 
     // TODO 使用 Dynamic-TP 监控执行
     private static final ThreadPoolExecutor EXECUTOR = ExecutorServiceUtils.newExecutor("Spring-Event-", 1, 2, 256);
+
+    private static final AtomicReference<ApplicationEventPublisher> PUBLISHER = new AtomicReference<>();
 
     /**
      * 上下文中已注册的事务回调事件 ids
@@ -39,7 +44,9 @@ public final class SpringEventPublishUtils {
      */
     public static void publishEvent(Object event) {
         log.debug("publish event = {}", event);
-        SpringApplicationContextUtils.requireApplicationContext().publishEvent(event);
+        ApplicationEventPublisher publisher = PUBLISHER.get();
+        AssertUtils.notNull(publisher, "application event publisher no init");
+        publisher.publishEvent(event);
     }
 
     /**
@@ -65,7 +72,7 @@ public final class SpringEventPublishUtils {
                 Set<String> eventIds = TRANSACTION_EVENT_IDS.get();
                 if (CollectionUtils.isEmpty(eventIds) && eventIds.contains(eventId)) {
                     // 如果该事件已注册，则不重复注册
-                  return;
+                    return;
                 }
                 eventIds.add(eventId);
             }
@@ -84,6 +91,10 @@ public final class SpringEventPublishUtils {
         } else {
             publishEvent(event);
         }
+    }
+
+    static void setApplicationEventPublisher(ApplicationEventPublisher publisher){
+        PUBLISHER.set(publisher);
     }
 
 }

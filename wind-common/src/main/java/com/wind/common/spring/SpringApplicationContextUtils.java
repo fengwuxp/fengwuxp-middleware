@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.lang.NonNull;
 
 import java.util.Date;
@@ -44,19 +42,9 @@ public class SpringApplicationContextUtils implements ApplicationContextAware {
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         AssertUtils.notNull(applicationContext, "argument applicationContext must not null");
-        if (CONTEXT_HOLDER.get() != null && STARTED.get()) {
-            log.info("reset spring application context, old contextType = {}, start date = {}, new contextType = {}, start date = {}",
-                    CONTEXT_HOLDER.get().getClass().getName(), new Date(CONTEXT_HOLDER.get().getStartupDate()),
-                    applicationContext.getClass().getName(), new Date(applicationContext.getStartupDate()));
-            ApplicationContext context = CONTEXT_HOLDER.get();
-            if (applicationContext.getClass() == context.getClass()) {
-                // 类型相同
-                CONTEXT_HOLDER.set(context);
-            } else if (context.getParent() != null && context.getParent().getParent() == applicationContext.getParent()) {
-                // 类型和 parent context 相同，更新 parent
-                ((ConfigurableApplicationContext) context).setParent(applicationContext);
-            }
-            return;
+        if (!STARTED.get()) {
+            // 设置 ApplicationEventPublisher
+            SpringEventPublishUtils.setApplicationEventPublisher(applicationContext);
         }
         log.info("set spring application context, contextType = {}, start date = {}", applicationContext.getClass().getName(), new Date(applicationContext.getStartupDate()));
         CONTEXT_HOLDER.set(applicationContext);
@@ -66,13 +54,7 @@ public class SpringApplicationContextUtils implements ApplicationContextAware {
         STARTED.set(true);
     }
 
-    //  TODO 下一个版本将会移除
-    @Deprecated
-    public static void publishEvent(ApplicationEvent event) {
-        requireApplicationContext().publishEvent(event);
-    }
-
-    static ApplicationContext requireApplicationContext() {
+    private static ApplicationContext requireApplicationContext() {
         ApplicationContext result = CONTEXT_HOLDER.get();
         AssertUtils.notNull(result, "spring application context not init");
         return result;
