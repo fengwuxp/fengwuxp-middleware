@@ -91,11 +91,11 @@ public class DefaultCaptchaManager implements CaptchaManager {
     @Override
     public void verify(String expected, Captcha.CaptchaType type, Captcha.CaptchaUseScene useScene, String owner) {
         Captcha captcha = captchaStorage.get(type, useScene, owner);
-        AssertUtils.notNull(captcha, CaptchaI18nMessageKeys.CAPTCHA_NOT_EXIST_OR_EXPIRED);
+        AssertUtils.notNull(captcha, CaptchaI18nMessageKeys.getCaptchaNotExistOrExpired(type));
         if (!captcha.isAvailable()) {
             // 验证码已失效，移除
             captchaStorage.remove(type, useScene, owner);
-            throw BaseException.common(CaptchaI18nMessageKeys.CAPTCHA_NOT_EXIST_OR_EXPIRED);
+            throw BaseException.common(CaptchaI18nMessageKeys.getCaptchaNotExistOrExpired(type));
         }
         boolean isPass = verificationIgnoreCase ? captcha.getValue().equalsIgnoreCase(expected) : captcha.getValue().equals(expected);
         if (isPass) {
@@ -110,7 +110,7 @@ public class DefaultCaptchaManager implements CaptchaManager {
                 // 验证码已失效，移除
                 captchaStorage.remove(type, useScene, owner);
             }
-            throw BaseException.common(CaptchaI18nMessageKeys.CAPTCHA_VERITY_FAILURE);
+            throw BaseException.common(CaptchaI18nMessageKeys.getCaptchaVerityFailure(type));
         }
     }
 
