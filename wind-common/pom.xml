@@ -36,6 +36,10 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.wind.middleware</groupId>
+            <artifactId>wind-tracer</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
