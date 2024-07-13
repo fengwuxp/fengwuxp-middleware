@@ -9,6 +9,7 @@ import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.sentinel.SentinelResource;
+import com.wind.sentinel.SentinelResourcesType;
 import com.wind.sentinel.metrics.SentinelMetricsCollector;
 import com.wind.server.web.restful.RestfulApiRespFactory;
 import com.wind.web.util.HttpResponseMessageUtils;
@@ -40,7 +41,7 @@ public class SentinelWebInterceptor implements HandlerInterceptor {
 
     static {
         // 增加自定义的指标收集器
-        MetricExtensionProvider.addMetricExtension(new SentinelMetricsCollector());
+        MetricExtensionProvider.addMetricExtension(new SentinelMetricsCollector(SentinelResourcesType.HTTP_API.getTypeName()));
     }
 
     private final Function<HttpServletRequest, SentinelResource> resourceProvider;

@@ -4,7 +4,6 @@ package com.wind.server.web.security;
 import com.wind.api.core.signature.ApiSecretAccount;
 import com.wind.api.core.signature.ApiSignatureRequest;
 import com.wind.api.core.signature.SignatureHttpHeaderNames;
-import com.wind.client.rest.ApiSignatureRequestInterceptor;
 import com.wind.common.WindHttpConstants;
 import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.common.util.ServiceInfoUtils;
@@ -17,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.StreamUtils;
@@ -84,19 +82,18 @@ public class RequestSignFilter implements Filter, Ordered {
             return;
         }
 
-        MediaType contentType = StringUtils.hasLength(request.getContentType()) ? MediaType.parseMediaType(request.getContentType()) : null;
-        boolean signRequiredBody = ApiSignatureRequestInterceptor.signRequiredRequestBody(contentType);
-        HttpServletRequest httpRequest = signRequiredBody ? new RepeatableReadRequestWrapper(request) : request;
-        ApiSignatureRequest signatureRequest = buildSignatureRequest(httpRequest, signRequiredBody);
+        boolean signRequireBody = ApiSignatureRequest.signRequireRequestBody(request.getContentType());
+        HttpServletRequest httpRequest = signRequireBody ? new RepeatableReadRequestWrapper(request) : request;
+        ApiSignatureRequest signatureRequest = buildSignatureRequest(httpRequest, signRequireBody);
         String requestSign = request.getHeader(headerNames.getSign());
 
         // 使用访问标识和秘钥版本号加载秘钥账号
-        ApiSecretAccount account = apiSecretAccountProvider.apply(accessId, headerNames.getSecretVersion());
+        ApiSecretAccount account = apiSecretAccountProvider.apply(accessId, request.getHeader(headerNames.getSecretVersion()));
         if (account == null) {
             badRequest(response, String.format("please check %s, %s request header", headerNames.getAccessId(), headerNames.getSecretVersion()));
             return;
         }
-        if (account.getSignAlgorithm().verify(signatureRequest, account.getSecretKey(), requestSign)) {
+        if (account.getSigner().verify(signatureRequest, account.getSecretKey(), requestSign)) {
             // 设置到签名认证账号到上下文中
             request.setAttribute(WindHttpConstants.API_SECRET_ACCOUNT_ATTRIBUTE_NAME, account);
             chain.doFilter(httpRequest, servletResponse);

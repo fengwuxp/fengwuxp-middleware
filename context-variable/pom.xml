@@ -9,9 +9,9 @@
         <version>${revision}</version>
     </parent>
 
-    <groupId>com.wind.context.variable</groupId>
     <artifactId>wind-context-variable</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>annotations</module>
         <module>injection</module>

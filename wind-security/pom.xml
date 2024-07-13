@@ -18,6 +18,7 @@
         <module>captcha</module>
         <module>core</module>
         <module>mfa</module>
+        <module>crypto</module>
     </modules>
 
     <properties>

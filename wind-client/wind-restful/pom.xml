@@ -13,15 +13,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.wind.core</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.sequence</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-sequence-generate</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.trace</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-tracer</artifactId>
         </dependency>
         <dependency>

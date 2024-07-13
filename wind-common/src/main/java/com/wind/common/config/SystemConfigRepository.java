@@ -25,7 +25,7 @@ public interface SystemConfigRepository extends SystemConfigStorage {
      * @return 配置值
      */
     @NotNull
-    default String requiredConfig(String name) {
+    default String requireConfig(String name) {
         String result = getConfig(name);
         AssertUtils.notNull(result, () -> String.format("config %s not found", name));
         return result;

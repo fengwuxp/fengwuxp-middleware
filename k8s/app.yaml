@@ -33,6 +33,14 @@ spec:
           image: ${IMAGE}
           imagePullPolicy: IfNotPresent
           env:
+            - name: POD_NAME  # pod name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP   # pod ip
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
             - name: SPRING_APPLICATION_NAME     # 应用名称
               value: "${SPRING_APPLICATION_NAME}"
             - name: SPRING_PROFILES_ACTIVE       # 指定激活环境
@@ -74,10 +82,10 @@ spec:
               path: /actuator/health/readiness
               port: 8899
             initialDelaySeconds: 10      # 延迟加载时间
-            periodSeconds: 5             # 重试时间间隔
+            periodSeconds: 3             # 重试时间间隔
             timeoutSeconds: 1            # 超时时间设置
             successThreshold: 1          # 健康阈值
-            failureThreshold: 5         # 不健康阈值
+            failureThreshold: 3         # 不健康阈值
           livenessProbe: # 存活探针
             httpGet:
               path: /actuator/health/liveness

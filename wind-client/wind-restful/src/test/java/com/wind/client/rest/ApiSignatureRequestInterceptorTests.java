@@ -1,7 +1,6 @@
 package com.wind.client.rest;
 
 import com.wind.api.core.signature.ApiSecretAccount;
-import com.wind.api.core.signature.ApiSignAlgorithm;
 import com.wind.api.core.signature.SignatureHttpHeaderNames;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
@@ -25,7 +24,7 @@ import java.nio.charset.StandardCharsets;
  **/
 class ApiSignatureRequestInterceptorTests {
 
-    ApiSecretAccount secretAccount = ApiSecretAccount.immutable(RandomStringUtils.randomAlphabetic(12), RandomStringUtils.randomAlphabetic(32), ApiSignAlgorithm.HMAC_SHA256);
+    ApiSecretAccount secretAccount = ApiSecretAccount.hmacSha256(RandomStringUtils.randomAlphabetic(12), RandomStringUtils.randomAlphabetic(32));
 
     @Test
     void testSha256() throws IOException {

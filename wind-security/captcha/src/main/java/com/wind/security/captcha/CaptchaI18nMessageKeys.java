@@ -15,7 +15,7 @@ public final class CaptchaI18nMessageKeys {
     /**
      * 验证码不存在或已失效
      */
-    public static final String CAPTCHA_NOT_EXIST_OR_EXPIRED = "$.captcha.not.exist.or.expired";
+    private static final String CAPTCHA_NOT_EXIST_OR_EXPIRED = "$.%s.captcha.not.exist.or.expired";
 
     /**
      * 验证码发送流控
@@ -35,5 +35,14 @@ public final class CaptchaI18nMessageKeys {
     /**
      * 验证码验证失败
      */
-    public static final String CAPTCHA_VERITY_FAILURE = "$.captcha.verify.failure";
+    private static final String CAPTCHA_VERITY_FAILURE = "$.%s.captcha.verify.failure";
+
+
+    public static String getCaptchaNotExistOrExpired(Captcha.CaptchaType type) {
+        return String.format(CAPTCHA_NOT_EXIST_OR_EXPIRED, type.name());
+    }
+
+    public static String getCaptchaVerityFailure(Captcha.CaptchaType type) {
+        return String.format(CAPTCHA_VERITY_FAILURE, type.name());
+    }
 }

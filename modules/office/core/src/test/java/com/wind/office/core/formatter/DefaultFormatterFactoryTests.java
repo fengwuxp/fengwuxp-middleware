@@ -30,14 +30,10 @@ class DefaultFormatterFactoryTests {
     }
 
     @Test
-    void testOfDateTime() {
+    void testOfDateTime() throws Exception {
         Formatter<TemporalAccessor> formatter = DefaultFormatterFactory.ofDateTime(WindDateFormatPatterns.YYYY_MM_DD_HH_MM_SS);
-        Assertions.assertEquals("2007-12-03 10:15:30", formatter.print(LocalDateTime.parse( "2007-12-03T10:15:30"), Locale.CHINA));
-    }
-
-    @Test
-    void testOfPrinter() {
-        Formatter<Object> formatter = DefaultFormatterFactory.ofPrinter((object, locale) -> "test");
-        Assertions.assertEquals("test", formatter.print(DefaultExceptionCode.BAD_REQUEST, Locale.CHINA));
+        String text = "2007-12-03 10:15:30";
+        TemporalAccessor time = formatter.parse(text, Locale.CHINA);
+        Assertions.assertEquals(text, formatter.print(time, Locale.CHINA));
     }
 }

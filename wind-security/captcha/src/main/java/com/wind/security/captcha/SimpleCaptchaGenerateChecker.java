@@ -66,7 +66,7 @@ public class SimpleCaptchaGenerateChecker implements CaptchaGenerateChecker {
             throw new BaseException(DefaultExceptionCode.COMMON_ERROR, CAPTCHA_CONCURRENT_GENERATE, exception);
         }
         try {
-            Cache cache = requiredCache(type);
+            Cache cache = requireCache(type);
             List<Long> times = cache.get(key, List.class);
             if (times == null) {
                 times = new ArrayList<>();
@@ -96,7 +96,7 @@ public class SimpleCaptchaGenerateChecker implements CaptchaGenerateChecker {
     }
 
     @NonNull
-    private Cache requiredCache(Captcha.CaptchaType captchaTyp) {
+    private Cache requireCache(Captcha.CaptchaType captchaTyp) {
         String name = CaptchaConstants.getCaptchaAllowGenTimesCacheName(properties.getGroup(), captchaTyp);
         Cache result = cacheManager.getCache(name);
         AssertUtils.notNull(result, String.format("获取验证码生成次数 Cache 失败，CacheName = %s", name));

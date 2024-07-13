@@ -4,15 +4,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.wind.configcenter</groupId>
+        <groupId>com.wind.middleware</groupId>
         <artifactId>wind-config-center</artifactId>
         <version>${revision}</version>
     </parent>
 
     <artifactId>wind-config-center-core</artifactId>
+
     <dependencies>
         <dependency>
-            <groupId>com.wind.common</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-common</artifactId>
         </dependency>
         <dependency>

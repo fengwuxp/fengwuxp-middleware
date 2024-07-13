@@ -13,17 +13,17 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>easyexcel</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
             <groupId>com.wind.office</groupId>
             <artifactId>wind-office-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.script</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-script</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>easyexcel</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 

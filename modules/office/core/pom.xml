@@ -10,9 +10,10 @@
     </parent>
 
     <artifactId>wind-office-core</artifactId>
+
     <dependencies>
         <dependency>
-            <groupId>com.wind.common</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-common</artifactId>
         </dependency>
         <dependency>

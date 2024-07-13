@@ -13,6 +13,7 @@
     <groupId>com.wind.office</groupId>
     <artifactId>wind-office</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>core</module>
         <module>excel</module>

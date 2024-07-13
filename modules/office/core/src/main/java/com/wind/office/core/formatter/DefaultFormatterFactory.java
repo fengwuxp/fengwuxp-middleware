@@ -7,8 +7,9 @@ import com.wind.common.WindDateFormater;
 import com.wind.common.enums.DescriptiveEnum;
 import com.wind.common.exception.AssertUtils;
 import org.springframework.format.Formatter;
-import org.springframework.format.Printer;
+import org.springframework.util.StringUtils;
 
+import java.text.ParseException;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.HashMap;
@@ -55,19 +56,16 @@ public final class DefaultFormatterFactory {
 
     public static Formatter<TemporalAccessor> ofDateTime(String pattern) {
         DateTimeFormatter formatter = DEFAULT_FORMATTERS.containsKey(pattern) ? DEFAULT_FORMATTERS.get(pattern) : DateTimeFormatter.ofPattern(pattern);
-        return ofPrinter((object, locale) -> formatter.format(object));
-    }
+        return new Formatter<TemporalAccessor>() {
 
-    public static <T> Formatter<T> ofPrinter(Printer<T> printer) {
-        return new Formatter<T>() {
             @Override
-            public T parse(String text, Locale locale) {
-                return null;
+            public TemporalAccessor parse(String text, Locale locale) throws ParseException {
+                return StringUtils.hasText(text) ? formatter.parse(text) : null;
             }
 
             @Override
-            public String print(T object, Locale locale) {
-                return printer.print(object, locale);
+            public String print(TemporalAccessor time, Locale locale) {
+                return formatter.format(time);
             }
         };
     }

@@ -1,7 +1,6 @@
 package com.wind.security.authority.rbac;
 
 import com.wind.security.core.SecurityAccessOperations;
-import com.wind.security.core.rbac.RbacResource;
 import com.wind.security.core.rbac.RbacResourceService;
 import com.wind.security.web.util.RequestMatcherUtils;
 import lombok.AllArgsConstructor;
@@ -15,17 +14,14 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.ObjectUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
-import static com.wind.security.WebSecurityConstants.REQUEST_REQUIRED_ROLES_ATTRIBUTE_NAME;
+import static com.wind.security.WebSecurityConstants.REQUEST_REQUIRED_PERMISSIONS_ATTRIBUTE_NAME;
 
 /**
  * 基于请求的 rbac 权限控制
@@ -72,14 +68,9 @@ public class WebRequestAuthorizationManager implements AuthorizationManager<Requ
         if (log.isDebugEnabled()) {
             log.debug("request resource ={} {}, required permissions = {}", context.getRequest().getMethod(), context.getRequest().getRequestURI(), permissions);
         }
-        Set<String> roles = getRolesByPermissionIds(permissions);
-        if (log.isDebugEnabled()) {
-            log.debug("request resource ={} {}, required  has any role = {}", context.getRequest().getMethod(), context.getRequest().getRequestURI(), roles);
-        }
-        context.getRequest().setAttribute(REQUEST_REQUIRED_ROLES_ATTRIBUTE_NAME, roles);
-        return securityAccessOperations.hasAnyRole(roles.toArray(new String[0])) ? ACCESS_PASSED : ACCESS_DENIED;
+        context.getRequest().setAttribute(REQUEST_REQUIRED_PERMISSIONS_ATTRIBUTE_NAME, permissions);
+        return securityAccessOperations.hasAnyAuthority(permissions.toArray(new String[0])) ? ACCESS_PASSED : ACCESS_DENIED;
     }
-
 
     /**
      * 匹配当前请请你需要的权限
@@ -93,7 +84,7 @@ public class WebRequestAuthorizationManager implements AuthorizationManager<Requ
             if (RequestMatcherUtils.matches(entry.getValue(), request)) {
                 // 权限匹配
                 result.add(entry.getKey());
-                if (matchesRequestAllPermission) {
+                if (!matchesRequestAllPermission) {
                     //非匹配所有权限模式， 匹配到了则返回
                     break;
                 }
@@ -102,36 +93,9 @@ public class WebRequestAuthorizationManager implements AuthorizationManager<Requ
         return result;
     }
 
-    /**
-     * 通过权限标识查找权限
-     *
-     * @param permissionIds 权限标识
-     * @return 有 {@param permissionIds} 权限的角色
-     */
-    private Set<String> getRolesByPermissionIds(Set<String> permissionIds) {
-        List<RbacResource.Role> roles = rbacResourceService.getAllRoles().stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-        Set<String> result = permissionIds.stream()
-                .map(id -> findRoleByPermissionId(id, roles))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-        return Collections.unmodifiableSet(result);
-    }
-
-    @Nullable
-    private String findRoleByPermissionId(String permissionId, List<RbacResource.Role> roles) {
-        for (RbacResource.Role role : roles) {
-            if (role.getPermissions().contains(permissionId)) {
-                return role.getId();
-            }
-        }
-        return null;
-    }
-
     private Map<String, Set<RequestMatcher>> getRequestPermissionMatchers() {
         Map<String, Set<RequestMatcher>> result = new HashMap<>();
-        rbacResourceService.getAllPermissions().stream()
+        rbacResourceService.getPermissions().stream()
                 .filter(Objects::nonNull)
                 .forEach(permission -> result.put(permission.getId(), RequestMatcherUtils.convertMatchers(permission.getAttributes())));
         return result;

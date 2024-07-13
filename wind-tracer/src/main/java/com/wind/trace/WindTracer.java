@@ -21,31 +21,33 @@ public interface WindTracer {
     WindTracer TRACER = new WindThreadTracer();
 
     /**
-     * 自动记录traceId
+     * 自动生成 traceId 并设置到上下文中
+     *
+     * @see #trace(String)
      */
     void trace();
 
     /**
-     * 线程切换时记录traceId、和上下文变量
+     * 通过传入的 traceId 设置到上下文中，如果 traceId 为空，则生成新的 traceId
      *
-     * @param traceId traceId
+     * @param traceId traceId 如果为空则生成新的 traceId
      */
     default void trace(@Null String traceId) {
         trace(traceId, Collections.emptyMap());
     }
 
     /**
-     * 线程切换时记录traceId、和上下文变量
+     * 通过传入的 traceId、 contextVariables 设置到上下文中，如果 traceId 为空，则生成新的 traceId
      *
      * @param traceId          traceId 如果为空则生成新的 traceId
-     * @param contextVariables 复制记录的上下文变量
+     * @param contextVariables trace 上下文变量
      */
     void trace(@Null String traceId, @NotNull Map<String, Object> contextVariables);
 
     /**
-     * 清除线程上下文
+     * 清除 trace 上下文
      */
-    void clearTraceContext();
+    void clear();
 
     /**
      * 获取线程上下文中的 traceId
@@ -57,7 +59,7 @@ public interface WindTracer {
     }
 
     /**
-     * 获取线程上下文
+     * 获取 trace Context
      *
      * @return WindTraceContext
      */

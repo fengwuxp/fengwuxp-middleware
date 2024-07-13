@@ -54,7 +54,7 @@ public class JwtUser implements Serializable {
      * @param key 属性名称
      * @return 属性值
      */
-    public <T> T requiredAttribute(String key) {
+    public <T> T requireAttribute(String key) {
         T result = getAttribute(key);
         AssertUtils.notNull(result, () -> String.format("attribute name = %s must not null", key));
         return result;

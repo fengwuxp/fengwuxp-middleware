@@ -1,8 +1,6 @@
 package com.wind.common.query.supports;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
@@ -60,35 +58,6 @@ public interface Pagination<T> extends Serializable {
     @Transient
     default boolean isEmpty() {
         return CollectionUtils.isEmpty(getRecords());
-    }
-
-
-    /**
-     * @author wuxp
-     */
-
-    @Getter
-    @AllArgsConstructor
-    class ImmutablePagination<T> implements Pagination<T> {
-
-        private static final long serialVersionUID = -4678352910174889294L;
-
-        private final long total;
-
-        private final List<T> records;
-
-        private final int queryPage;
-
-        private final int querySize;
-
-        private final QueryType queryType;
-
-        /**
-         * 为了给序列化框架使用，提供一个空构造
-         */
-        ImmutablePagination() {
-            this(0, Collections.emptyList(), 0, 0, QueryType.QUERY_BOTH);
-        }
     }
 
     static <E> Pagination<E> empty() {

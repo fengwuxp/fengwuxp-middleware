@@ -1,7 +1,6 @@
 package com.wind.security.captcha.configuration;
 
 import com.wind.common.locks.LockFactory;
-import com.wind.common.locks.JdkLockFactory;
 import com.wind.security.captcha.CaptchaContentProvider;
 import com.wind.security.captcha.CaptchaGenerateChecker;
 import com.wind.security.captcha.CaptchaStorage;
@@ -75,12 +74,6 @@ public class CaptchaAutoConfiguration {
     @ConditionalOnMissingBean(CaptchaStorage.class)
     public CacheCaptchaStorage cacheCaptchaStorage(CacheManager cacheManager, CaptchaProperties properties) {
         return new CacheCaptchaStorage(cacheManager, properties.getGroup());
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(LockFactory.class)
-    public LockFactory simpleLockFactory() {
-        return new JdkLockFactory();
     }
 
     @Bean

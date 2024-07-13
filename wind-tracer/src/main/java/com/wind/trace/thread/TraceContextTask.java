@@ -5,11 +5,10 @@ import com.wind.trace.WindTraceContext;
 import com.wind.trace.WindTracer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.TaskDecorator;
-
-import javax.validation.constraints.NotNull;
+import org.springframework.lang.NonNull;
 
 /**
- * 用于在线程切换时，将线程上下文信息传递到新的线程中
+ * 用于在线程切换时，将 trace 上下文信息复制到新的线程中
  *
  * @author wuxp
  * @date 2023-12-29 09:55
@@ -18,8 +17,8 @@ import javax.validation.constraints.NotNull;
 public abstract class TraceContextTask implements TaskDecorator {
 
     @Override
-    @NotNull
-    public Runnable decorate(@NotNull Runnable task) {
+    @NonNull
+    public Runnable decorate(@NonNull Runnable task) {
         AssertUtils.notNull(task, "argument task must not null");
         // 获取当前线程的上下文
         WindTraceContext context = WindTracer.TRACER.getTraceContext();
@@ -37,7 +36,7 @@ public abstract class TraceContextTask implements TaskDecorator {
                     log.debug("task decorate, clear trace context");
                 }
                 // 清除线程上下文
-                WindTracer.TRACER.clearTraceContext();
+                WindTracer.TRACER.clear();
                 clearContext();
             }
         };

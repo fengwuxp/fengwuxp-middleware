@@ -5,6 +5,7 @@ import com.wind.common.exception.AssertUtils;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.beans.Transient;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -18,7 +19,7 @@ public abstract class AbstractPageQuery<F extends QueryOrderField> {
     /**
      * 避免查询页面数据过大，拖垮数据库
      */
-    private static final AtomicInteger MAX_QUERY_SIZE = new AtomicInteger(5000);
+    private static final AtomicInteger MAX_QUERY_SIZE = new AtomicInteger(3000);
 
     /**
      * 当前查询页码
@@ -49,7 +50,7 @@ public abstract class AbstractPageQuery<F extends QueryOrderField> {
     private QueryOrderType[] orderTypes;
 
     public void setQuerySize(Integer querySize) {
-        AssertUtils.isTrue(querySize <= MAX_QUERY_SIZE.get(), () -> String.format("查询大小不能超过：%d", MAX_QUERY_SIZE.get()));
+        AssertUtils.isTrue(querySize <= getMaxQuerySize(), () -> String.format("查询大小不能超过：%d", MAX_QUERY_SIZE.get()));
         this.querySize = querySize;
     }
 
@@ -78,6 +79,7 @@ public abstract class AbstractPageQuery<F extends QueryOrderField> {
     /**
      * @return 查询大小最大值
      */
+    @Transient
     public int getMaxQuerySize() {
         return MAX_QUERY_SIZE.get();
     }

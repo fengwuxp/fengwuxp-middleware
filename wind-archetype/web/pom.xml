@@ -21,7 +21,7 @@
             <artifactId>wind-archetype-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.server</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-server</artifactId>
         </dependency>
         <dependency>

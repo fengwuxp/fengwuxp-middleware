@@ -9,7 +9,6 @@
         <version>${revision}</version>
     </parent>
 
-    <groupId>com.wind.core</groupId>
     <artifactId>wind-core</artifactId>
 
     <dependencies>

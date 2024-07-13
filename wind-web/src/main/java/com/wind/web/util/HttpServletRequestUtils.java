@@ -7,12 +7,15 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * 从上下文中获取 http servlet request
  *
  * @author wuxp
  * @date 2023-09-28 07:32
+ * @see org.springframework.boot.web.servlet.filter.OrderedRequestContextFilter;
  **/
 public final class HttpServletRequestUtils {
 
@@ -20,7 +23,8 @@ public final class HttpServletRequestUtils {
         throw new AssertionError();
     }
 
-    public static HttpServletRequest requiredContextRequest() {
+    @NotNull
+    public static HttpServletRequest requireContextRequest() {
         HttpServletRequest result = getContextRequestOfNullable();
         AssertUtils.notNull(result, "not currently in web servlet context");
         return result;
@@ -35,7 +39,11 @@ public final class HttpServletRequestUtils {
         return ((ServletRequestAttributes) requestAttributes).getRequest();
     }
 
-    public static <T> T requiredRequestAttribute(String name, HttpServletRequest request) {
+    public static <T> T requireRequestAttribute(@NotBlank String name) {
+        return requireRequestAttribute(name, requireContextRequest());
+    }
+
+    public static <T> T requireRequestAttribute(@NotBlank String name, @NotNull HttpServletRequest request) {
         T result = getRequestAttribute(name, request);
         AssertUtils.notNull(result, () -> String.format("attribute = %s must not null", name));
         return result;

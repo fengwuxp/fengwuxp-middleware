@@ -9,9 +9,10 @@
         <version>${revision}</version>
     </parent>
 
-    <groupId>com.wind.configcenter</groupId>
+
     <artifactId>wind-config-center</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>nacos</module>
         <module>core</module>

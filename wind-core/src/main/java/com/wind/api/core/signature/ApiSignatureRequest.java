@@ -18,10 +18,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -36,6 +36,11 @@ import java.util.stream.Collectors;
 @Builder
 @FieldNameConstants
 public class ApiSignatureRequest {
+
+    /**
+     * 需要 requestBody 参与签名的 Content-Type
+     */
+    private static final List<String> SIGNE_CONTENT_TYPES = Arrays.asList("application/json", "application/x-www-form-urlencoded");
 
     private static final String MD5_TAG = "Md5";
 
@@ -71,7 +76,7 @@ public class ApiSignatureRequest {
 
     private ApiSignatureRequest(String method, String requestPath, String nonce, String timestamp, String queryString, String requestBody) {
         AssertUtils.hasText(method, "method must not empty");
-        AssertUtils.hasText(requestPath, "requestPath must not empty");
+        AssertUtils.notNull(requestPath, "requestPath must not null");
         AssertUtils.hasText(nonce, "nonce must not empty");
         AssertUtils.hasText(timestamp, "timestamp must not empty");
         this.method = method.toUpperCase();
@@ -79,7 +84,7 @@ public class ApiSignatureRequest {
         this.nonce = nonce;
         this.timestamp = timestamp;
         // 将查询字符串 key 按照字典序排序
-        this.queryString =  buildCanonicalizedQueryString(parseQueryParamsAsMap(queryString));
+        this.queryString = buildCanonicalizedQueryString(parseQueryParamsAsMap(queryString));
         this.requestBody = requestBody;
     }
 
@@ -131,7 +136,7 @@ public class ApiSignatureRequest {
                 .stream()
                 .map(entry -> {
                     if (ObjectUtils.isEmpty(entry.getValue())) {
-                        return entry.getKey()+WindConstants.EQ;
+                        return entry.getKey() + WindConstants.EQ;
                     }
                     return entry.getValue()
                             .stream()
@@ -170,5 +175,12 @@ public class ApiSignatureRequest {
         } catch (UnsupportedEncodingException exception) {
             throw new BaseException(DefaultExceptionCode.BAD_REQUEST, "decode url error", exception);
         }
+    }
+
+    public static boolean signRequireRequestBody(@Nullable String contentType) {
+        if (contentType == null || contentType.trim().isEmpty()) {
+            return false;
+        }
+        return SIGNE_CONTENT_TYPES.stream().anyMatch(contentType::startsWith);
     }
 }

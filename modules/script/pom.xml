@@ -10,17 +10,16 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <groupId>com.wind.script</groupId>
     <artifactId>wind-script</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>com.wind.common</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -34,19 +33,27 @@
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
         </dependency>
+        <!-- Linux and Windows (x86_64) -->
         <dependency>
-            <groupId>com.eclipsesource.j2v8</groupId>
-            <artifactId>j2v8_linux_x86_64</artifactId>
+            <groupId>com.caoccao.javet</groupId>
+            <artifactId>javet</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- Linux (arm64) -->
+        <dependency>
+            <groupId>com.caoccao.javet</groupId>
+            <artifactId>javet-linux-arm64</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- Mac OS (x86_64 and arm64) -->
+        <dependency>
+            <groupId>com.caoccao.javet</groupId>
+            <artifactId>javet-macos</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.eclipsesource.j2v8</groupId>
-            <artifactId>j2v8_win32_x86_64</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.eclipsesource.j2v8</groupId>
-            <artifactId>j2v8_macosx_x86_64</artifactId>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
             <optional>true</optional>
         </dependency>
     </dependencies>

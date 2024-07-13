@@ -37,12 +37,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.wind.tools.h2</groupId>
+            <groupId>com.wind.tools</groupId>
             <artifactId>h2-functions-for-mysql</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.wind.server</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-server</artifactId>
             <scope>test</scope>
         </dependency>

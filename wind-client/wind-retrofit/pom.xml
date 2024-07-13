@@ -13,11 +13,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.wind.core</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.sequence</groupId>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-sequence-generate</artifactId>
         </dependency>
         <dependency>
@@ -31,6 +31,10 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
     </dependencies>
 

@@ -8,7 +8,6 @@ package com.wind.common.enums;
  **/
 public interface DescriptiveEnum {
 
-
     /**
      * 枚举名称
      *

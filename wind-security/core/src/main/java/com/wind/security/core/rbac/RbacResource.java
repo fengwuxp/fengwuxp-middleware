@@ -2,9 +2,11 @@ package com.wind.security.core.rbac;
 
 import com.wind.common.util.StringJoinSplitUtils;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
@@ -12,16 +14,15 @@ import java.util.Set;
 /**
  * rbac 资源定义
  *
- * @param <I> id 类型
  * @author wuxp
  * @date 2023-09-26 07:41
  **/
-public interface RbacResource<I extends Serializable> extends Serializable {
+public interface RbacResource extends Serializable {
 
     /**
      * @return 唯一标识
      */
-    I getId();
+    String getId();
 
     /**
      * @return 用于展示的名称
@@ -31,12 +32,7 @@ public interface RbacResource<I extends Serializable> extends Serializable {
     /**
      * rbac 权限资源
      */
-    interface Permission extends RbacResource<String> {
-
-        /**
-         * @return 权限类型，例如：菜单、接口、数据
-         */
-        String getType();
+    interface Permission extends RbacResource {
 
         /**
          * @return 权限内容
@@ -48,25 +44,23 @@ public interface RbacResource<I extends Serializable> extends Serializable {
          *
          * @param id    权限 id
          * @param name  权限名称
-         * @param type  权限类型
          * @param value 权限值，使用逗号分隔
          * @return 权限
          */
-        static Permission immutable(String id, String name, String type, String value) {
+        static Permission immutable(String id, String name, String value) {
             Set<String> attributes = StringUtils.hasLength(value) ? StringJoinSplitUtils.split(value) : Collections.emptySet();
-            return immutable(id, name, type, attributes);
+            return immutable(id, name, attributes);
         }
 
-        static Permission immutable(String id, String name, String type, Set<String> attributes) {
-            return new ImmutablePermission(id, name, type, attributes);
+        static Permission immutable(String id, String name, Set<String> attributes) {
+            return new ImmutablePermission(id, name, attributes);
         }
     }
 
     /**
      * rbac 角色资源
      */
-    interface Role extends RbacResource<String> {
-
+    interface Role extends RbacResource {
 
         /**
          * 角色关联的权限
@@ -89,14 +83,49 @@ public interface RbacResource<I extends Serializable> extends Serializable {
     }
 
     /**
+     * 用户角色
+     */
+    @AllArgsConstructor
+    @Getter
+    class UserRole {
+
+        /**
+         * 角色 id
+         */
+        private final String roleId;
+
+        /**
+         * 过期时间戳，为空表示不过期
+         */
+        @Nullable
+        private final Long expireTime;
+
+        /**
+         * 为了给序列化框架使用，提供一个空构造
+         */
+        public UserRole() {
+            this("", null);
+        }
+
+       public static UserRole immutable(String roleId, Long expireTime) {
+            return new UserRole(roleId, expireTime);
+        }
+
+        public static UserRole immutable(String roleId) {
+            return immutable(roleId, null);
+        }
+    }
+
+    /**
      * rbac 用户资源
      */
-    interface User extends RbacResource<String> {
+    interface User extends RbacResource {
 
     }
 
     @AllArgsConstructor
     @Getter
+    @EqualsAndHashCode(of = "id")
     class ImmutablePermission implements RbacResource.Permission {
 
         private static final long serialVersionUID = 6255678473411919964L;
@@ -112,11 +141,6 @@ public interface RbacResource<I extends Serializable> extends Serializable {
         private final String name;
 
         /**
-         * 权限类型
-         */
-        private final String type;
-
-        /**
          * 权限内容
          */
         private final Set<String> attributes;
@@ -125,13 +149,14 @@ public interface RbacResource<I extends Serializable> extends Serializable {
          * 为了给序列化框架使用，提供一个空构造
          */
         ImmutablePermission() {
-            this("", "", "", Collections.emptySet());
+            this("", "", Collections.emptySet());
         }
 
     }
 
     @AllArgsConstructor
     @Getter
+    @EqualsAndHashCode(of = "id")
     class ImmutableRole implements RbacResource.Role {
 
         private static final long serialVersionUID = -6791142921724321619L;

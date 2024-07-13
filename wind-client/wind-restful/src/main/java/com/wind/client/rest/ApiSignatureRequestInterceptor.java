@@ -1,9 +1,9 @@
 package com.wind.client.rest;
 
-import com.wind.common.exception.AssertUtils;
 import com.wind.api.core.signature.ApiSecretAccount;
 import com.wind.api.core.signature.ApiSignatureRequest;
 import com.wind.api.core.signature.SignatureHttpHeaderNames;
+import com.wind.common.exception.AssertUtils;
 import com.wind.sequence.SequenceGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpRequest;
@@ -13,6 +13,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -60,14 +61,17 @@ public class ApiSignatureRequestInterceptor implements ClientHttpRequestIntercep
                 .nonce(SequenceGenerator.randomAlphanumeric(32))
                 .timestamp(String.valueOf(System.currentTimeMillis()))
                 .queryString(request.getURI().getQuery());
-        if (signRequiredRequestBody(request.getHeaders().getContentType())) {
+        if (signRequireRequestBody(request.getHeaders().getContentType())) {
             builder.requestBody(new String(body, StandardCharsets.UTF_8));
         }
         ApiSignatureRequest signatureRequest = builder.build();
         request.getHeaders().add(headerNames.getAccessId(), account.getAccessId());
+        if (StringUtils.hasText(account.getSecretKeyVersion())) {
+            request.getHeaders().add(headerNames.getSecretVersion(), account.getSecretKeyVersion());
+        }
         request.getHeaders().add(headerNames.getTimestamp(), signatureRequest.getTimestamp());
         request.getHeaders().add(headerNames.getNonce(), signatureRequest.getNonce());
-        String sign = account.getSignAlgorithm().sign(signatureRequest, account.getSecretKey());
+        String sign = account.getSigner().sign(signatureRequest, account.getSecretKey());
         request.getHeaders().add(headerNames.getSign(), sign);
         if (log.isDebugEnabled()) {
             log.debug("api sign object = {} , sign = {}", request, sign);
@@ -75,11 +79,10 @@ public class ApiSignatureRequestInterceptor implements ClientHttpRequestIntercep
         return execution.execute(request, body);
     }
 
-    // TODO 暂时先放到这里，待重构
-    public static boolean signRequiredRequestBody(@Nullable MediaType contentType) {
+    private static boolean signRequireRequestBody(@Nullable MediaType contentType) {
         if (contentType == null) {
             return false;
         }
-        return SIGNE_CONTENT_TYPES.stream().anyMatch(mediaType -> mediaType.includes(contentType));
+       return ApiSignatureRequest.signRequireRequestBody(contentType.toString());
     }
 }

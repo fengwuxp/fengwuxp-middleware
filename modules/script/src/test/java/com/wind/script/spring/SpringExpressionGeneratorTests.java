@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.google.common.collect.ImmutableMap;
 import com.wind.common.exception.BaseException;
 import com.wind.script.ConditionalNode;
+import com.wind.script.expression.Operand;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ import java.util.Map;
  * @author wuxp
  * @date 2023-09-23 07:58
  **/
- class SpringExpressionGeneratorTests {
+class SpringExpressionGeneratorTests {
 
     private static final String EXPECTED_EXPRESSION = "#name == '张三' AND ({'dev','sit'}.contains(#env) AND ((#age >= 16 and #age <= 45) OR ({'杭州','上海'}.contains(#city) OR #tags['example'] != 'demo')))";
 
@@ -59,8 +60,8 @@ import java.util.Map;
     void generateOpByExpressionNoArgs() {
         ConditionalNode node = new ConditionalNode();
         node.setOp(ConditionalNode.Op.GLOBAL_METHOD);
-        node.setLeft(new ConditionalNode.Operand("root.getExample", ConditionalNode.OperandSource.SCRIPT));
-        node.setRight(new ConditionalNode.Operand("{}", ConditionalNode.OperandSource.SCRIPT));
+        node.setLeft(Operand.immutable("root.getExample", Operand.OperandSource.SCRIPT));
+        node.setRight(Operand.immutable("{}", Operand.OperandSource.SCRIPT));
         String spel = SpringExpressionGenerator.generate(node);
         Assertions.assertEquals("#root.getExample()", spel);
     }
@@ -99,7 +100,7 @@ import java.util.Map;
     private static ConditionalNode mockGlobalMethodNode(String expression) {
         ConditionalNode result = new ConditionalNode();
         result.setOp(ConditionalNode.Op.GLOBAL_METHOD);
-        result.setLeft(new ConditionalNode.Operand("root.execCmd", ConditionalNode.OperandSource.SCRIPT));
+        result.setLeft(Operand.immutable("root.execCmd", Operand.OperandSource.SCRIPT));
         List<String> args = new ArrayList<>();
         args.add("#name");
         args.add("'张三'");
@@ -109,8 +110,9 @@ import java.util.Map;
                 "args", JSON.toJSONString(args),
                 "result", expression
         );
-        result.setRight(new ConditionalNode.Operand(JSON.toJSONString(config), ConditionalNode.OperandSource.SCRIPT));
+        result.setRight(Operand.immutable(JSON.toJSONString(config), Operand.OperandSource.SCRIPT));
         String jsonString = JSON.toJSONString(result);
+        Assertions.assertNotNull(jsonString);
         return result;
     }
 }

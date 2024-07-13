@@ -19,6 +19,11 @@ public class WindSecurityRbacProperties {
     private Duration cacheEffectiveTime = Duration.ofMinutes(3);
 
     /**
+     * 开启缓存刷新
+     */
+    private boolean enableRefreshCache = true;
+
+    /**
      * 默认的角色值前缀
      *
      * @see org.springframework.security.access.vote.RoleVoter#getRolePrefix

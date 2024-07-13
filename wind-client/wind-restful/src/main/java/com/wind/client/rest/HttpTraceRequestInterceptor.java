@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 /**
- * 从上线文中设置 traceId 到 http 请求头中
+ * 从上下文中设置 traceId 到 http 请求头中
  *
  * @author wuxp
  * @date 2024-01-30 15:37

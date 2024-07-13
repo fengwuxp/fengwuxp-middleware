@@ -27,8 +27,8 @@ public interface CaptchaStorage {
      * @param useScene 验证码使用场景
      * @param key      验证码存储 key
      */
-    @NotEmpty
-    Collection<Captcha> get(Captcha.CaptchaType type, Captcha.CaptchaUseScene useScene, String key);
+    @Nullable
+    Captcha get(Captcha.CaptchaType type, Captcha.CaptchaUseScene useScene, String key);
 
     /**
      * 删除验证码

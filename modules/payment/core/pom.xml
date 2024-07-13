@@ -13,12 +13,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
+            <groupId>com.wind.middleware</groupId>
+            <artifactId>wind-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wind.common</groupId>
-            <artifactId>wind-common</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
         </dependency>
     </dependencies>
 

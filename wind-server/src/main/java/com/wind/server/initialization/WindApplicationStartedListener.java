@@ -1,5 +1,6 @@
 package com.wind.server.initialization;
 
+import com.wind.common.spring.SpringApplicationContextUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
@@ -30,6 +31,8 @@ public class WindApplicationStartedListener implements ApplicationListener<Appli
         if (flag.get()) {
             return;
         }
+        // 标记应用已启动
+        SpringApplicationContextUtils.markStarted();
         // 执行系统初始化器
         execSystemInitializers(event.getApplicationContext());
     }
@@ -43,7 +46,7 @@ public class WindApplicationStartedListener implements ApplicationListener<Appli
                     .values());
             OrderComparator.sort(initializers);
             initializers.stream()
-                    .filter(SystemInitializer::requiredInitialize)
+                    .filter(SystemInitializer::requireInitialize)
                     .forEach(SystemInitializer::initialize);
         } catch (Exception exception) {
             log.error("execute SystemInitializer error", exception);

@@ -18,9 +18,6 @@ import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -32,11 +29,6 @@ import java.util.function.Function;
  **/
 @Slf4j
 public class OkHttpApiSignatureRequestInterceptor implements Interceptor {
-
-    /**
-     * 需要 requestBody 参与签名的 Content-Type
-     */
-    private static final List<String> SIGNE_CONTENT_TYPES = Arrays.asList("application/json", "application/x-www-form-urlencoded");
 
     private final Function<Request, ApiSecretAccount> accountProvider;
 
@@ -65,7 +57,7 @@ public class OkHttpApiSignatureRequestInterceptor implements Interceptor {
                 .timestamp(String.valueOf(System.currentTimeMillis()))
                 .queryString(getQueryString(request.url()));
         RequestBody requestBody = request.body();
-        if (signRequiredRequestBody(requestBody)) {
+        if (signRequireRequestBody(requestBody)) {
             Buffer buffer = new Buffer();
             requestBody.writeTo(buffer);
             builder.requestBody(new String(buffer.readByteArray(), StandardCharsets.UTF_8));
@@ -73,9 +65,12 @@ public class OkHttpApiSignatureRequestInterceptor implements Interceptor {
         ApiSignatureRequest signatureRequest = builder.build();
         Request.Builder requestBuilder = request.newBuilder();
         requestBuilder.addHeader(headerNames.getAccessId(), account.getAccessId());
+        if (StringUtils.hasText(account.getSecretKeyVersion())) {
+            requestBuilder.addHeader(headerNames.getSecretVersion(), account.getSecretKeyVersion());
+        }
         requestBuilder.addHeader(headerNames.getTimestamp(), signatureRequest.getTimestamp());
         requestBuilder.addHeader(headerNames.getNonce(), signatureRequest.getNonce());
-        String sign = account.getSignAlgorithm().sign(signatureRequest, account.getSecretKey());
+        String sign = account.getSigner().sign(signatureRequest, account.getSecretKey());
         requestBuilder.addHeader(headerNames.getSign(), sign);
         log.debug("api sign object = {} , sign = {}", request, sign);
         Response result = chain.proceed(requestBuilder.build());
@@ -91,13 +86,13 @@ public class OkHttpApiSignatureRequestInterceptor implements Interceptor {
         return StringUtils.hasText(queryString) ? queryString : null;
     }
 
-    private boolean signRequiredRequestBody(RequestBody requestBody) {
-        if (requestBody == null) {
+    private boolean signRequireRequestBody(RequestBody requestBody) {
+        if (requestBody == null || requestBody.contentType() == null) {
+            // 当 reqeustBody content 为空时，content-type 为空，不参与签名
             return false;
         }
         MediaType mediaType = requestBody.contentType();
-        AssertUtils.notNull(mediaType, "request body content type must not null");
         String[] parts = mediaType.toString().split(";");
-        return SIGNE_CONTENT_TYPES.stream().anyMatch(type -> Objects.equals(parts[0], type));
+        return ApiSignatureRequest.signRequireRequestBody(parts[0]);
     }
 }

@@ -8,8 +8,7 @@ import com.wind.common.exception.AssertUtils;
 import com.wind.script.ConditionalExpressionJoiner;
 import com.wind.script.ConditionalNode;
 import com.wind.script.ConditionalNode.Op;
-import com.wind.script.ConditionalNode.Operand;
-import com.wind.script.ConditionalNode.OperandSource;
+import com.wind.script.expression.Operand;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -112,7 +111,7 @@ public class SpringExpressionConditionalExpressionJoiner implements ConditionalE
         }
         Object value = operand.getValue();
         AssertUtils.notNull(value, "操作数的值不能为 null");
-        if (Objects.equals(OperandSource.CONTEXT_VARIABLE, operand.getSource())) {
+        if (Objects.equals(Operand.OperandSource.CONTEXT_VARIABLE, operand.getSource())) {
             // context 上下文变量
             return String.format("%s%s", WindConstants.SHARP, value);
         }
@@ -125,17 +124,17 @@ public class SpringExpressionConditionalExpressionJoiner implements ConditionalE
         return toExpression(value, operand.getSource());
     }
 
-    private String toSpringExpressionArray(Collection<?> collection, OperandSource source) {
+    private String toSpringExpressionArray(Collection<?> collection, Operand.OperandSource source) {
         String val = collection.stream()
                 .map(item -> toExpression(item, source))
                 .collect(Collectors.joining(WindConstants.COMMA));
         return String.format("{%s}", val);
     }
 
-    private String toExpression(Object o, OperandSource source) {
+    private String toExpression(Object o, Operand.OperandSource source) {
         // TODO 其他类型判断
         if (o instanceof String) {
-            if (Objects.equals(source, OperandSource.SCRIPT)) {
+            if (Objects.equals(source, Operand.OperandSource.SCRIPT)) {
                 String text = (String) o;
                 AssertUtils.isTrue(!text.startsWith(WindConstants.AT), "不允许使用 @ 开头，访问 spring context bean 对象");
                 return text;

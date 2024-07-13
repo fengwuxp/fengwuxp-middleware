@@ -88,12 +88,11 @@ public class WindPropertySourceLoader {
             if (Objects.equals(type, WindMiddlewareType.REDIS) && REDISSON_IF_PRESENT) {
                 // redisson 配置支持
                 loadRedissonConfig(name, result);
+            } else if (Objects.equals(type, WindMiddlewareType.DYNAMIC_TP)) {
+                // dynamic-tp 使用 yaml
+                WindDynamicTpConfigDescriptorDetector.getConfigDescriptors(middlewareShareName).forEach(descriptor -> loadConfigs(descriptor, result));
             } else {
                 SimpleConfigDescriptor descriptor = buildDescriptor(name + WindConstants.DASHED + type.name().toLowerCase(), type.name());
-                if (Objects.equals(type, WindMiddlewareType.DYNAMIC_TP)) {
-                    // dynamic-tp 使用 yaml
-                    descriptor.setFileType(ConfigFileType.YAML);
-                }
                 loadConfigs(descriptor, result);
             }
         }
