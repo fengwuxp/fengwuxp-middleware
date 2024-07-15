@@ -17,7 +17,7 @@ import java.util.function.Function;
  **/
 public final class FileBytesKeyProvider extends AbstractBytesKeyProvider<String> {
 
-    public FileBytesKeyProvider(String filepath, Function<byte[], byte[]> keyDecryptor) {
+    public FileBytesKeyProvider(String filepath, Function<String, byte[]> keyDecryptor) {
         super(filepath, keyDecryptor);
     }
 
@@ -26,9 +26,10 @@ public final class FileBytesKeyProvider extends AbstractBytesKeyProvider<String>
     }
 
     @Override
-    protected byte[] loadKeyBytes(String filepath) {
+    protected String loadKey(String filepath) {
         try {
-            return FileCopyUtils.copyToByteArray(Files.newInputStream(Paths.get(filepath)));
+            byte[] bytes = FileCopyUtils.copyToByteArray(Files.newInputStream(Paths.get(filepath)));
+            return new String(bytes);
         } catch (IOException exception) {
             throw new BaseException(DefaultExceptionCode.COMMON_ERROR, "load key error", exception);
         }

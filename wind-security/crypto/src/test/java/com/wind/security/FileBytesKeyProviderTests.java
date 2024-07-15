@@ -40,10 +40,10 @@ class FileBytesKeyProviderTests {
 
     @Test
     void testGenerateKey() {
-        Function<byte[], byte[]> keyDecryptor = bytes -> Base64.getDecoder().decode(bytes);
+        Function<String, byte[]> keyDecryptor = String::getBytes;
         FileBytesKeyProvider provider = new FileBytesKeyProvider(filepath, keyDecryptor);
         byte[] bytes = provider.generateKey();
-        Assertions.assertEquals(new String(keyDecryptor.apply(secretKey.getBytes(StandardCharsets.UTF_8))), new String(bytes));
+        Assertions.assertEquals(keyDecryptor.apply(secretKey), new String(bytes));
     }
 
 

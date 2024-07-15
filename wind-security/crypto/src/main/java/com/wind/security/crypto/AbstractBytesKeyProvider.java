@@ -1,6 +1,5 @@
 package com.wind.security.crypto;
 
-import lombok.Getter;
 import org.springframework.security.crypto.keygen.BytesKeyGenerator;
 
 import java.util.function.Function;
@@ -11,28 +10,27 @@ import java.util.function.Function;
  **/
 public abstract class AbstractBytesKeyProvider<T> implements BytesKeyGenerator {
 
-    private static final Function<byte[], byte[]> NONE = encryptedBytes -> encryptedBytes;
+    private static final Function<String, byte[]> NONE = String::getBytes;
 
     /**
      * 秘钥字节数组
      */
-    @Getter
     private final byte[] keyBytes;
 
     /**
      * 用于解密秘钥的 Decryptor
      */
-    private final Function<byte[], byte[]> keyDecryptor;
+    private final Function<String, byte[]> keyDecryptor;
 
     /**
      * 用于加载秘钥的参数
      */
     private final T loadKeyParam;
 
-    public AbstractBytesKeyProvider(T loadKeyParam, Function<byte[], byte[]> keyDecryptor) {
+    public AbstractBytesKeyProvider(T loadKeyParam, Function<String, byte[]> keyDecryptor) {
         this.loadKeyParam = loadKeyParam;
         this.keyDecryptor = keyDecryptor;
-        this.keyBytes = getKeyBytes();
+        this.keyBytes = loadKeyBytes();
     }
 
     public AbstractBytesKeyProvider(T loadKeyParam) {
@@ -49,10 +47,10 @@ public abstract class AbstractBytesKeyProvider<T> implements BytesKeyGenerator {
         return keyBytes;
     }
 
-    protected abstract byte[] loadKeyBytes(T loadKeyParam);
+    protected abstract String loadKey(T loadKeyParam);
 
-    private byte[] getKeyBytes() {
-        byte[] bytes = loadKeyBytes(this.loadKeyParam);
-        return keyDecryptor == null ? bytes : keyDecryptor.apply(bytes);
+    private byte[] loadKeyBytes() {
+        String key = loadKey(this.loadKeyParam);
+        return keyDecryptor == null ? key.getBytes() : keyDecryptor.apply(key);
     }
 }
