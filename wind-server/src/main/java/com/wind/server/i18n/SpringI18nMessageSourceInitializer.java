@@ -10,6 +10,7 @@ import org.springframework.web.servlet.LocaleResolver;
 
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -36,7 +37,8 @@ public class SpringI18nMessageSourceInitializer implements ApplicationListener<A
     @Override
     public void onApplicationEvent(@Nonnull ApplicationStartedEvent event) {
         try {
-            LOCALE_RESOLVER.set(event.getApplicationContext().getBean(LocaleResolver.class));
+            // TODO
+            LOCALE_RESOLVER.set(new AcceptI18nHeaderLocaleResolver(Arrays.asList("Wind-Language", "Accept-Language")));
             SpringI18nMessageUtils.setMessageSource(event.getApplicationContext().getBean(MessageSource.class));
             SpringI18nMessageUtils.setLocaleSupplier(SpringI18nMessageSourceInitializer::getWebRequestLocal);
             log.info("enabled i18n supported");
