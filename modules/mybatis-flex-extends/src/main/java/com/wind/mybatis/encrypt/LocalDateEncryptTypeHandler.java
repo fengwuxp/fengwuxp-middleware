@@ -24,6 +24,7 @@ public final class LocalDateEncryptTypeHandler extends AbstractEncryptBaseTypeHa
 
     @Override
     public LocalDate getNullableResult(ResultSet rs, String columnName) throws SQLException {
+
         return parseLocalDate(rs.getString(columnName));
     }
 
