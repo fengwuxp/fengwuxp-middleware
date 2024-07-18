@@ -1,5 +1,6 @@
 package com.wind.server.i18n;
 
+import com.wind.common.exception.AssertUtils;
 import org.apache.tomcat.util.http.parser.AcceptLanguage;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.Nullable;
@@ -11,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -24,86 +24,29 @@ import java.util.Locale;
  **/
 public class AcceptI18nHeaderLocaleResolver implements LocaleResolver {
 
-    private final List<Locale> supportedLocales = new ArrayList<>(4);
-
-    @Nullable
-    private Locale defaultLocale;
+    private final Locale defaultLocale;
 
     private final List<String> headerNames;
 
-    public AcceptI18nHeaderLocaleResolver(List<String> headerNames) {
+    public AcceptI18nHeaderLocaleResolver(List<String> headerNames, Locale defaultLocale) {
+        AssertUtils.notNull(defaultLocale,"argument defaultLocale must not null");
+        AssertUtils.notEmpty(headerNames,"argument headerNames must not empty");
         this.headerNames = headerNames;
-    }
-
-    public AcceptI18nHeaderLocaleResolver() {
-        this(Collections.singletonList("Accept-Language"));
-    }
-
-    /**
-     * Configure supported locales to check against the requested locales
-     * determined via {@link HttpServletRequest#getLocales()}. If this is not
-     * configured then {@link HttpServletRequest#getLocale()} is used instead.
-     *
-     * @param locales the supported locales
-     * @since 4.3
-     */
-    public void setSupportedLocales(List<Locale> locales) {
-        this.supportedLocales.clear();
-        this.supportedLocales.addAll(locales);
-    }
-
-    /**
-     * Get the configured list of supported locales.
-     *
-     * @since 4.3
-     */
-    public List<Locale> getSupportedLocales() {
-        return this.supportedLocales;
-    }
-
-    /**
-     * Configure a fixed default locale to fall back on if the request does not
-     * have an "Accept-Language" header.
-     * <p>By default this is not set in which case when there is no "Accept-Language"
-     * header, the default locale for the server is used as defined in
-     * {@link HttpServletRequest#getLocale()}.
-     *
-     * @param defaultLocale the default locale to use
-     * @since 4.3
-     */
-    public void setDefaultLocale(@Nullable Locale defaultLocale) {
         this.defaultLocale = defaultLocale;
     }
 
-    /**
-     * The configured default locale, if any.
-     * <p>This method may be overridden in subclasses.
-     *
-     * @since 4.3
-     */
-    @Nullable
-    public Locale getDefaultLocale() {
-        return this.defaultLocale;
+    public AcceptI18nHeaderLocaleResolver(List<String> headerNames) {
+       this(headerNames,Locale.SIMPLIFIED_CHINESE);
     }
 
+    public AcceptI18nHeaderLocaleResolver() {
+        this(Collections.singletonList("Accept-Language"), Locale.SIMPLIFIED_CHINESE);
+    }
 
     @Override
     public Locale resolveLocale(@NotNull HttpServletRequest request) {
-        Locale defaultLocale = getDefaultLocale();
         String requestLocal = getLanguageHeader(request);
-        if (defaultLocale != null && requestLocal == null) {
-            return defaultLocale;
-        }
-        Locale requestLocale = parseLocale(requestLocal);
-        List<Locale> supportedLocales = getSupportedLocales();
-        if (supportedLocales.isEmpty() || supportedLocales.contains(requestLocale)) {
-            return requestLocale;
-        }
-        Locale supportedLocale = findSupportedLocale(request, supportedLocales);
-        if (supportedLocale != null) {
-            return supportedLocale;
-        }
-        return (defaultLocale != null ? defaultLocale : requestLocale);
+        return parseLocale(getLanguageHeader(request));
     }
 
     @Nullable
@@ -147,14 +90,16 @@ public class AcceptI18nHeaderLocaleResolver implements LocaleResolver {
 
     @Nullable
     private Locale parseLocale(String value) {
-        try {
-            List<AcceptLanguage> acceptLanguages = AcceptLanguage.parse(new StringReader(value));
-            return CollectionUtils.isEmpty(acceptLanguages) ? null : acceptLanguages.get(0).getLocale();
-        } catch (IOException e) {
-            // Mal-formed headers are ignore. Do the same in the unlikely event
-            // of an IOException.
+        if (StringUtils.hasText(value)) {
+            try {
+                List<AcceptLanguage> acceptLanguages = AcceptLanguage.parse(new StringReader(value));
+                return CollectionUtils.isEmpty(acceptLanguages) ? defaultLocale : acceptLanguages.get(0).getLocale();
+            } catch (IOException e) {
+                // Mal-formed headers are ignore. Do the same in the unlikely event
+                // of an IOException.
+            }
         }
-        return null;
+        return defaultLocale;
     }
 
 }
