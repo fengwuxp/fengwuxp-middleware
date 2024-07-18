@@ -1,12 +1,16 @@
 package com.wind.server.i18n;
 
+import org.apache.tomcat.util.http.parser.AcceptLanguage;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.LocaleResolver;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -86,10 +90,11 @@ public class AcceptI18nHeaderLocaleResolver implements LocaleResolver {
     @Override
     public Locale resolveLocale(@NotNull HttpServletRequest request) {
         Locale defaultLocale = getDefaultLocale();
-        if (defaultLocale != null && getLanguageHeader(request) == null) {
+        String requestLocal = getLanguageHeader(request);
+        if (defaultLocale != null && requestLocal == null) {
             return defaultLocale;
         }
-        Locale requestLocale = request.getLocale();
+        Locale requestLocale = parseLocale(requestLocal);
         List<Locale> supportedLocales = getSupportedLocales();
         if (supportedLocales.isEmpty() || supportedLocales.contains(requestLocale)) {
             return requestLocale;
@@ -138,6 +143,18 @@ public class AcceptI18nHeaderLocaleResolver implements LocaleResolver {
                 .filter(StringUtils::hasText)
                 .findFirst()
                 .orElse(null);
+    }
+
+    @Nullable
+    private Locale parseLocale(String value) {
+        try {
+            List<AcceptLanguage> acceptLanguages = AcceptLanguage.parse(new StringReader(value));
+            return CollectionUtils.isEmpty(acceptLanguages) ? null : acceptLanguages.get(0).getLocale();
+        } catch (IOException e) {
+            // Mal-formed headers are ignore. Do the same in the unlikely event
+            // of an IOException.
+        }
+        return null;
     }
 
 }
