@@ -7,7 +7,7 @@ import com.wind.common.exception.DefaultExceptionCode;
 
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.locks.Lock;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -22,17 +22,30 @@ public class JdkLockFactory implements LockFactory {
      * @key 锁标识
      * @value Lock
      */
-    private final Cache<String, Lock> locks = CacheBuilder.newBuilder()
+    private final Cache<String, WindLock> locks = CacheBuilder.newBuilder()
             .expireAfterWrite(Duration.ofSeconds(10))
             .maximumSize(5000)
             .build();
 
     @Override
-    public Lock apply(String key) {
+    public WindLock apply(String key) {
         try {
-            return locks.get(key, ReentrantLock::new);
+            return locks.get(key, WindReentrantLock::new);
         } catch (ExecutionException exception) {
             throw new BaseException(DefaultExceptionCode.COMMON_ERROR, String.format("get lock failure：%s", exception.getMessage()), exception);
+        }
+    }
+
+    private static final class WindReentrantLock extends ReentrantLock implements WindLock {
+
+        @Override
+        public boolean tryLock(long waitTime, long leaseTime, TimeUnit unit) throws InterruptedException {
+            throw new UnsupportedOperationException("Unsupported");
+        }
+
+        @Override
+        public void lock(long leaseTime, TimeUnit unit) {
+            throw new UnsupportedOperationException("Unsupported");
         }
     }
 }

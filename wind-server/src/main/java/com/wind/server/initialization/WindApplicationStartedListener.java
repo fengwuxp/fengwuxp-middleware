@@ -24,13 +24,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @AllArgsConstructor
 public class WindApplicationStartedListener implements ApplicationListener<ApplicationStartedEvent> {
 
-    private final AtomicBoolean flag = new AtomicBoolean(false);
+    private static final AtomicBoolean INITIALIZED = new AtomicBoolean(false);
 
     @Override
     public void onApplicationEvent(@Nonnull ApplicationStartedEvent event) {
-        if (flag.get()) {
+        if (INITIALIZED.get()) {
             return;
         }
+        INITIALIZED.set(true);
         // 标记应用已启动
         SpringApplicationContextUtils.markStarted();
         // 执行系统初始化器
