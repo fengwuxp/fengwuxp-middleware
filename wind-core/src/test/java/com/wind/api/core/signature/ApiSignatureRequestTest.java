@@ -3,6 +3,9 @@ package com.wind.api.core.signature;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Map;
+
 class ApiSignatureRequestTest {
 
 
@@ -73,6 +76,21 @@ class ApiSignatureRequestTest {
         Assertions.assertTrue(ApiSignatureRequest.signRequireRequestBody("application/json;chart=UTF-8"));
         Assertions.assertTrue(ApiSignatureRequest.signRequireRequestBody("application/x-www-form-urlencoded"));
         Assertions.assertTrue(ApiSignatureRequest.signRequireRequestBody("application/x-www-form-urlencoded;chart=UTF-8"));
+    }
+
+    @Test
+    void testParseQueryParamsAsMap() {
+        Map<String, List<String>> queryParams = ApiSignatureRequest.parseQueryParamsAsMap("a=1+2&b=1 2&h=1=1");
+        Assertions.assertEquals("1+2", queryParams.get("a").get(0));
+        Assertions.assertEquals("1 2", queryParams.get("b").get(0));
+        Assertions.assertEquals("1=1", queryParams.get("h").get(0));
+    }
+
+    @Test
+    void testBuildCanonicalizedQueryString() {
+        Map<String, List<String>> queryParams = ApiSignatureRequest.parseQueryParamsAsMap("a=1+2&b=1 2&h=1=1");
+        String queryString = ApiSignatureRequest.buildCanonicalizedQueryString(queryParams);
+        Assertions.assertEquals("a=1+2&b=1 2&h=1=1", queryString);
     }
 
     private static ApiSignatureRequest buildRequest(String queryString, String requestBody) {

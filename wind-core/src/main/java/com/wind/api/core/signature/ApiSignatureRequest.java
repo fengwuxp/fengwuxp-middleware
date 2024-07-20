@@ -1,6 +1,7 @@
 package com.wind.api.core.signature;
 
 import com.wind.common.WindConstants;
+import com.wind.common.annotations.VisibleForTesting;
 import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
@@ -127,7 +128,8 @@ public class ApiSignatureRequest {
      * @return 获取按照字典序的查询字符串
      */
     @Nullable
-    private String buildCanonicalizedQueryString(Map<String, List<String>> queryParams) {
+    @VisibleForTesting
+    static String buildCanonicalizedQueryString(Map<String, List<String>> queryParams) {
         if (ObjectUtils.isEmpty(queryParams)) {
             return null;
         }
@@ -147,12 +149,13 @@ public class ApiSignatureRequest {
                 .collect(Collectors.joining(WindConstants.AND));
     }
 
-    private Map<String, List<String>> parseQueryParamsAsMap(String queryString) {
+    @VisibleForTesting
+    static Map<String, List<String>> parseQueryParamsAsMap(String queryString) {
         Map<String, List<String>> result = new HashMap<>();
         if (StringUtils.hasText(queryString)) {
             String[] parts = decodeQueryString(queryString).split(WindConstants.AND);
             for (String part : parts) {
-                String[] keyValues = part.split(WindConstants.EQ);
+                String[] keyValues = part.split(WindConstants.EQ, 2);
                 String key = keyValues[0];
                 List<String> values = result.get(key);
                 if (values == null) {
@@ -168,10 +171,10 @@ public class ApiSignatureRequest {
     }
 
     @NotNull
-    private String decodeQueryString(String queryString) {
+    private static String decodeQueryString(String queryString) {
         try {
             // @see https://juejin.cn/post/6844904034453864462#heading-2
-            return queryString == null ? null : URLDecoder.decode(queryString.replace("+", "%20"), StandardCharsets.UTF_8.name());
+            return queryString == null ? null : URLDecoder.decode(queryString.replace("+", "%2B"), StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException exception) {
             throw new BaseException(DefaultExceptionCode.BAD_REQUEST, "decode url error", exception);
         }
