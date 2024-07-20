@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
  *
  * @author wuxp
  * @date 2023-10-18 22:08
+ * @see https://juejin.cn/post/6844904034453864462#heading-2
  */
 @Data
 @Getter
@@ -171,10 +172,10 @@ public class ApiSignatureRequest {
     }
 
     @NotNull
-    private static String decodeQueryString(String queryString) {
+    @VisibleForTesting
+    static String decodeQueryString(String queryString) {
         try {
-            // @see https://juejin.cn/post/6844904034453864462#heading-2
-            return queryString == null ? null : URLDecoder.decode(queryString.replace("+", "%2B"), StandardCharsets.UTF_8.name());
+            return queryString == null ? null : URLDecoder.decode(queryString, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException exception) {
             throw new BaseException(DefaultExceptionCode.BAD_REQUEST, "decode url error", exception);
         }
