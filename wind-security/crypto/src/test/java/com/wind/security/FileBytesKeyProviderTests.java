@@ -43,7 +43,7 @@ class FileBytesKeyProviderTests {
         Function<String, byte[]> keyDecryptor = String::getBytes;
         FileBytesKeyProvider provider = new FileBytesKeyProvider(filepath, keyDecryptor);
         byte[] bytes = provider.generateKey();
-        Assertions.assertEquals(keyDecryptor.apply(secretKey), new String(bytes));
+        Assertions.assertEquals(new String(keyDecryptor.apply(secretKey)), new String(bytes));
     }
 
 
