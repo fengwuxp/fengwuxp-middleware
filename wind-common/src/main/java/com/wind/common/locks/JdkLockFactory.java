@@ -40,12 +40,12 @@ public class JdkLockFactory implements LockFactory {
 
         @Override
         public boolean tryLock(long waitTime, long leaseTime, TimeUnit unit) throws InterruptedException {
-            throw new UnsupportedOperationException("Unsupported");
+          return tryLock(waitTime,unit);
         }
 
         @Override
         public void lock(long leaseTime, TimeUnit unit) {
-            throw new UnsupportedOperationException("Unsupported");
+            lock();
         }
     }
 }
