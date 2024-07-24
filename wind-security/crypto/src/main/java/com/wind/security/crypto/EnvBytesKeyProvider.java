@@ -14,7 +14,7 @@ import java.util.function.Function;
  **/
 public class EnvBytesKeyProvider extends AbstractBytesKeyProvider<String> {
 
-    public EnvBytesKeyProvider(String name, Function<byte[], byte[]> keyDecryptor) {
+    public EnvBytesKeyProvider(String name, Function<String, byte[]> keyDecryptor) {
         super(name, keyDecryptor);
     }
 
@@ -23,11 +23,7 @@ public class EnvBytesKeyProvider extends AbstractBytesKeyProvider<String> {
     }
 
     @Override
-    protected byte[] loadKeyBytes(String name) {
-        return getProperty(name).getBytes(StandardCharsets.UTF_8);
-    }
-
-    private static String getProperty(String name) {
+    protected String loadKey(String name) {
         String result = System.getenv(name);
         result = StringUtils.hasText(result) ? result : System.getProperty(name, result);
         if (StringUtils.hasText(result)) {

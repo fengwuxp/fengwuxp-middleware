@@ -40,10 +40,11 @@
         <module>modules/sequence-generate</module>
         <module>tests</module>
         <module>wind-rocketmq</module>
+        <module>modules/mybatis-flex-extends</module>
     </modules>
 
     <properties>
-        <revision>1.0.10-SNAPSHOT</revision>
+        <revision>1.0.12-SNAPSHOT</revision>
         <!--   占位使用     -->
         <jacoco-coverage-agent/>
         <tests.fork.count/>
@@ -190,6 +191,11 @@
             <dependency>
                 <groupId>com.wind.tools</groupId>
                 <artifactId>h2-functions-for-mysql</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wind.middleware</groupId>
+                <artifactId>mybatis-flex-extends</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

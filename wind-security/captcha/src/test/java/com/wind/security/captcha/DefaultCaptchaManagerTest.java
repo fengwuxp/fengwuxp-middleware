@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static com.wind.security.captcha.CaptchaI18nMessageKeys.CAPTCHA_GENERATE_MAX_LIMIT_OF_USER_BY_DAY;
-import static com.wind.security.captcha.CaptchaI18nMessageKeys.CAPTCHA_VERITY_FAILURE;
 
 class DefaultCaptchaManagerTest {
 
@@ -119,12 +118,12 @@ class DefaultCaptchaManagerTest {
             Assertions.assertNotNull(captcha);
             String expected = RandomStringUtils.randomAlphanumeric(4);
             BaseException exception = Assertions.assertThrows(BaseException.class, () -> captchaManager.verify(expected, type, scene, owner));
-            Assertions.assertEquals(CAPTCHA_VERITY_FAILURE, exception.getMessage());
-            Captcha captche = captchaManager.getCaptchaStorage().get(captcha.getType(), captcha.getUseScene(), owner);
+            Assertions.assertEquals(CaptchaI18nMessageKeys.getCaptchaVerityFailure(type), exception.getMessage());
+            Captcha result = captchaManager.getCaptchaStorage().get(captcha.getType(), captcha.getUseScene(), owner);
             if (maxAllowVerificationTimes <= 1) {
-                Assertions.assertNull(captche);
+                Assertions.assertNull(result);
             } else {
-                Assertions.assertNotNull(captche);
+                Assertions.assertNotNull(result);
             }
         }
     }

@@ -70,8 +70,16 @@ public interface Pagination<T> extends Serializable {
     }
 
     static <E> Pagination<E> of(List<E> records, AbstractPageQuery<?> query, long total) {
-        return new ImmutablePagination<>(total, records == null ? Collections.emptyList() : records,
-                query.getQueryPage(), query.getQuerySize(), query.getQueryType());
+        return of(records, query.getQueryPage(), query.getQuerySize(), query.getQueryType(), total);
+    }
+
+    static <E> Pagination<E> of(List<E> records, int queryPage, int querySize) {
+        // 不关心总数的情况
+        return of(records, queryPage, querySize, QueryType.QUERY_RESET, 0);
+    }
+
+    static <E> Pagination<E> of(List<E> records, int queryPage, int querySize, QueryType queryType, long total) {
+        return new ImmutablePagination<>(total, records == null ? Collections.emptyList() : records, queryPage, querySize, queryType);
     }
 
 }

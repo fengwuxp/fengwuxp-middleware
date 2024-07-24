@@ -30,17 +30,17 @@ public class WindControllerMethodInterceptor implements MethodInterceptor {
         // 参数注入
         methodParameterInjector.inject(invocation.getMethod(), invocation.getArguments());
         if (log.isDebugEnabled()) {
-            log.debug("请求方法：{}，参数：{}", getRequestMethodDesc(invocation.getMethod()), invocation.getArguments());
+            log.debug("请求方法：{}，参数: {}", getRequestMethodDesc(invocation.getMethod()), invocation.getArguments());
         }
         try {
             Object result = invocation.proceed();
             if (log.isDebugEnabled()) {
-                log.debug("请求方法：{}，响应：{}", getRequestMethodDesc(invocation.getMethod()), result);
+                log.debug("请求方法: {}，响应: {}", getRequestMethodDesc(invocation.getMethod()), result);
             }
             recordOperationLog(invocation, result, null);
             return result;
         } catch (Throwable throwable) {
-            log.error("请求方法：{} 异常， 参数：{}，message：{}", invocation.getMethod(), invocation.getArguments(), throwable.getMessage(), throwable);
+            log.error("请求方法: {} 异常， 参数: {}，message: {}", invocation.getMethod(), invocation.getArguments(), throwable.getMessage(), throwable);
             recordOperationLog(invocation, null, throwable);
             throw throwable;
         }

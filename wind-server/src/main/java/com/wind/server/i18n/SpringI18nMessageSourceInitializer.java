@@ -4,12 +4,14 @@ import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.web.util.HttpServletRequestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.boot.web.context.ConfigurableWebServerApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.web.servlet.LocaleResolver;
 
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -35,13 +37,16 @@ public class SpringI18nMessageSourceInitializer implements ApplicationListener<A
 
     @Override
     public void onApplicationEvent(@Nonnull ApplicationStartedEvent event) {
-        try {
-            LOCALE_RESOLVER.set(event.getApplicationContext().getBean(LocaleResolver.class));
-            SpringI18nMessageUtils.setMessageSource(event.getApplicationContext().getBean(MessageSource.class));
-            SpringI18nMessageUtils.setLocaleSupplier(SpringI18nMessageSourceInitializer::getWebRequestLocal);
-            log.info("enabled i18n supported");
-        } catch (Exception ignore) {
-            log.info("un enabled i18n supported");
+        if (event.getApplicationContext() instanceof ConfigurableWebServerApplicationContext) {
+            // 仅在 Web 上下文中执行
+            try {
+                LOCALE_RESOLVER.set(new AcceptI18nHeaderLocaleResolver(Arrays.asList("Wind-Language", "Accept-Language")));
+                SpringI18nMessageUtils.setMessageSource(event.getApplicationContext().getBean(MessageSource.class));
+                SpringI18nMessageUtils.setLocaleSupplier(SpringI18nMessageSourceInitializer::getWebRequestLocal);
+                log.info("enabled i18n supported");
+            } catch (Exception ignore) {
+                log.info("un enabled i18n supported");
+            }
         }
     }
 

@@ -18,15 +18,19 @@ import com.wind.common.exception.ApiClientException;
 import com.wind.common.exception.AssertUtils;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import retrofit2.Retrofit;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import static com.wind.common.WindDateFormatPatterns.HH_MM_SS;
@@ -105,6 +109,13 @@ public final class RetrofitClientFactory {
          */
         private OkHttpClient httpClient;
 
+        /**
+         * 国际化，请求的语言
+         *
+         * @see #checkAndUseDefaultConfig()
+         */
+        private Locale language;
+
         public RetrofitClientFactoryBuilder baseUrl(String baseUrl) {
             this.baseUrl = baseUrl;
             return this;
@@ -133,6 +144,11 @@ public final class RetrofitClientFactory {
 
         public RetrofitClientFactoryBuilder httpClient(OkHttpClient client) {
             this.httpClient = client;
+            return this;
+        }
+
+        public RetrofitClientFactoryBuilder language(Locale language) {
+            this.language = language;
             return this;
         }
 
@@ -165,6 +181,7 @@ public final class RetrofitClientFactory {
                     .addCallAdapterFactory(new JacksonResponseCallAdapterFactory(objectMapper, ImmutableApiResponse.class, RetrofitClientFactoryBuilder::defaultResponseExtractor))
                     .addConverterFactory(new JacksonConverterFactory(objectMapper, ImmutableApiResponse.class, RetrofitClientFactoryBuilder::defaultResponseExtractor))
                     .build();
+
             return new RetrofitClientFactory(retrofit);
         }
 
@@ -177,6 +194,21 @@ public final class RetrofitClientFactory {
                     // 添加自定义拦截器
                     builder.interceptors().addAll(httpClientInterceptors);
                 }
+                if (language != null) {
+                    // 添加国际化请求头
+                    builder.interceptors()
+                            .add(new Interceptor() {
+                                @NotNull
+                                @Override
+                                public Response intercept(@NotNull Interceptor.Chain chain) throws IOException {
+                                    Request request = chain.request()
+                                            .newBuilder()
+                                            .addHeader("Accept-Language", language.toLanguageTag())
+                                            .build();
+                                    return chain.proceed(request);
+                                }
+                            });
+                }
                 httpClient = builder.build();
             }
             if (objectMapper == null) {
@@ -184,7 +216,7 @@ public final class RetrofitClientFactory {
             }
         }
 
-        private static OkHttpClient.Builder detaultClientBuilder() {
+        private OkHttpClient.Builder detaultClientBuilder() {
             // 设置超时时间，这里以秒为单位
             return new OkHttpClient.Builder()
                     .readTimeout(15, TimeUnit.SECONDS)
