@@ -23,6 +23,7 @@ Default logback configuration provided for import
                         "env": "${SPRING_PROFILES_ACTIVE}",
                         "requestUrl": "%X{requestUrl:-}",
                         "requestSourceIp": "%X{requestSourceIp:-}",
+                        "requestSourceHost": "%X{requestSourceHost:-}",
                         "userAgent": "%X{User-Agent:-}",
                         "podIp": "%X{localhostIpv4:-}",
                         "thread": "%thread",

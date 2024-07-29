@@ -2,6 +2,7 @@ package com.wind.web.trace;
 
 import com.google.common.collect.ImmutableSet;
 import com.wind.common.WindConstants;
+import com.wind.common.WindHttpConstants;
 import com.wind.common.util.IpAddressUtils;
 import com.wind.common.util.ServiceInfoUtils;
 import com.wind.server.web.restful.RestfulApiRespFactory;
@@ -17,6 +18,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +27,7 @@ import java.util.Set;
 import static com.wind.common.WindConstants.HTTP_REQUEST_UR_TRACE_NAME;
 import static com.wind.common.WindConstants.LOCAL_HOST_IP_V4;
 import static com.wind.common.WindConstants.WIND_TRANCE_ID_HEADER_NAME;
+import static com.wind.common.WindHttpConstants.HTTP_REQUEST_HOST_ATTRIBUTE_NAME;
 import static com.wind.common.WindHttpConstants.HTTP_REQUEST_IP_ATTRIBUTE_NAME;
 import static com.wind.common.WindHttpConstants.HTTP_USER_AGENT_HEADER_NAME;
 
@@ -82,6 +85,7 @@ public class TraceFilter extends OncePerRequestFilter {
         String requestSourceIp = getRequestSourceIp(request);
         request.setAttribute(HTTP_REQUEST_IP_ATTRIBUTE_NAME, requestSourceIp);
         contextVariables.put(HTTP_REQUEST_IP_ATTRIBUTE_NAME, requestSourceIp);
+        contextVariables.put(HTTP_REQUEST_HOST_ATTRIBUTE_NAME, getReqeustSourceHost(request));
         contextVariables.put(HTTP_REQUEST_UR_TRACE_NAME, request.getRequestURI());
         contextVariables.put(HTTP_USER_AGENT_HEADER_NAME, request.getHeader(HttpHeaders.USER_AGENT));
         contextVariables.put(LOCAL_HOST_IP_V4, IpAddressUtils.getLocalIpv4());
@@ -113,4 +117,13 @@ public class TraceFilter extends OncePerRequestFilter {
         return request.getRemoteAddr();
     }
 
+    private String getReqeustSourceHost(HttpServletRequest request) {
+        try {
+            String host = request.getHeader("Host");
+            return host == null ? URI.create(request.getRequestURI()).getHost() : host;
+        } catch (Exception exception) {
+            log.error("get request host error, request url = {}", request.getRequestURL());
+            return WindConstants.UNKNOWN;
+        }
+    }
 }
