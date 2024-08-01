@@ -71,5 +71,4 @@ public interface PictureGenerator {
         }
     }
 
-
 }

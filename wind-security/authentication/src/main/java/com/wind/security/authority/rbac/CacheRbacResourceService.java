@@ -3,6 +3,7 @@ package com.wind.security.authority.rbac;
 import com.google.common.collect.ImmutableSet;
 import com.wind.common.exception.AssertUtils;
 import com.wind.common.locks.LockFactory;
+import com.wind.common.locks.WindLock;
 import com.wind.security.core.rbac.RbacResource;
 import com.wind.security.core.rbac.RbacResourceCacheManager;
 import com.wind.security.core.rbac.RbacResourceChangeEvent;
@@ -21,7 +22,6 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -39,7 +39,7 @@ import static com.wind.security.WebSecurityConstants.RBAC_USER_ROLE_CACHE_NAME;
 @Slf4j
 public class CacheRbacResourceService implements RbacResourceService, ApplicationListener<RbacResourceChangeEvent>, DisposableBean {
 
-    private static final String REFRESH_RBAC_CACHE_LOCK_KEY = "REFRESH_RBAC_CACHE_LOCK";
+    private static final String REFRESH_RBAC_CACHE_LOCK_KEY = "RBAC_CACHE_REFRESH_LOCK";
 
     private final RbacResourceService delegate;
 
@@ -108,9 +108,9 @@ public class CacheRbacResourceService implements RbacResourceService, Applicatio
 
     private void refresh() {
         log.debug("begin refresh rbac resource");
-        Lock lock = lockFactory.apply(REFRESH_RBAC_CACHE_LOCK_KEY);
+        WindLock lock = lockFactory.apply(REFRESH_RBAC_CACHE_LOCK_KEY);
         try {
-            if (lock.tryLock(300, TimeUnit.MICROSECONDS)) {
+            if (lock.tryLock(300, 10 * 1000, TimeUnit.MICROSECONDS)) {
                 try {
                     refreshPermissionCache();
                     refreshRoleCache();
