@@ -26,6 +26,10 @@
         </dependency>
         <dependency>
             <groupId>com.wind.middleware</groupId>
+            <artifactId>wind-object-sensitive</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.wind.middleware</groupId>
             <artifactId>wind-config-center-core</artifactId>
         </dependency>
         <dependency>

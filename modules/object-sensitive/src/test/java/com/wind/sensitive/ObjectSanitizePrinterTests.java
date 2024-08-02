@@ -1,12 +1,17 @@
 package com.wind.sensitive;
 
+import com.alibaba.fastjson2.JSON;
+import com.google.common.collect.ImmutableMap;
 import com.wind.sensitive.annotation.Sensitive;
+import com.wind.sensitive.sanitizer.json.JsonStringSanitizer;
+import com.wind.sensitive.sanitizer.json.MapObjectSanitizer;
 import lombok.Data;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -167,17 +172,41 @@ class ObjectSanitizePrinterTests {
         Assertions.assertNotNull(printer.sanitize((Supplier<String>) () -> ""));
     }
 
-    public static class ExampleObjectSanitizer implements ObjectSanitizer<Object> {
+    @Test
+    void testMapObjects() {
+        example.setSensitiveMaps(buildSensitiveMaps());
+        String val = printer.sanitize(example);
+        Assertions.assertTrue(val.contains("****"));
+    }
+
+    @Test
+    void testJsonString() {
+        example.setSensitiveText(JSON.toJSONString(buildSensitiveMaps()));
+        String val = printer.sanitize(example);
+        Assertions.assertTrue(val.contains("****"));
+    }
+
+    static Map<String, Object> buildSensitiveMaps() {
+        Map<String, Object> sensitiveMaps = new HashMap<>();
+        List<Map<String, String>> values = new ArrayList<>();
+        Map<String, String> item = new HashMap<>();
+        item.put("ak", "0001");
+        values.add(item);
+        sensitiveMaps.put("data", ImmutableMap.of("values", values));
+        return sensitiveMaps;
+    }
+
+    public static class ExampleObjectSanitizer implements ObjectSanitizer<Object, String> {
 
         @Override
-        public String sanitize(Object obj) {
+        public String sanitize(Object obj, Collection<String> keys) {
             return ObjectSanitizePrinter.ASTERISK.sanitize(obj);
         }
     }
 
     @Data
     @Sensitive(names = {"code", "ak"}, sanitizer = ExampleObjectSanitizer.class)
-    public static class Example {
+    static class Example {
 
         @Sensitive(sanitizer = ExampleObjectSanitizer.class)
         private String name;
@@ -195,5 +224,11 @@ class ObjectSanitizePrinterTests {
         private Example example;
 
         private Map<String, Object> depthObject;
+
+        @Sensitive(names = {"$.data.values[0].ak"}, sanitizer = MapObjectSanitizer.class)
+        private Map<String, Object> sensitiveMaps;
+
+        @Sensitive(names = {"$.data.values[0].ak", "$.data.ak"}, sanitizer = JsonStringSanitizer.class)
+        private String sensitiveText;
     }
 }

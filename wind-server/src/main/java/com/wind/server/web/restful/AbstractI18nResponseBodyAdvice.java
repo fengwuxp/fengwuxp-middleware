@@ -1,11 +1,11 @@
 package com.wind.server.web.restful;
 
 import com.wind.common.annotations.I18n;
-import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.common.query.supports.Pagination;
+import com.wind.common.util.ParseAnnotationFieldUtils;
 import com.wind.script.spring.SpringExpressionEvaluator;
 import com.wind.server.web.supports.ApiResp;
 import org.springframework.core.MethodParameter;
@@ -21,20 +21,14 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import javax.annotation.Nonnull;
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * 响应之前尝试处理结果对象中被 {@link I18n}注解标记的字段
  * <p>
- * TODO 嵌套对象支持
  *
  * @author wuxp
  * @date 2024-07-11 15:43
@@ -95,7 +89,12 @@ public abstract class AbstractI18nResponseBodyAdvice implements ResponseBodyAdvi
         Field[] fields = i18nFields.computeIfAbsent(val.getClass(), this::parseI18nFields);
         for (Field field : fields) {
             try {
-                fillI18nMessage(val, field);
+                if (field.getType() == String.class) {
+                    fillI18nMessage(val, field);
+                } else {
+                    // 字段为复杂对象
+                    handleReturnValueI18n(field.get(val));
+                }
             } catch (IllegalAccessException exception) {
                 throw new BaseException(DefaultExceptionCode.COMMON_ERROR, "i18n message fill error", exception);
             }
@@ -124,25 +123,7 @@ public abstract class AbstractI18nResponseBodyAdvice implements ResponseBodyAdvi
         if (!(clazz.isAnnotationPresent(I18n.class) || clazz.getSuperclass().isAnnotationPresent(I18n.class))) {
             return EMPTY;
         }
-
-        List<Field> clazzFields = getClazzFields(clazz);
-        List<Field> result = clazzFields
-                .stream()
-                .filter(field -> field.isAnnotationPresent(I18n.class))
-                .collect(Collectors.toList());
-        result.forEach(field -> {
-            AssertUtils.isTrue(field.getType() == String.class, "I18n Annotation unsupported String Field");
-            field.setAccessible(true);
-        });
-        return result.toArray(new Field[0]);
+        return ParseAnnotationFieldUtils.parse(clazz, I18n.class);
     }
 
-    private List<Field> getClazzFields(Class<?> clazz) {
-        if (clazz == Object.class) {
-            return Collections.emptyList();
-        }
-        List<Field> result = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
-        result.addAll(getClazzFields(clazz.getSuperclass()));
-        return result;
-    }
 }

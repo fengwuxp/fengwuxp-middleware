@@ -1,24 +1,36 @@
 package com.wind.sensitive;
 
+import com.wind.common.WindConstants;
+
+import java.util.Collection;
+import java.util.Collections;
+
 /**
- * 对象 {@param T} toString 脱敏器
+ * 对象 {@param T} 脱敏器
  *
  * @author wuxp
  */
-public interface ObjectSanitizer<T> {
-
-    String NULL_TEXT = "null";
+public interface ObjectSanitizer<T, R> {
 
     /**
      * 将对象强制以星号的方式打印
      */
-    ObjectSanitizer<Object> ASTERISK = value -> value == null ? NULL_TEXT : "******";
+    ObjectSanitizer<Object, String> ASTERISK = (value, keys) -> value == null ? WindConstants.NULL : "******";
 
     /**
-     * 将一个 java 对象转换为字符串，并做脱敏
+     * 将一个 java 对象脱敏
      *
      * @param value 需要脱敏的值
      * @return 脱敏后的字符串
      */
-    String sanitize(T value);
+    default R sanitize(T value) {
+        return sanitize(value, Collections.emptyList());
+    }
+
+    /**
+     * @param value 需要脱敏的值
+     * @param keys  需要脱敏的 keys
+     * @return 脱敏后的字符串
+     */
+    R sanitize(T value, Collection<String> keys);
 }

@@ -22,9 +22,9 @@ import java.lang.annotation.Target;
 public @interface Sensitive {
 
     /**
-     * 仅在配置在类上是需要，用于匹配字段名称，支持正则表达式
+     * 仅在配置在类或 Map 类型的字段时需要，用于匹配字段名称，支持正则表达式
      *
-     * @return 字段名称列表
+     * @return 字段名称列表或
      */
     String[] names() default {};
 

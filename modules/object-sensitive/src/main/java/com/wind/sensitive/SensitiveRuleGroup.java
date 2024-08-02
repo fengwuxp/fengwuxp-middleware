@@ -1,5 +1,6 @@
 package com.wind.sensitive;
 
+import com.wind.common.WindConstants;
 import com.wind.common.exception.AssertUtils;
 import com.wind.sensitive.annotation.Sensitive;
 import lombok.Data;
@@ -95,6 +96,8 @@ public final class SensitiveRuleGroup {
     @Data
     public static class SensitiveRule {
 
+        static final SensitiveRule EMPTY = new SensitiveRule(WindConstants.EMPTY, Collections.emptyList(), null, null);
+
         /**
          * 需要脱敏的字段名称
          */
@@ -111,7 +114,7 @@ public final class SensitiveRuleGroup {
         /**
          * 脱敏器
          */
-        private final ObjectSanitizer<?> sanitizer;
+        private final ObjectSanitizer<?, ?> sanitizer;
 
         /**
          * 引用全局的 {@link ObjectSanitizer} 实现
@@ -120,8 +123,8 @@ public final class SensitiveRuleGroup {
         private final Class<? extends ObjectSanitizer> globalSanitizerType;
 
         @SuppressWarnings("rawtypes")
-        private SensitiveRule(String fieldName, Collection<String> keys, ObjectSanitizer<?> sanitizer,
-                              Class<? extends ObjectSanitizer> globalSanitizerType) {
+        SensitiveRule(String fieldName, Collection<String> keys, ObjectSanitizer<?, ?> sanitizer,
+                      Class<? extends ObjectSanitizer> globalSanitizerType) {
             this.fieldName = fieldName;
             this.keys = new HashSet<>(keys);
             this.sanitizer = sanitizer;
@@ -139,7 +142,7 @@ public final class SensitiveRuleGroup {
          * @param sanitizer 自定义的脱敏器
          * @param keys      Map 类型字段的 Keys
          */
-        public static SensitiveRule mark(String fieldName, ObjectSanitizer<?> sanitizer, String... keys) {
+        public static SensitiveRule mark(String fieldName, ObjectSanitizer<?, ?> sanitizer, String... keys) {
             AssertUtils.notNull(sanitizer, "argument sanitizer must not null");
             return new SensitiveRule(fieldName, keys == null ? Collections.emptyList() : Arrays.asList(keys), sanitizer, null);
         }
@@ -204,7 +207,7 @@ public final class SensitiveRuleGroup {
          * @param fieldNames 需要脱敏的字段名称
          * @return RuleBuilder
          */
-        public RuleBuilder mark(ObjectSanitizer<?> sanitizer, String... fieldNames) {
+        public RuleBuilder mark(ObjectSanitizer<?, ?> sanitizer, String... fieldNames) {
             addRules(fieldNames, fieldName -> SensitiveRule.mark(fieldName, sanitizer));
             return this;
         }
@@ -217,12 +220,12 @@ public final class SensitiveRuleGroup {
          * @param keys       需要脱敏的 Map keys
          * @return RuleBuilder
          */
-        public RuleBuilder markMapFieldKeys(ObjectSanitizer<?> sanitizer, Collection<String> fieldNames, String... keys) {
+        public RuleBuilder markMapFieldKeys(ObjectSanitizer<?, ?> sanitizer, Collection<String> fieldNames, String... keys) {
             addRules(fieldNames.toArray(new String[0]), fieldName -> SensitiveRule.mark(fieldName, sanitizer, keys));
             return this;
         }
 
-        public RuleBuilder markMapFieldKeys(ObjectSanitizer<?> sanitizer, String fieldName, String... keys) {
+        public RuleBuilder markMapFieldKeys(ObjectSanitizer<?, ?> sanitizer, String fieldName, String... keys) {
             markMapFieldKeys(sanitizer, Collections.singletonList(fieldName), keys);
             return this;
         }
