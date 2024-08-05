@@ -19,18 +19,18 @@ public class DefaultObjectSanitizerTests {
 
     private final DefaultObjectSanitizer sanitizer = new DefaultObjectSanitizer();
 
-    private DefaultObjectSanitizerTests.Demo demo;
+    private DefaultObjectSanitizerDemo demo;
 
     @BeforeEach
     void setup() {
-        demo = new Demo();
+        demo = new DefaultObjectSanitizerDemo();
         demo.setSensitiveMaps(ObjectSanitizePrinterTests.buildSensitiveMaps());
         demo.setSensitiveText(JSON.toJSONString(ObjectSanitizePrinterTests.buildSensitiveMaps()));
     }
 
     @Test
     void testRequiredSanitize(){
-        Assertions.assertTrue(sanitizer.requiredSanitize(Demo.class));
+        Assertions.assertTrue(sanitizer.requiredSanitize(DefaultObjectSanitizerDemo.class));
     }
 
     @Test
@@ -41,7 +41,7 @@ public class DefaultObjectSanitizerTests {
 
     @Data
     @Sensitive(names = {}, sanitizer = ObjectSanitizer.class)
-    static class Demo {
+    static class DefaultObjectSanitizerDemo {
 
         @Sensitive(names = {"$.data.values[0].ak"}, sanitizer = MapObjectSanitizer.class)
         private Map<String, Object> sensitiveMaps;

@@ -108,6 +108,7 @@ public final class WindObjectDigestUtils {
         List<String> sortedNames = fieldNames.stream().sorted().collect(Collectors.toList());
         for (String name : sortedNames) {
             Field field = fieldMaps.get(name);
+            AssertUtils.notNull(field, String.format("field name = %s not found", name));
             Object value = null;
             try {
                 value = field.get(target);

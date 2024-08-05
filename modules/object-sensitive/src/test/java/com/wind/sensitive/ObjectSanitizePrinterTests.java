@@ -31,16 +31,16 @@ class ObjectSanitizePrinterTests {
 
     private final ObjectSanitizePrinter printer = createPrinter();
 
-    private Example example;
+    private ObjectSanitizePrinterExample example;
 
     @BeforeEach
     void setup() {
-        example = new Example();
+        example = new ObjectSanitizePrinterExample();
         example.setName("zhangs");
         example.setAk("AK_test");
         example.setCode("1002");
         example.setDesc("测试");
-        example.setFlag(true);
+        example.setZed(true);
         example.setAge(11);
         example.setDepthObject(new HashMap<>());
     }
@@ -91,7 +91,7 @@ class ObjectSanitizePrinterTests {
 
     @Test
     void testSanitizeCycleObject() {
-        example.setExample(example);
+        example.setObjectSanitizePrinterExample(example);
         String result = printer.sanitize(example);
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("@ref["));
@@ -99,7 +99,7 @@ class ObjectSanitizePrinterTests {
 
     @Test
     void testSanitizeCycleObject2() {
-        example.setExample(example);
+        example.setObjectSanitizePrinterExample(example);
         Map<String, Object> map = new HashMap<>();
         map.put("test2", example);
         map.put("cycle", map);
@@ -143,10 +143,10 @@ class ObjectSanitizePrinterTests {
         depth2.put("depth3", depth3);
         Map<String, Object> depth4 = new HashMap<>();
         depth3.put("depth4", depth4);
-        Example exampleDepth1 = new Example();
-        exampleDepth1.setAge(1);
-        exampleDepth1.setAk("depth");
-        example.setExample(exampleDepth1);
+        ObjectSanitizePrinterExample objectSanitizePrinterExampleDepth1 = new ObjectSanitizePrinterExample();
+        objectSanitizePrinterExampleDepth1.setAge(1);
+        objectSanitizePrinterExampleDepth1.setAk("depth");
+        example.setObjectSanitizePrinterExample(objectSanitizePrinterExampleDepth1);
         String result = printer.sanitize(example);
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("@ref["));
@@ -206,7 +206,7 @@ class ObjectSanitizePrinterTests {
 
     @Data
     @Sensitive(names = {"code", "ak"}, sanitizer = ExampleObjectSanitizer.class)
-    static class Example {
+    static class ObjectSanitizePrinterExample {
 
         @Sensitive(sanitizer = ExampleObjectSanitizer.class)
         private String name;
@@ -219,9 +219,9 @@ class ObjectSanitizePrinterTests {
 
         private int age;
 
-        private boolean flag;
+        private boolean zed;
 
-        private Example example;
+        private ObjectSanitizePrinterExample objectSanitizePrinterExample;
 
         private Map<String, Object> depthObject;
 
