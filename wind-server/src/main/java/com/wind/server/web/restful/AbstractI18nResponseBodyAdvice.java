@@ -123,7 +123,9 @@ public abstract class AbstractI18nResponseBodyAdvice implements ResponseBodyAdvi
         if (!(clazz.isAnnotationPresent(I18n.class) || clazz.getSuperclass().isAnnotationPresent(I18n.class))) {
             return EMPTY;
         }
-        return WindReflectUtils.findFields(clazz, I18n.class);
+        Field[] fields = WindReflectUtils.findFields(clazz, I18n.class);
+        Field.setAccessible(fields, true);
+        return fields;
     }
 
 }

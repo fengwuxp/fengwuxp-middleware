@@ -52,7 +52,11 @@ public class DefaultObjectSanitizer implements ObjectSanitizer<Object, Object> {
     }
 
     private Field[] getSensitiveFields(Class<?> clazz) {
-        return sensitiveFields.computeIfAbsent(clazz, k -> WindReflectUtils.findFields(k, Sensitive.class));
+        return sensitiveFields.computeIfAbsent(clazz, k -> {
+            Field[] fields = WindReflectUtils.findFields(k, Sensitive.class);
+            Field.setAccessible(fields, true);
+            return fields;
+        });
     }
 
     private void sanitizeField(Field field, Object val) throws Exception {
