@@ -2,7 +2,7 @@ package com.wind.sensitive;
 
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
-import com.wind.common.util.ParseAnnotationFieldUtils;
+import com.wind.common.util.WindReflectUtils;
 import com.wind.sensitive.annotation.Sensitive;
 import com.wind.sensitive.sanitizer.SanitizerFactory;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -52,7 +52,7 @@ public class DefaultObjectSanitizer implements ObjectSanitizer<Object, Object> {
     }
 
     private Field[] getSensitiveFields(Class<?> clazz) {
-        return sensitiveFields.computeIfAbsent(clazz, k -> ParseAnnotationFieldUtils.parse(k, Sensitive.class));
+        return sensitiveFields.computeIfAbsent(clazz, k -> WindReflectUtils.findFields(k, Sensitive.class));
     }
 
     private void sanitizeField(Field field, Object val) throws Exception {

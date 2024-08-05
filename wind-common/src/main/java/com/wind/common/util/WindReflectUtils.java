@@ -10,14 +10,23 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * 反射工具类
+ *
  * @author wuxp
  * @date 2024-08-02 14:57
  **/
-public final class ParseAnnotationFieldUtils {
+public final class WindReflectUtils {
 
     private static final Field[] EMPTY = new Field[0];
 
-    public static Field[] parse(Class<?> clazz, Class<? extends Annotation> annotationClass) {
+    /**
+     * 根据注解查找 {@link Field}，会递归查找超类
+     *
+     * @param clazz           类类型
+     * @param annotationClass 注解类型
+     * @return 字段列表
+     */
+    public static Field[] findFields(Class<?> clazz, Class<? extends Annotation> annotationClass) {
         AssertUtils.notNull(clazz, "argument clazz  must not null");
         AssertUtils.notNull(annotationClass, "argument annotationClass  must not null");
         List<Field> clazzFields = getClazzFields(clazz);

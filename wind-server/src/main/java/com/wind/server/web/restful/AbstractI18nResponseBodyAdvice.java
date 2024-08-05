@@ -5,7 +5,7 @@ import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.common.i18n.SpringI18nMessageUtils;
 import com.wind.common.query.supports.Pagination;
-import com.wind.common.util.ParseAnnotationFieldUtils;
+import com.wind.common.util.WindReflectUtils;
 import com.wind.script.spring.SpringExpressionEvaluator;
 import com.wind.server.web.supports.ApiResp;
 import org.springframework.core.MethodParameter;
@@ -123,7 +123,7 @@ public abstract class AbstractI18nResponseBodyAdvice implements ResponseBodyAdvi
         if (!(clazz.isAnnotationPresent(I18n.class) || clazz.getSuperclass().isAnnotationPresent(I18n.class))) {
             return EMPTY;
         }
-        return ParseAnnotationFieldUtils.parse(clazz, I18n.class);
+        return WindReflectUtils.findFields(clazz, I18n.class);
     }
 
 }

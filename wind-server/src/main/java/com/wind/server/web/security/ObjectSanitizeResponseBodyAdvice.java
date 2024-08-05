@@ -1,5 +1,6 @@
 package com.wind.server.web.security;
 
+import com.wind.common.query.supports.Pagination;
 import com.wind.sensitive.DefaultObjectSanitizer;
 import com.wind.server.web.supports.ApiResp;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import java.util.Collection;
 import java.util.Objects;
 
 import static com.wind.common.WindConstants.ENABLED_NAME;
@@ -36,14 +38,29 @@ public class ObjectSanitizeResponseBodyAdvice implements ResponseBodyAdvice<Obje
     public boolean supports(MethodParameter returnType, @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
         Class<?> returnTypeClass = Objects.requireNonNull(returnType.getMethod()).getReturnType();
         return returnTypeClass.isAssignableFrom(ApiResp.class) || sanitizer.requiredSanitize(returnTypeClass);
-
     }
 
     @Override
     public Object beforeBodyWrite(Object body, @NotNull MethodParameter returnType, @NotNull MediaType selectedContentType, @NotNull Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+        // TODO 待优化
         if (body instanceof ApiResp) {
-            sanitizer.sanitize(((ApiResp<?>) body).getData());
+            sanitizeReturnValue(((ApiResp<?>) body).getData());
+        } else {
+            sanitizeReturnValue(body);
         }
-        return sanitizer.sanitize(body);
+        return body;
+    }
+
+    private void sanitizeReturnValue(Object result) {
+        if (result instanceof Pagination) {
+            // 分页对象
+            ((Pagination<?>) result).getRecords().forEach(sanitizer::sanitize);
+        } else if (result instanceof Collection) {
+            // 集合对象
+            ((Collection<?>) result).forEach(sanitizer::sanitize);
+
+        } else {
+            sanitizer.sanitize(result);
+        }
     }
 }
