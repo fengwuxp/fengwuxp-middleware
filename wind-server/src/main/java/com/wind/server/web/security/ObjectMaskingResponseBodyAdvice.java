@@ -52,13 +52,13 @@ public class ObjectMaskingResponseBodyAdvice implements ResponseBodyAdvice<Objec
     private void sanitizeReturnValue(Object result) {
         if (result instanceof Pagination) {
             // 分页对象
-            ((Pagination<?>) result).getRecords().forEach(ObjectDataMaskingUtils::sanitize);
+            ((Pagination<?>) result).getRecords().forEach(ObjectDataMaskingUtils::mask);
         } else if (result instanceof Collection) {
             // 集合对象
-            ((Collection<?>) result).forEach(ObjectDataMaskingUtils::sanitize);
+            ((Collection<?>) result).forEach(ObjectDataMaskingUtils::mask);
 
         } else {
-            ObjectDataMaskingUtils.sanitize(result);
+            ObjectDataMaskingUtils.mask(result);
         }
     }
 }

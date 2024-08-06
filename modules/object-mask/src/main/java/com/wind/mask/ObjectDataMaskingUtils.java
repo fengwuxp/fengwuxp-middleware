@@ -44,7 +44,7 @@ public final class ObjectDataMaskingUtils {
      * @return 脱敏后的对象
      */
     @Nullable
-    public static <T> T sanitize(@Nullable T target) {
+    public static <T> T mask(@Nullable T target) {
         if (target == null) {
             return null;
         }

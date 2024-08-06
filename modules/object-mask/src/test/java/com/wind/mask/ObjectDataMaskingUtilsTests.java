@@ -40,26 +40,26 @@ class ObjectDataMaskingUtilsTests {
     }
 
     @Test
-    void testRequiredSanitize() {
+    void testRequiredMask() {
         Assertions.assertTrue(ObjectDataMaskingUtils.requiredSanitize(DefaultObjectSanitizerDemo1.class));
         Assertions.assertTrue(ObjectDataMaskingUtils.requiredSanitize(DefaultObjectSanitizerDemo2.class));
     }
 
     @Test
-    void testSanitize() {
-        DefaultObjectSanitizerDemo1 result = ObjectDataMaskingUtils.sanitize(demo1);
+    void testMask() {
+        DefaultObjectSanitizerDemo1 result = ObjectDataMaskingUtils.mask(demo1);
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.getSensitiveText().contains("***"));
     }
 
     @Test
-    void testSanitize2() {
-        DefaultObjectSanitizerDemo2 result2 = ObjectDataMaskingUtils.sanitize(mockDemo2());
+    void testMask2() {
+        DefaultObjectSanitizerDemo2 result2 = ObjectDataMaskingUtils.mask(mockDemo2());
         Assertions.assertNotNull(result2);
         Assertions.assertTrue(result2.getSensitiveText2().contains("***"));
         // clear sensitive rules
         ObjectDataMaskingUtils.clearClassRules(DefaultObjectSanitizerDemo2.class);
-        result2 = ObjectDataMaskingUtils.sanitize(mockDemo2());
+        result2 = ObjectDataMaskingUtils.mask(mockDemo2());
         Assertions.assertNotNull(result2);
         Assertions.assertFalse(result2.getSensitiveText2().contains("***"));
     }
