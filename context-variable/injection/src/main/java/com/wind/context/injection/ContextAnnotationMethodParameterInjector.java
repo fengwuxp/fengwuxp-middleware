@@ -86,7 +86,7 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
         for (int i = 0; i < parameters.length; i++) {
             Class<?> parameterType = parameterTypes[i];
             Parameter parameter = parameters[i];
-            if (isSimpleType(parameterType)) {
+            if (isSimpleType(parameterType) || ClassUtils.isPrimitiveArray(parameterType)) {
                 ContextVariable annotation = AnnotatedElementUtils.getMergedAnnotation(parameter, ContextVariable.class);
                 if (annotation != null) {
                     result.add(new SimpleParameterInjectionDescriptor(annotation, parameter, i));

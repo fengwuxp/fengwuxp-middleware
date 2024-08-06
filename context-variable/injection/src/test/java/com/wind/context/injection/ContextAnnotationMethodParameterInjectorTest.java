@@ -15,6 +15,7 @@ import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 class ContextAnnotationMethodParameterInjectorTest {
@@ -24,6 +25,7 @@ class ContextAnnotationMethodParameterInjectorTest {
             ContextVariableNames.USER_NAME, "张三",
             ContextVariableNames.TENANT_ID, 101L,
             ContextVariableNames.REQUEST_IP, "10.0.0.1",
+            "user_ids", new long[]{1L, 2L},
             "example", "test",
             "age", 23
     ), ImmutableSet.of("com.wind.context"));
@@ -40,7 +42,7 @@ class ContextAnnotationMethodParameterInjectorTest {
         Assertions.assertEquals("张三", request.userName);
         Assertions.assertEquals("test", request.example);
         Assertions.assertEquals(23, request.age);
-        Assertions.assertEquals(true, request.falg);
+        Assertions.assertEquals(true, request.flag);
         Assertions.assertNull(request.example2);
     }
 
@@ -52,6 +54,15 @@ class ContextAnnotationMethodParameterInjectorTest {
         Assertions.assertEquals(1L, arguments[0]);
         Assertions.assertEquals("test", arguments[1]);
     }
+
+    @Test
+    void testInjectPrimitiveArray() {
+        Method method = ReflectionUtils.findMethod(Example.class, "examplePrimitiveArray", long[].class);
+        Object[] arguments = {null};
+        injector.inject(method, arguments);
+        Assertions.assertEquals("[1, 2]",Arrays.toString((long[]) arguments[0]));
+    }
+
 
     @Test
     void testInjectParameterWithArray() {
@@ -80,6 +91,10 @@ class ContextAnnotationMethodParameterInjectorTest {
         }
 
         public void exampleParameter(@ContextUserId Long id, @ContextVariable(expression = "#example") String userName) {
+
+        }
+
+        public void examplePrimitiveArray(@ContextVariable(expression = "#user_ids") long[] userIds) {
 
         }
 
@@ -122,7 +137,7 @@ class ContextAnnotationMethodParameterInjectorTest {
         private int age;
 
         @ContextVariable(expression = "#age > 22")
-        private Boolean falg;
+        private Boolean flag;
 
         @ContextVariable(name = "example2")
         private String example2 = "example2";
