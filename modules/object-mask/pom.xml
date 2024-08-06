@@ -10,7 +10,7 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>wind-object-sensitive</artifactId>
+    <artifactId>wind-object-mask</artifactId>
 
     <dependencies>
         <dependency>

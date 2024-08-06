@@ -3,6 +3,7 @@ package com.wind.common.util;
 import com.wind.common.exception.AssertUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
+import javax.validation.constraints.NotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public final class WindReflectUtils {
      * @param annotationClass 注解类型
      * @return 字段列表
      */
+    @NotNull
     public static Field[] findFields(Class<?> clazz, Class<? extends Annotation> annotationClass) {
         AssertUtils.notNull(clazz, "argument clazz  must not null");
         AssertUtils.notNull(annotationClass, "argument annotationClass  must not null");
@@ -49,9 +51,10 @@ public final class WindReflectUtils {
      * 根据字段名称查找 {@link Field}，会递归查找超类
      *
      * @param clazz      类类型
-     * @param fieldNames 注解类型
+     * @param fieldNames 字段名称集合
      * @return 字段列表
      */
+    @NotNull
     public static Field[] findFields(Class<?> clazz, Collection<String> fieldNames) {
         AssertUtils.notNull(clazz, "argument clazz  must not null");
         AssertUtils.notEmpty(fieldNames, "argument fieldNames  must not empty");
@@ -63,6 +66,20 @@ public final class WindReflectUtils {
                 .toArray(Field[]::new);
         Field.setAccessible(result, true);
         return result;
+    }
+
+    /**
+     * 根据字段名称查找 {@link Field}，会递归查找超类
+     *
+     * @param clazz     类类型
+     * @param fieldName 字段名称
+     * @return 字段
+     */
+    @NotNull
+    public static Field findField(Class<?> clazz, String fieldName) {
+        Field[] fields = findFields(clazz, Collections.singleton(fieldName));
+        AssertUtils.notEmpty(fields, String.format("not found name = %s field", fieldName));
+        return fields[0];
     }
 
     /**

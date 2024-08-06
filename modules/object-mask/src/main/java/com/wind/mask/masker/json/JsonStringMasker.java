@@ -1,9 +1,9 @@
-package com.wind.sensitive.sanitizer.json;
+package com.wind.mask.masker.json;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONPath;
-import com.wind.sensitive.ObjectSanitizePrinter;
-import com.wind.sensitive.ObjectSanitizer;
+import com.wind.mask.ObjectMaskPrinter;
+import com.wind.mask.ObjectMasker;
 import org.springframework.util.StringUtils;
 
 import java.util.Collection;
@@ -14,17 +14,17 @@ import java.util.Collection;
  * @author wuxp
  * @date 2024-08-02 15:04
  **/
-public final class JsonStringSanitizer implements ObjectSanitizer<String, String> {
+public final class JsonStringMasker implements ObjectMasker<String, String> {
 
     @Override
-    public String sanitize(String json, Collection<String> keys) {
+    public String mask(String json, Collection<String> keys) {
         if (StringUtils.hasText(json)) {
             Object val = JSON.parse(json);
             keys.forEach(key -> {
                 try {
                     Object eval = JSONPath.eval(val, key);
                     if (eval != null) {
-                        JSONPath.set(val, key, ObjectSanitizePrinter.ASTERISK.sanitize(eval));
+                        JSONPath.set(val, key, ObjectMaskPrinter.ASTERISK.mask(eval));
                     }
                 } catch (Exception exception) {
                     // ignore

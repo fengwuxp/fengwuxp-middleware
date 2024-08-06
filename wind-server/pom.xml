@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>com.wind.middleware</groupId>
-            <artifactId>wind-object-sensitive</artifactId>
+            <artifactId>wind-object-mask</artifactId>
         </dependency>
         <dependency>
             <groupId>com.wind.middleware</groupId>

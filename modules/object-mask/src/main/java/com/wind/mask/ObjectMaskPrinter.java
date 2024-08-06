@@ -1,9 +1,9 @@
-package com.wind.sensitive;
+package com.wind.mask;
 
 import com.wind.common.WindConstants;
 import com.wind.common.annotations.VisibleForTesting;
-import com.wind.sensitive.annotation.Sensitive;
-import com.wind.sensitive.sanitizer.SanitizerFactory;
+import com.wind.mask.annotation.Sensitive;
+import com.wind.mask.masker.MaskerFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -23,6 +23,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.wind.mask.MaskRuleGroup.convertMapFiledRule;
+
 /**
  * 对象脱敏打印器
  *
@@ -30,7 +32,7 @@ import java.util.stream.Collectors;
  * @date 2024-03-11 13:27
  **/
 @Slf4j
-public final class ObjectSanitizePrinter implements ObjectSanitizer<Object, String> {
+public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
 
     /**
      * 对象 toString 时，连接字段的字符
@@ -47,20 +49,20 @@ public final class ObjectSanitizePrinter implements ObjectSanitizer<Object, Stri
      */
     private static final int MIN_LENGTH = REMOVE_LENGTH + 1;
 
-    private final Map<Class<?>, ObjectSanitizer<?, ?>> globalSanitizers;
+    private final Map<Class<?>, ObjectMasker<?, ?>> globalSanitizers;
 
-    private final SensitiveRuleRegistry rueRegistry;
+    private final ObjectMaskRuleRegistry rueRegistry;
 
-    public ObjectSanitizePrinter(SensitiveRuleRegistry rueRegistry, Collection<ObjectSanitizer<?, ?>> globalSanitizers) {
+    public ObjectMaskPrinter(ObjectMaskRuleRegistry rueRegistry, Collection<ObjectMasker<?, ?>> globalSanitizers) {
         this.rueRegistry = rueRegistry;
         this.globalSanitizers = globalSanitizers.stream().collect(Collectors.toMap(Object::getClass, Function.identity()));
     }
 
     @Override
-    public String sanitize(Object obj, Collection<String> keys) {
+    public String mask(Object obj, Collection<String> keys) {
         try {
             IdentityLimitPrinter printer = new IdentityLimitPrinter();
-            return printer.sanitize(obj);
+            return printer.mask(obj);
         } catch (Throwable throwable) {
             log.warn("sanitize object error", throwable);
             return WindConstants.EMPTY;
@@ -73,7 +75,7 @@ public final class ObjectSanitizePrinter implements ObjectSanitizer<Object, Stri
      * 通过 {@link #maxPrintDepth} {@link #depthCounter} 限制递归打印对象的深度，避免超大对于 toString 占用过多的内存
      */
     @VisibleForTesting
-    class IdentityLimitPrinter implements ObjectSanitizer<Object, String> {
+    class IdentityLimitPrinter implements ObjectMasker<Object, String> {
 
         private static final String CYCLE_REF_FLAG = "@ref";
 
@@ -104,11 +106,11 @@ public final class ObjectSanitizePrinter implements ObjectSanitizer<Object, Stri
         }
 
         @Override
-        public String sanitize(Object obj, Collection<String> keys) {
+        public String mask(Object obj, Collection<String> keys) {
             return checkCycleRefAndSanitize(obj, null);
         }
 
-        private String checkCycleRefAndSanitize(Object value, @Nullable SensitiveRuleGroup.SensitiveRule fieldRule) {
+        private String checkCycleRefAndSanitize(Object value, @Nullable MaskRule fieldRule) {
             if (value == null) {
                 return WindConstants.NULL;
             }
@@ -158,7 +160,7 @@ public final class ObjectSanitizePrinter implements ObjectSanitizer<Object, Stri
          * @param value     脱敏的对象
          * @param fieldRule 在 {@param value} 为字段时，改字段的配置规则组
          */
-        private String sanitizeByRule(Object value, @Nullable SensitiveRuleGroup.SensitiveRule fieldRule) {
+        private String sanitizeByRule(Object value, @Nullable MaskRule fieldRule) {
             Class<?> clazz = value.getClass();
             if (clazz.isArray()) {
                 return printArray((Object[]) value, fieldRule);
@@ -186,7 +188,7 @@ public final class ObjectSanitizePrinter implements ObjectSanitizer<Object, Stri
         /**
          * copy form {@link Arrays#toString}
          */
-        private String printArray(Object[] objects, SensitiveRuleGroup.SensitiveRule fieldRule) {
+        private String printArray(Object[] objects, MaskRule fieldRule) {
             int iMax = objects.length - 1;
             if (iMax == -1) {
                 return "[]";
@@ -205,14 +207,14 @@ public final class ObjectSanitizePrinter implements ObjectSanitizer<Object, Stri
             }
         }
 
-        private String printMap(Map<?, ?> map, SensitiveRuleGroup.SensitiveRule fieldRule) {
+        private String printMap(Map<?, ?> map, MaskRule fieldRule) {
             if (map.isEmpty()) {
                 return "{}";
             }
             if (isOverPrintSize(map.size())) {
                 return toOverMaxSizeString(map.getClass());
             }
-            SensitiveRuleGroup group = fieldRule == null ? rueRegistry.getRuleGroup(Map.class) : SensitiveRuleGroup.convertMapFiledRule(
+            MaskRuleGroup group = fieldRule == null ? rueRegistry.getRuleGroup(Map.class) : convertMapFiledRule(
                     fieldRule);
             StringBuilder result = new StringBuilder();
             result.append('{');
@@ -220,11 +222,11 @@ public final class ObjectSanitizePrinter implements ObjectSanitizer<Object, Stri
                 Object key = entry.getKey();
                 result.append(key).append("=");
                 if (key instanceof String) {
-                    ObjectSanitizer<Object, Object> sanitizer = getSanitizer(group.matches((String) key));
+                    ObjectMasker<Object, Object> sanitizer = getSanitizer(group.matches((String) key));
                     result.append(sanitizer == null ? checkCycleRefAndSanitize(entry.getValue(), fieldRule)
-                            : sanitizer.sanitize(entry.getValue()));
+                            : sanitizer.mask(entry.getValue()));
                 } else {
-                    result.append(sanitize(entry.getValue()));
+                    result.append(mask(entry.getValue()));
                 }
                 result.append(", ");
             }
@@ -242,18 +244,18 @@ public final class ObjectSanitizePrinter implements ObjectSanitizer<Object, Stri
                 }
                 ReflectionUtils.makeAccessible(field);
                 Object value = ReflectionUtils.getField(field, obj);
-                SensitiveRuleGroup.SensitiveRule fieldRule = getFieldRuleGroup(field);
-                if (value instanceof Map && SensitiveRuleGroup.SensitiveRule.EMPTY == fieldRule) {
+                MaskRule fieldRule = getFieldRuleGroup(field);
+                if (value instanceof Map && MaskRule.EMPTY == fieldRule) {
                     // Map 类型字段，未单独设置脱敏规则
                     result.append(field.getName())
                             .append("=")
                             .append(printMap((Map<?, ?>) value, fieldRule))
                             .append(", ");
                 } else {
-                    ObjectSanitizer<Object, Object> sanitizer = getSanitizer(fieldRule);
+                    ObjectMasker<Object, Object> sanitizer = getSanitizer(fieldRule);
                     result.append(field.getName())
                             .append("=")
-                            .append(sanitizer == null ? checkCycleRefAndSanitize(value, fieldRule) : sanitizer.sanitize(value, fieldRule.getKeys()))
+                            .append(sanitizer == null ? checkCycleRefAndSanitize(value, fieldRule) : sanitizer.mask(value, fieldRule.getKeys()))
                             .append(", ");
                 }
             }
@@ -263,14 +265,14 @@ public final class ObjectSanitizePrinter implements ObjectSanitizer<Object, Stri
         }
 
         @NotNull
-        private SensitiveRuleGroup.SensitiveRule getFieldRuleGroup(Field field) {
+        private MaskRule getFieldRuleGroup(Field field) {
             Sensitive annotation = field.getAnnotation(Sensitive.class);
             String name = field.getName();
             if (annotation == null) {
-                SensitiveRuleGroup ruleGroup = rueRegistry.getRuleGroup(field.getDeclaringClass());
-                return ruleGroup == null ? SensitiveRuleGroup.SensitiveRule.EMPTY : ruleGroup.matches(name);
+                MaskRuleGroup ruleGroup = rueRegistry.getRuleGroup(field.getDeclaringClass());
+                return ruleGroup == null ? MaskRule.EMPTY : ruleGroup.matches(name);
             }
-            return new SensitiveRuleGroup.SensitiveRule(name, Arrays.asList(annotation.names()), SanitizerFactory.getObjectSanitizer(annotation.sanitizer()), null);
+            return new MaskRule(name, Arrays.asList(annotation.names()), MaskerFactory.getObjectSanitizer(annotation.sanitizer()), null);
         }
 
         private String printPrimitiveArray(Object o) {
@@ -302,13 +304,13 @@ public final class ObjectSanitizePrinter implements ObjectSanitizer<Object, Stri
         }
 
         @SuppressWarnings("unchecked")
-        private ObjectSanitizer<Object, Object> getSanitizer(SensitiveRuleGroup.SensitiveRule rule) {
+        private ObjectMasker<Object, Object> getSanitizer(MaskRule rule) {
             if (rule == null) {
                 return null;
             }
-            ObjectSanitizer<?, ?> result = rule.getGlobalSanitizerType() == null ? rule.getSanitizer() : globalSanitizers
+            ObjectMasker<?, ?> result = rule.getGlobalSanitizerType() == null ? rule.getSanitizer() : globalSanitizers
                     .get(rule.getGlobalSanitizerType());
-            return (ObjectSanitizer<Object, Object>) result;
+            return (ObjectMasker<Object, Object>) result;
         }
 
         private void deleteLastBlank(StringBuilder builder) {

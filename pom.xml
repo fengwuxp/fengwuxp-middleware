@@ -34,7 +34,7 @@
         <module>wind-archetype</module>
         <module>tools</module>
         <module>modules/office</module>
-        <module>modules/object-sensitive</module>
+        <module>modules/object-mask</module>
         <module>modules/payment</module>
         <module>modules/script</module>
         <module>modules/sequence-generate</module>
@@ -261,7 +261,7 @@
             </dependency>
             <dependency>
                 <groupId>com.wind.middleware</groupId>
-                <artifactId>wind-object-sensitive</artifactId>
+                <artifactId>wind-object-mask</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

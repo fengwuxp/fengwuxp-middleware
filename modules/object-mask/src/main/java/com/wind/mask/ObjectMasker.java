@@ -1,4 +1,4 @@
-package com.wind.sensitive;
+package com.wind.mask;
 
 import com.wind.common.WindConstants;
 
@@ -10,12 +10,12 @@ import java.util.Collections;
  *
  * @author wuxp
  */
-public interface ObjectSanitizer<T, R> {
+public interface ObjectMasker<T, R> {
 
     /**
      * 将对象强制以星号的方式打印
      */
-    ObjectSanitizer<Object, String> ASTERISK = (value, keys) -> value == null ? WindConstants.NULL : "******";
+    ObjectMasker<Object, String> ASTERISK = (value, keys) -> value == null ? WindConstants.NULL : "******";
 
     /**
      * 将一个 java 对象脱敏
@@ -23,8 +23,8 @@ public interface ObjectSanitizer<T, R> {
      * @param value 需要脱敏的值
      * @return 脱敏后的字符串
      */
-    default R sanitize(T value) {
-        return sanitize(value, Collections.emptyList());
+    default R mask(T value) {
+        return mask(value, Collections.emptyList());
     }
 
     /**
@@ -32,5 +32,5 @@ public interface ObjectSanitizer<T, R> {
      * @param keys  需要脱敏的 keys
      * @return 脱敏后的字符串
      */
-    R sanitize(T value, Collection<String> keys);
+    R mask(T value, Collection<String> keys);
 }

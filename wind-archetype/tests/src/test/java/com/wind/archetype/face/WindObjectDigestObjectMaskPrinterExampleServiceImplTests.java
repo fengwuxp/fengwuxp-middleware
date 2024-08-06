@@ -12,9 +12,9 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author wind
  **/
-@ContextConfiguration(classes = WindObjectDigestObjectSanitizePrinterExampleServiceImplTests.TestConfig.class)
+@ContextConfiguration(classes = WindObjectDigestObjectMaskPrinterExampleServiceImplTests.TestConfig.class)
 @Slf4j
- class WindObjectDigestObjectSanitizePrinterExampleServiceImplTests extends AbstractServiceTest {
+ class WindObjectDigestObjectMaskPrinterExampleServiceImplTests extends AbstractServiceTest {
 
     @Autowired
     private ExampleService exampleService;

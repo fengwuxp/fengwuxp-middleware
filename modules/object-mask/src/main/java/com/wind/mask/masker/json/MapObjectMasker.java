@@ -1,9 +1,9 @@
-package com.wind.sensitive.sanitizer.json;
+package com.wind.mask.masker.json;
 
 
 import com.alibaba.fastjson2.JSONPath;
-import com.wind.sensitive.ObjectSanitizePrinter;
-import com.wind.sensitive.ObjectSanitizer;
+import com.wind.mask.ObjectMaskPrinter;
+import com.wind.mask.ObjectMasker;
 
 import java.util.Collection;
 import java.util.Map;
@@ -14,10 +14,10 @@ import java.util.Map;
  * @author wuxp
  * @date 2024-08-02 15:03
  **/
-public final class MapObjectSanitizer implements ObjectSanitizer<Map<String, Object>, Object> {
+public final class MapObjectMasker implements ObjectMasker<Map<String, Object>, Object> {
 
     @Override
-    public Object sanitize(Map<String, Object> obj, Collection<String> keys) {
+    public Object mask(Map<String, Object> obj, Collection<String> keys) {
         if (obj == null || obj.isEmpty()) {
             return obj;
         }
@@ -25,7 +25,7 @@ public final class MapObjectSanitizer implements ObjectSanitizer<Map<String, Obj
             try {
                 Object eval = JSONPath.eval(obj, key);
                 if (eval != null) {
-                    JSONPath.set(obj, key, ObjectSanitizePrinter.ASTERISK.sanitize(eval));
+                    JSONPath.set(obj, key, ObjectMaskPrinter.ASTERISK.mask(eval));
                 }
             } catch (Exception exception) {
                 // ignore

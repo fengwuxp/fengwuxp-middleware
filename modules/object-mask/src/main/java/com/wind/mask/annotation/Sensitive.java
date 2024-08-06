@@ -1,7 +1,7 @@
-package com.wind.sensitive.annotation;
+package com.wind.mask.annotation;
 
-import com.wind.sensitive.ObjectSanitizer;
-import com.wind.sensitive.SensitiveRuleGroup;
+import com.wind.mask.MaskRuleGroup;
+import com.wind.mask.ObjectMasker;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -29,11 +29,11 @@ public @interface Sensitive {
     String[] names() default {};
 
     /**
-     * 使用的全局脱敏 {@link ObjectSanitizer}类型
-     * 如果想针对字段使用自定义的 ObjectSanitizer 实例，参见{@link SensitiveRuleGroup.GroupBuilder}
+     * 使用的全局脱敏 {@link ObjectMasker}类型
+     * 如果想针对字段使用自定义的 ObjectSanitizer 实例，参见{@link MaskRuleGroup.GroupBuilder}
      *
      * @return ObjectSanitizer 类类型
      */
     @SuppressWarnings("rawtypes")
-    Class<? extends ObjectSanitizer> sanitizer();
+    Class<? extends ObjectMasker> sanitizer();
 }

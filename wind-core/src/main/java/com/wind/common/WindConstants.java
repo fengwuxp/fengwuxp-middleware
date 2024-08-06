@@ -172,7 +172,7 @@ public final class WindConstants {
     /**
      * 对象脱敏 advice
      */
-    public static final String WIND_SERVER_OBJECT_SANITIZE_ADVICE = "wind.server.object-sanitize.advice";
+    public static final String WIND_SERVER_OBJECT_MASK_ADVICE = "wind.server.object-mask.advice";
 
     /**
      * 配置中心支持
