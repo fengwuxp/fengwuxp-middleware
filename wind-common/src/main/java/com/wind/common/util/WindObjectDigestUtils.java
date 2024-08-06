@@ -140,21 +140,21 @@ public final class WindObjectDigestUtils {
             if (ClassUtils.isPrimitiveArray(val.getClass())) {
                 // 基础数据类型数组
                 if (val.getClass().getComponentType() == byte.class) {
-                    return arrayToString((byte[]) val);
+                    return Arrays.toString((byte[]) val);
                 } else if (val.getClass().getComponentType() == short.class) {
-                    return arrayToString((short[]) val);
+                    return Arrays.toString((short[]) val);
                 } else if (val.getClass().getComponentType() == int.class) {
-                    return arrayToString((int[]) val);
+                    return Arrays.toString((int[]) val);
                 } else if (val.getClass().getComponentType() == long.class) {
-                    return arrayToString((long[]) val);
+                    return Arrays.toString((long[]) val);
                 } else if (val.getClass().getComponentType() == float.class) {
-                    return arrayToString((float[]) val);
+                    return Arrays.toString((float[]) val);
                 } else if (val.getClass().getComponentType() == double.class) {
-                    return arrayToString((double[]) val);
+                    return Arrays.toString((double[]) val);
                 } else if (val.getClass().getComponentType() == boolean.class) {
-                    return arrayToString((boolean[]) val);
+                    return Arrays.toString((boolean[]) val);
                 } else {
-                    return arrayToString((char[]) val);
+                    return Arrays.toString((char[]) val);
                 }
             } else {
                 // 数组
@@ -168,11 +168,11 @@ public final class WindObjectDigestUtils {
                     .map(WindObjectDigestUtils::getValueText)
                     .collect(Collectors.joining(WindConstants.COMMA));
         } else if (val instanceof Map) {
-            // Map 使用 @ 开头
-            return WindConstants.AT + getMapText(((Map<?, ?>) val));
+            // Map 使用 {}
+            return String.format("%s%s%s", WindConstants.DELIM_START, getMapText(((Map<?, ?>) val)), WindConstants.DELIM_END);
         } else {
-            // 对象使用 @ 开头
-            return WindConstants.AT + genSha256Text(val, getObjectFieldNames(val), null, WindConstants.AND);
+            // 对象使用 {}
+            return String.format("%s%s%s", WindConstants.DELIM_START, genSha256Text(val, getObjectFieldNames(val), null, WindConstants.AND), WindConstants.DELIM_END);
         }
     }
 
@@ -202,77 +202,4 @@ public final class WindObjectDigestUtils {
             return accessor.getLong(ChronoField.MILLI_OF_DAY);
         }
     }
-
-    private static String arrayToString(char[] array) {
-        StringBuilder result = new StringBuilder();
-        for (char value : array) {
-            result.append(value).append(WindConstants.COMMA);
-        }
-        result.deleteCharAt(result.length() - 1);
-        return result.toString();
-    }
-
-    private static String arrayToString(byte[] array) {
-        StringBuilder result = new StringBuilder();
-        for (byte value : array) {
-            result.append(value).append(WindConstants.COMMA);
-        }
-        result.deleteCharAt(result.length() - 1);
-        return result.toString();
-    }
-
-    private static String arrayToString(short[] array) {
-        StringBuilder result = new StringBuilder();
-        for (short value : array) {
-            result.append(value).append(WindConstants.COMMA);
-        }
-        result.deleteCharAt(result.length() - 1);
-        return result.toString();
-    }
-
-    private static String arrayToString(int[] array) {
-        StringBuilder result = new StringBuilder();
-        for (int value : array) {
-            result.append(value).append(WindConstants.COMMA);
-        }
-        result.deleteCharAt(result.length() - 1);
-        return result.toString();
-    }
-
-    private static String arrayToString(long[] array) {
-        StringBuilder result = new StringBuilder();
-        for (long value : array) {
-            result.append(value).append(WindConstants.COMMA);
-        }
-        result.deleteCharAt(result.length() - 1);
-        return result.toString();
-    }
-
-    private static String arrayToString(float[] array) {
-        StringBuilder result = new StringBuilder();
-        for (float value : array) {
-            result.append(value).append(WindConstants.COMMA);
-        }
-        result.deleteCharAt(result.length() - 1);
-        return result.toString();
-    }
-
-    private static String arrayToString(double[] array) {
-        StringBuilder result = new StringBuilder();
-        for (double value : array) {
-            result.append(value).append(WindConstants.COMMA);
-        }
-        result.deleteCharAt(result.length() - 1);
-        return result.toString();
-    }
-
-    private static String arrayToString(boolean[] array) {
-        StringBuilder result = new StringBuilder();
-        for (boolean value : array) {
-            result.append(value).append(WindConstants.COMMA);
-        }
-        result.deleteCharAt(result.length() - 1);
-        return result.toString();
-    }
-
 }

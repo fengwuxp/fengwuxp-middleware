@@ -14,7 +14,6 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
@@ -23,7 +22,6 @@ import javax.validation.constraints.NotNull;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -36,8 +34,6 @@ import java.util.Objects;
 public abstract class AbstractI18nResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
     private static final Field[] EMPTY = new Field[0];
-
-    private final Map<Class<?>, Field[]> i18nFields = new ConcurrentReferenceHashMap<>();
 
     private final Locale defaultLocal;
 
@@ -86,7 +82,7 @@ public abstract class AbstractI18nResponseBodyAdvice implements ResponseBodyAdvi
         if (val == null) {
             return;
         }
-        Field[] fields = i18nFields.computeIfAbsent(val.getClass(), this::parseI18nFields);
+        Field[] fields = this.parseI18nFields(val.getClass());
         for (Field field : fields) {
             try {
                 if (field.getType() == String.class) {
@@ -120,12 +116,10 @@ public abstract class AbstractI18nResponseBodyAdvice implements ResponseBodyAdvi
     }
 
     private Field[] parseI18nFields(Class<?> clazz) {
-        if (!(clazz.isAnnotationPresent(I18n.class) || clazz.getSuperclass().isAnnotationPresent(I18n.class))) {
-            return EMPTY;
+        if ((clazz.isAnnotationPresent(I18n.class) || clazz.getSuperclass().isAnnotationPresent(I18n.class))) {
+            return WindReflectUtils.findFields(clazz, I18n.class);
         }
-        Field[] fields = WindReflectUtils.findFields(clazz, I18n.class);
-        Field.setAccessible(fields, true);
-        return fields;
+        return EMPTY;
     }
 
 }

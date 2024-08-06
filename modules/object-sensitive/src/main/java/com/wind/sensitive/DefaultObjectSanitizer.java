@@ -5,12 +5,10 @@ import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.common.util.WindReflectUtils;
 import com.wind.sensitive.annotation.Sensitive;
 import com.wind.sensitive.sanitizer.SanitizerFactory;
-import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * 默认对象脱敏器
@@ -19,8 +17,6 @@ import java.util.Map;
  * @date 2024-08-02 14:33
  **/
 public class DefaultObjectSanitizer implements ObjectSanitizer<Object, Object> {
-
-    private final Map<Class<?>, Field[]> sensitiveFields = new ConcurrentReferenceHashMap<>();
 
     @Override
     public Object sanitize(Object value, Collection<String> keys) {
@@ -52,11 +48,7 @@ public class DefaultObjectSanitizer implements ObjectSanitizer<Object, Object> {
     }
 
     private Field[] getSensitiveFields(Class<?> clazz) {
-        return sensitiveFields.computeIfAbsent(clazz, k -> {
-            Field[] fields = WindReflectUtils.findFields(k, Sensitive.class);
-            Field.setAccessible(fields, true);
-            return fields;
-        });
+        return WindReflectUtils.findFields(clazz, Sensitive.class);
     }
 
     private void sanitizeField(Field field, Object val) throws Exception {

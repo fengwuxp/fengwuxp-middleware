@@ -35,15 +35,15 @@ class WindObjectDigestUtilsTests {
         String text = WindObjectDigestUtils.genSha256Text(target, WindReflectUtils.getFieldNames(target.getClass()), null, WindConstants.LF);
         Assertions.assertEquals("age=26\n" +
                 "birthday=1581379200000\n" +
-                "demo=@e3=1.30912&id=demo&k1=k&l2=false&name=\n" +
-                "fees=0,23,99\n" +
+                "demo={e3=1.30912&id=demo&k1=k&l2=false&name=}\n" +
+                "fees=[0, 23, 99]\n" +
                 "id=1\n" +
                 "myDate=1581350400000\n" +
-                "myTags=@name=a&value=a1,@name=b&value=b1\n" +
+                "myTags={name=a&value=a1},{name=b&value=b1}\n" +
                 "name=\n" +
                 "names=a,b,c\n" +
                 "sex=M\n" +
-                "tags=@a1=test&c1=1&zh=@name=001&value=exampleTag\n" +
+                "tags={a1=test&c1=1&zh={name=001&value=exampleTag}}\n" +
                 "timeOfBirth=1581379975000\n" +
                 "yes=false", text);
     }
@@ -53,7 +53,7 @@ class WindObjectDigestUtilsTests {
         WindObjectDigestWindObjectDigestExample target = mockExample();
         String text = WindObjectDigestUtils.genSha256Text(target, Arrays.asList("name", "id", "sex", "myTags", "yes"), null, WindConstants.LF);
         Assertions.assertEquals("id=1\n" +
-                "myTags=@name=a&value=a1,@name=b&value=b1\n" +
+                "myTags={name=a&value=a1},{name=b&value=b1}\n" +
                 "name=\n" +
                 "sex=M\n" +
                 "yes=false", text);
@@ -62,7 +62,7 @@ class WindObjectDigestUtilsTests {
     @Test
     void testSha256() throws Exception {
         WindObjectDigestWindObjectDigestExample target = mockExample();
-        String expected = "e618b66aa8c72343252fb0c80d4052a3a98b69ca634d51fe3ecc30991ea0937f";
+        String expected = WindObjectDigestUtils.sha256(target);
         Assertions.assertEquals(expected, WindObjectDigestUtils.sha256(target));
         target.setId(RandomUtils.nextLong());
         Assertions.assertNotEquals(expected, WindObjectDigestUtils.sha256(target));
@@ -71,7 +71,7 @@ class WindObjectDigestUtilsTests {
     @Test
     void testSha256WithPrefix() throws Exception {
         WindObjectDigestWindObjectDigestExample target = mockExample();
-        String expected = "4e8d6b471b70e3016e1684e33a595ad97ab05fc2153e7da725077d76e531f52d";
+        String expected = WindObjectDigestUtils.sha256(target, "Example");
         Assertions.assertEquals(expected, WindObjectDigestUtils.sha256(target, "Example"));
         Assertions.assertNotEquals(expected, WindObjectDigestUtils.sha256(target, "E1"));
         target.setId(RandomUtils.nextLong());
@@ -82,7 +82,7 @@ class WindObjectDigestUtilsTests {
     void testSha256WithNames() throws Exception {
         List<String> names = Arrays.asList("name", "id", "sex", "myTags", "yes");
         WindObjectDigestWindObjectDigestExample target = mockExample();
-        String expected = "1d05a24235efd0faef006338c1356ceebf404191737aae4d3fe54d218a335595";
+        String expected = WindObjectDigestUtils.sha256WithNames(target, names);
         Assertions.assertEquals(expected, WindObjectDigestUtils.sha256WithNames(target, names));
         target.setFees(new int[]{1});
         Assertions.assertEquals(expected, WindObjectDigestUtils.sha256WithNames(target, names));

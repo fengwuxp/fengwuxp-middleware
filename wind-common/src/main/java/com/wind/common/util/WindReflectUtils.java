@@ -1,6 +1,7 @@
 package com.wind.common.util;
 
 import com.wind.common.exception.AssertUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -10,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,6 +25,8 @@ public final class WindReflectUtils {
 
     private static final Field[] EMPTY = new Field[0];
 
+    private static final Map<Class<?>, List<Field>> FIELDS = new ConcurrentReferenceHashMap<>();
+
     /**
      * 根据注解查找 {@link Field}，会递归查找超类
      *
@@ -33,10 +37,12 @@ public final class WindReflectUtils {
     public static Field[] findFields(Class<?> clazz, Class<? extends Annotation> annotationClass) {
         AssertUtils.notNull(clazz, "argument clazz  must not null");
         AssertUtils.notNull(annotationClass, "argument annotationClass  must not null");
-        return getClazzFields(clazz)
+        Field[] result = FIELDS.computeIfAbsent(clazz, WindReflectUtils::getClazzFields)
                 .stream()
                 .filter(field -> field.isAnnotationPresent(annotationClass))
                 .toArray(Field[]::new);
+        Field.setAccessible(result, true);
+        return result;
     }
 
     /**
@@ -50,11 +56,13 @@ public final class WindReflectUtils {
         AssertUtils.notNull(clazz, "argument clazz  must not null");
         AssertUtils.notEmpty(fieldNames, "argument fieldNames  must not empty");
         Set<String> names = new HashSet<>(fieldNames);
-        return getClazzFields(clazz)
+        Field[] result = FIELDS.computeIfAbsent(clazz, WindReflectUtils::getClazzFields)
                 .stream()
                 .filter(field -> names.contains(field.getName()))
                 .distinct()
                 .toArray(Field[]::new);
+        Field.setAccessible(result, true);
+        return result;
     }
 
     /**
@@ -65,7 +73,7 @@ public final class WindReflectUtils {
      */
     public static List<String> getFieldNames(Class<?> clazz) {
         AssertUtils.notNull(clazz, "argument clazz  must not null");
-        return getClazzFields(clazz)
+        return FIELDS.computeIfAbsent(clazz, WindReflectUtils::getClazzFields)
                 .stream()
                 .map(Field::getName)
                 .collect(Collectors.toList());
