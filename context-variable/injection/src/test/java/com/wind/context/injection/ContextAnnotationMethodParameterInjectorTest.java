@@ -14,9 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 class ContextAnnotationMethodParameterInjectorTest {
-
 
     private final ContextAnnotationMethodParameterInjector injector = new ContextAnnotationMethodParameterInjector(() -> ImmutableMap.of(
             ContextVariableNames.USER_ID, 1L,
@@ -40,7 +41,7 @@ class ContextAnnotationMethodParameterInjectorTest {
         Assertions.assertEquals("test", request.example);
         Assertions.assertEquals(23, request.age);
         Assertions.assertEquals(true, request.falg);
-        Assertions.assertEquals("example2", request.example2);
+        Assertions.assertNull(request.example2);
     }
 
     @Test
@@ -52,6 +53,26 @@ class ContextAnnotationMethodParameterInjectorTest {
         Assertions.assertEquals("test", arguments[1]);
     }
 
+    @Test
+    void testInjectParameterWithArray() {
+        Method method = ReflectionUtils.findMethod(Example.class, "exampleArray", ExampleRequest[].class);
+        ExampleRequest request = new ExampleRequest();
+        Object[] arguments = {new Object[]{request}};
+        injector.inject(method, arguments);
+        Assertions.assertEquals(1L, request.id);
+    }
+
+    @Test
+    void testInjectParameterWithCollection() {
+        List<ExampleRequest> requests = new ArrayList<>();
+        Method method = ReflectionUtils.findMethod(Example.class, "exampleCollection", List.class);
+        ExampleRequest request = new ExampleRequest();
+        requests.add(request);
+        Object[] arguments = {requests};
+        injector.inject(method, arguments);
+        Assertions.assertEquals(1L, request.id);
+    }
+
     static class Example {
 
         public void exampleObject(ExampleRequest request) {
@@ -61,6 +82,15 @@ class ContextAnnotationMethodParameterInjectorTest {
         public void exampleParameter(@ContextUserId Long id, @ContextVariable(expression = "#example") String userName) {
 
         }
+
+        public void exampleArray(ExampleRequest[] requests) {
+
+        }
+
+        public void exampleCollection(List<ExampleRequest> requests) {
+
+        }
+
 
         public void exampleRequired(@ContextVariable(expression = "#userName_1") String userName) {
 
@@ -95,6 +125,6 @@ class ContextAnnotationMethodParameterInjectorTest {
         private Boolean falg;
 
         @ContextVariable(name = "example2")
-        private String example2="example2";
+        private String example2 = "example2";
     }
 }

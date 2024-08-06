@@ -1,8 +1,9 @@
 package com.wind.context.injection;
 
-import com.wind.common.WindConstants;
 import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.BaseException;
+import com.wind.common.exception.DefaultExceptionCode;
+import com.wind.common.util.WindReflectUtils;
 import com.wind.context.variable.annotations.ContextVariable;
 import com.wind.script.spring.SpringExpressionEvaluator;
 import lombok.AllArgsConstructor;
@@ -12,22 +13,22 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * 基于{@link ContextVariable}注解标记的方法参数注入者
@@ -38,7 +39,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ContextAnnotationMethodParameterInjector implements MethodParameterInjector {
 
-    private static final ParameterInjectionDescriptor[] EMPTY = new ParameterInjectionDescriptor[0];
+    private static final SimpleParameterInjectionDescriptor[] EMPTY = new SimpleParameterInjectionDescriptor[0];
 
     /**
      * 方法参数注入原信息
@@ -46,7 +47,7 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
      * @key method
      * @value 注入字段的元信息
      */
-    private final Map<Method, ParameterInjectionDescriptor[]> descriptors = new ConcurrentReferenceHashMap<>(1024);
+    private final Map<Method, AbstractInjectionDescriptor[]> descriptors = new ConcurrentReferenceHashMap<>(1024);
 
     private final ContextVariableProvider contextVariableProvider;
 
@@ -68,54 +69,62 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
      */
     @Override
     public void inject(Method method, Object[] arguments) {
-        ParameterInjectionDescriptor[] injectionDescriptors = descriptors.computeIfAbsent(method, this::parseParameterInjectionDescriptors);
+        AbstractInjectionDescriptor[] injectionDescriptors = descriptors.computeIfAbsent(method, this::parseParameterInjectionDescriptors);
         if (ObjectUtils.isEmpty(injectionDescriptors)) {
             return;
         }
         Map<String, Object> variables = contextVariableProvider.get();
-        for (ParameterInjectionDescriptor descriptor : injectionDescriptors) {
-            Object val = descriptor.evalVariable(variables);
-            if (descriptor.isInjectParameter()) {
-                descriptor.injectParameter(arguments, val);
-            } else {
-                // 注入字段值
-                descriptor.injectFieldValue(arguments[descriptor.parameterIndex], val);
-            }
+        for (AbstractInjectionDescriptor descriptor : injectionDescriptors) {
+            arguments[descriptor.getParameterIndex()] = descriptor.getArg(arguments[descriptor.getParameterIndex()], variables);
         }
     }
 
-    private ParameterInjectionDescriptor[] parseParameterInjectionDescriptors(Method method) {
-        List<ParameterInjectionDescriptor> result = new ArrayList<>(4);
+    private AbstractInjectionDescriptor[] parseParameterInjectionDescriptors(Method method) {
+        List<AbstractInjectionDescriptor> result = new ArrayList<>(4);
         Parameter[] parameters = method.getParameters();
         Class<?>[] parameterTypes = method.getParameterTypes();
         for (int i = 0; i < parameters.length; i++) {
-            if (isSimpleType(parameterTypes[i])) {
-                ContextVariable annotation = AnnotatedElementUtils.getMergedAnnotation(parameters[i], ContextVariable.class);
+            Class<?> parameterType = parameterTypes[i];
+            Parameter parameter = parameters[i];
+            if (isSimpleType(parameterType)) {
+                ContextVariable annotation = AnnotatedElementUtils.getMergedAnnotation(parameter, ContextVariable.class);
                 if (annotation != null) {
-                    result.add(new ParameterInjectionDescriptor(annotation, parameterTypes[i], parameters[i], null, i));
+                    result.add(new SimpleParameterInjectionDescriptor(annotation, parameter, i));
+                }
+            } else if (parameterType.isArray()) {
+                // 数组
+                ObjectArrayParameterInjectionDescriptor descriptor = new ObjectArrayParameterInjectionDescriptor(parameterType.getComponentType(), parameter, i);
+                if (!descriptor.getFieldAnnotations().isEmpty()) {
+                    result.add(descriptor);
+                }
+
+            } else if (isCollection(parameterType)) {
+                // 集合对象
+                Type genericType = parameter.getParameterizedType();
+                if (genericType instanceof ParameterizedType) {
+                    Type[] actualTypeArguments = ((ParameterizedType) genericType).getActualTypeArguments();
+                    AssertUtils.isTrue(actualTypeArguments.length >= 1, String.format("method = %s, parameter = %s actualTypeArguments size le 1", method.getName(), parameter.getName()));
+                    Class<?> actualTypeArgument = (Class<?>) actualTypeArguments[0];
+                    ObjectCollectionParameterInjectionDescriptor descriptor = new ObjectCollectionParameterInjectionDescriptor(actualTypeArgument, parameter, i);
+                    if (!descriptor.getFieldAnnotations().isEmpty()) {
+                        result.add(descriptor);
+                    }
+                } else {
+                    throw new BaseException(DefaultExceptionCode.COMMON_ERROR, String.format("find method = %s, parameter = %s parameterizedType error", method.getName(), parameter.getName()));
                 }
             } else {
-                if (isAllowInject(parameterTypes[i])) {
-                    result.addAll(parseParameterInjectionDescriptors(parameters[i], parameterTypes[i], i));
+                if (isAllowInject(parameterType)) {
+                    ObjectParameterInjectionDescriptor descriptor = new ObjectParameterInjectionDescriptor(parameterType, parameter, i);
+                    if (!descriptor.getFieldAnnotations().isEmpty()) {
+                        result.add(descriptor);
+                    }
                 }
             }
         }
 
-        return result.isEmpty() ? EMPTY : result.toArray(new ParameterInjectionDescriptor[0]);
+        return result.isEmpty() ? EMPTY : result.toArray(new AbstractInjectionDescriptor[0]);
     }
 
-    private List<ParameterInjectionDescriptor> parseParameterInjectionDescriptors(Parameter parameter, Class<?> parameterType, final int index) {
-        return getClassFields(parameterType).stream()
-                .map(field -> {
-                    ContextVariable annotation = AnnotatedElementUtils.getMergedAnnotation(field, ContextVariable.class);
-                    if (annotation == null) {
-                        return null;
-                    }
-                    return new ParameterInjectionDescriptor(annotation, parameterType, parameter, field, index);
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
 
     private boolean isSimpleType(Class<?> clazz) {
         return ClassUtils.isPrimitiveOrWrapper(clazz) ||
@@ -123,134 +132,168 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
                 clazz.isEnum();
     }
 
-    /**
-     * 获取一个类所有的 Field，包括私有的Field，并且会递归的获取超类的字段
-     *
-     * @param clazz 类类型
-     * @return fields
-     */
-    private List<Field> getClassFields(Class<?> clazz) {
-        List<Field> fields = new ArrayList<>(16);
-        fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
-        Class<?> superclass = clazz.getSuperclass();
-        if (!Object.class.equals(superclass)) {
-            fields.addAll(this.getClassFields(superclass));
-        }
-        return fields;
+    private boolean isCollection(Class<?> clazz) {
+        return ClassUtils.isAssignable(Collection.class, clazz);
     }
 
     private boolean isAllowInject(Class<?> clazz) {
         return injectMatcher.test(clazz);
     }
 
-    /**
-     * 参数注入描述
-     */
     @Getter
-    private static final class ParameterInjectionDescriptor {
+    @AllArgsConstructor
+    static abstract class AbstractInjectionDescriptor {
 
-        private final String variableName;
-
-        private final String expression;
-
-        private final boolean override;
-
+        /**
+         * 参数
+         */
         private final Parameter parameter;
-
-        /**
-         * 注入字段或参数的类型
-         */
-        private final Class<?> type;
-
-        /**
-         * 注入字段的 set 方法
-         */
-        private final Method setterMethod;
-
-        /**
-         * 取值方法
-         */
-        private final Method getterMethod;
-
-        private final String fieldName;
 
         /**
          * 在方法参数中的索引
          */
         private final int parameterIndex;
 
-        public ParameterInjectionDescriptor(ContextVariable variable, Class<?> type, Parameter parameter, @Nullable Field field, int parameterIndex) {
-            this.variableName = variable.name();
-            this.expression = variable.expression();
-            this.override = variable.override();
-            this.parameter = parameter;
-            this.type = type;
-            this.setterMethod = field == null ? null : findSetterMethod(field);
-            this.getterMethod = field == null ? null : findGetterMethod(field);
-            this.fieldName = field == null ? parameter.getName() : field.getDeclaringClass().getName() + WindConstants.SHARP + field.getName();
-            this.parameterIndex = parameterIndex;
+        /**
+         * 参数注入
+         *
+         * @param value     原始参数
+         * @param variables 上下文变量
+         * @return 进过注入处理或计算的参数
+         */
+        protected abstract Object getArg(@Nullable Object value, Map<String, Object> variables);
+
+    }
+
+    /**
+     * 简单的参数类型
+     */
+    private static final class SimpleParameterInjectionDescriptor extends AbstractInjectionDescriptor {
+
+        private final ContextVariable annotation;
+
+        public SimpleParameterInjectionDescriptor(ContextVariable annotation, Parameter parameter, int parameterIndex) {
+            super(parameter, parameterIndex);
+            this.annotation = annotation;
         }
 
-        boolean isInjectParameter() {
-            return setterMethod == null;
-        }
-
-        void injectParameter(Object[] arguments, Object value) {
-            injectWithOverride(val -> arguments[parameterIndex] = val,
-                    value,
-                    () -> arguments[parameterIndex]);
-        }
-
-        void injectFieldValue(Object owner, Object value) {
-            injectWithOverride(val -> ReflectionUtils.invokeMethod(setterMethod, owner, val),
-                    value,
-                    () -> ReflectionUtils.invokeMethod(getterMethod, owner));
-        }
-
-        private void injectWithOverride(Consumer<Object> setter, Object value, Supplier<Object> getter) {
-            if (value == null) {
-                return;
-            }
-            // 仅在 value 不为空的时候注入
-            if (override) {
-                setter.accept(value);
+        @Override
+        protected Object getArg(Object value, Map<String, Object> variables) {
+            Object result = evalVariable(annotation, variables);
+            if (annotation.override()) {
+                // 强制覆盖
+                return result;
             } else {
-                if (getter.get() == null) {
-                    // 仅在该字段没有值的时候尝试注入
-                    setter.accept(value);
+                // 空则覆盖
+                return value == null ? result : value;
+            }
+        }
+    }
+
+    /**
+     * 对象
+     */
+    @Getter
+    private static class ObjectParameterInjectionDescriptor extends AbstractInjectionDescriptor {
+
+        private final Map<Field, ContextVariable> fieldAnnotations;
+
+        public ObjectParameterInjectionDescriptor(Class<?> clazz, Parameter parameter, int parameterIndex) {
+            super(parameter, parameterIndex);
+            this.fieldAnnotations = this.parseFields(clazz);
+        }
+
+        @Override
+        protected Object getArg(Object value, Map<String, Object> variables) {
+            fieldAnnotations.forEach((field, annotation) -> {
+                injectField(field, annotation, value, variables);
+            });
+            return value;
+        }
+
+        private Map<Field, ContextVariable> parseFields(Class<?> clazz) {
+            Field[] fields = WindReflectUtils.findFields(clazz, WindReflectUtils.getFieldNames(clazz));
+            Map<Field, ContextVariable> result = new HashMap<>();
+            Arrays.stream(fields).forEach(field -> {
+                ContextVariable annotation = AnnotatedElementUtils.getMergedAnnotation(field, ContextVariable.class);
+                if (annotation != null) {
+                    result.put(field, annotation);
                 }
+            });
+            return result;
+        }
+    }
+
+    /**
+     * 对象数组
+     */
+    @Getter
+    private static final class ObjectArrayParameterInjectionDescriptor extends ObjectParameterInjectionDescriptor {
+
+        public ObjectArrayParameterInjectionDescriptor(Class<?> clazz, Parameter parameter, int parameterIndex) {
+            super(clazz, parameter, parameterIndex);
+        }
+
+        @Override
+        protected Object getArg(Object value, Map<String, Object> variables) {
+            Object[] values = (Object[]) value;
+            for (Object v : values) {
+                getFieldAnnotations().forEach((field, annotation) -> {
+                    injectField(field, annotation, v, variables);
+                });
             }
-        }
-
-        Object evalVariable(Map<String, Object> contextVariables) {
-            if (StringUtils.hasLength(variableName)) {
-                return contextVariables.get(variableName);
-            }
-            if (StringUtils.hasLength(expression)) {
-                return SpringExpressionEvaluator.DEFAULT.eval(expression, contextVariables);
-            }
-            throw BaseException.common("invalid annotation tag, name and expression attribute is empty");
-        }
-
-        private Method findGetterMethod(Field field) {
-            String methodName = findFieldMethodName(field.getName(), "get");
-            Method method = ReflectionUtils.findMethod(field.getDeclaringClass(), methodName);
-            AssertUtils.notNull(method, () -> String.format("not find get method, field = %s#%s", field.getDeclaringClass().getName(), field.getName()));
-            return method;
-        }
-
-        private Method findSetterMethod(Field field) {
-            String methodName = findFieldMethodName(field.getName(), "set");
-            Method method = ReflectionUtils.findMethod(field.getDeclaringClass(), methodName, field.getType());
-            AssertUtils.notNull(method, () -> String.format("not find set method, field = %s#%s", field.getDeclaringClass().getName(), field.getName()));
-            return method;
-        }
-
-        private String findFieldMethodName(String fieldName, String action) {
-            String[] chars = fieldName.split(WindConstants.EMPTY);
-            chars[0] = chars[0].toUpperCase();
-            return action + String.join(WindConstants.EMPTY, chars);
+            return values;
         }
 
     }
+
+
+    /**
+     * 集合对象
+     */
+    private static final class ObjectCollectionParameterInjectionDescriptor extends ObjectParameterInjectionDescriptor {
+
+        public ObjectCollectionParameterInjectionDescriptor(Class<?> componentType, Parameter parameter, int parameterIndex) {
+            super(componentType, parameter, parameterIndex);
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        protected Object getArg(Object value, Map<String, Object> variables) {
+            for (Object v : (Collection<Object>) value) {
+                getFieldAnnotations().forEach((field, annotation) -> {
+                    injectField(field, annotation, v, variables);
+                });
+            }
+            return value;
+        }
+    }
+
+    static Object evalVariable(ContextVariable annotation, Map<String, Object> contextVariables) {
+        if (StringUtils.hasLength(annotation.name())) {
+            return contextVariables.get(annotation.name());
+        }
+        if (StringUtils.hasLength(annotation.expression())) {
+            return SpringExpressionEvaluator.DEFAULT.eval(annotation.expression(), contextVariables);
+        }
+        throw BaseException.common("invalid annotation tag, name and expression attribute is empty");
+    }
+
+    static void injectField(Field field, ContextVariable annotation, Object object, Map<String, Object> contextVariables) {
+        try {
+            Object value = evalVariable(annotation, contextVariables);
+            if (annotation.override()) {
+                // 强制覆盖
+                field.set(object, value);
+            } else {
+                if (field.get(object) == null) {
+                    // 空则覆盖
+                    field.set(object, value);
+                }
+            }
+        } catch (IllegalAccessException exception) {
+            throw new BaseException(DefaultExceptionCode.COMMON_ERROR, "inject filed error", exception);
+        }
+    }
+
 }
