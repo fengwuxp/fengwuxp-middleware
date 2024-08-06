@@ -6,6 +6,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 import javax.validation.constraints.NotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,14 +18,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * 反射工具类
+ * 反射工具类，注意不支持静态字段
  *
  * @author wuxp
  * @date 2024-08-02 14:57
  **/
 public final class WindReflectUtils {
-
-    private static final Field[] EMPTY = new Field[0];
 
     private static final Map<Class<?>, List<Field>> FIELDS = new ConcurrentReferenceHashMap<>();
 
@@ -39,7 +38,7 @@ public final class WindReflectUtils {
     public static Field[] findFields(Class<?> clazz, Class<? extends Annotation> annotationClass) {
         AssertUtils.notNull(clazz, "argument clazz  must not null");
         AssertUtils.notNull(annotationClass, "argument annotationClass  must not null");
-        Field[] result = FIELDS.computeIfAbsent(clazz, WindReflectUtils::getClazzFields)
+        Field[] result = getMemberFields(clazz)
                 .stream()
                 .filter(field -> field.isAnnotationPresent(annotationClass))
                 .toArray(Field[]::new);
@@ -59,7 +58,7 @@ public final class WindReflectUtils {
         AssertUtils.notNull(clazz, "argument clazz  must not null");
         AssertUtils.notEmpty(fieldNames, "argument fieldNames  must not empty");
         Set<String> names = new HashSet<>(fieldNames);
-        Field[] result = FIELDS.computeIfAbsent(clazz, WindReflectUtils::getClazzFields)
+        Field[] result = getMemberFields(clazz)
                 .stream()
                 .filter(field -> names.contains(field.getName()))
                 .distinct()
@@ -90,9 +89,23 @@ public final class WindReflectUtils {
      */
     public static List<String> getFieldNames(Class<?> clazz) {
         AssertUtils.notNull(clazz, "argument clazz  must not null");
-        return FIELDS.computeIfAbsent(clazz, WindReflectUtils::getClazzFields)
+        return getMemberFields(clazz)
                 .stream()
                 .map(Field::getName)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 获取成员变量
+     *
+     * @param clazz 类类型
+     * @return 字段列表
+     */
+    private static List<Field> getMemberFields(Class<?> clazz) {
+        return FIELDS.computeIfAbsent(clazz, WindReflectUtils::getClazzFields)
+                .stream()
+                // 过滤静态变量
+                .filter(field -> !Modifier.isStatic(field.getModifiers()))
                 .collect(Collectors.toList());
     }
 
