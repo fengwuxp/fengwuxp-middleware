@@ -3,6 +3,7 @@ package com.wind.mask;
 import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
+import com.wind.common.util.WindDeepCopyUtils;
 import com.wind.common.util.WindReflectUtils;
 import com.wind.mask.annotation.Sensitive;
 import com.wind.mask.masker.MaskerFactory;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -40,27 +42,52 @@ public final class ObjectDataMaskingUtils {
     /**
      * 对象脱敏
      *
-     * @param target 需要脱敏的对象
+     * @param target     需要脱敏的对象
+     * @param deepCopyer 深拷贝函数
      * @return 脱敏后的对象
      */
     @Nullable
-    public static <T> T mask(@Nullable T target) {
+    public static <T> T mask(@Nullable T target, Function<T, T> deepCopyer) {
         if (target == null) {
             return null;
         }
+        T result = deepCopyer.apply(target);
         Class<?> clazz = target.getClass();
         if (requiredSanitize(clazz)) {
             Collection<ObjectDesensitizationRule> sensitiveFields = getSensitiveFields(clazz);
             for (ObjectDesensitizationRule rule : sensitiveFields) {
                 try {
-                    sanitizeField(rule, target);
+                    sanitizeField(rule, result);
                 } catch (Exception exception) {
                     throw new BaseException(DefaultExceptionCode.COMMON_ERROR, "object sanitize error", exception);
                 }
             }
         }
-        return target;
+        return result;
     }
+
+    /**
+     * 使用源对象脱敏
+     * 注意：该方法会改变源对象
+     *
+     * @param target 需要脱敏的对象
+     * @return 脱敏后的对象
+     */
+    public static <T> T mask(@Nullable T target) {
+        return ObjectDataMaskingUtils.mask(target, o -> o);
+    }
+
+    /**
+     * 使用原对象脱敏
+     * 注意: 该方法会 deep copy 原对象，如果对象中某些数据类型的构造方法不可见将导致 copy 失败
+     *
+     * @param target 需要脱敏的对象
+     * @return 脱敏后的对象
+     */
+    public static <T> T maskWithDeepCopy(@Nullable T target) {
+        return ObjectDataMaskingUtils.mask(target, WindDeepCopyUtils::copy);
+    }
+
 
     /**
      * 是否需要脱敏

@@ -192,7 +192,7 @@ class ObjectMaskPrinterTests {
         Map<String, String> item = new HashMap<>();
         item.put("ak", "0001");
         values.add(item);
-        sensitiveMaps.put("data", ImmutableMap.of("values", values));
+        sensitiveMaps.put("data", new HashMap<>(ImmutableMap.of("values", values)));
         return sensitiveMaps;
     }
 

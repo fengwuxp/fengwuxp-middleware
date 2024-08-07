@@ -54,12 +54,14 @@ class ObjectDataMaskingUtilsTests {
 
     @Test
     void testMask2() {
-        DefaultObjectSanitizerDemo2 result2 = ObjectDataMaskingUtils.mask(mockDemo2());
+        DefaultObjectSanitizerDemo2 target = mockDemo2();
+        DefaultObjectSanitizerDemo2 result2 = ObjectDataMaskingUtils.maskWithDeepCopy(target);
         Assertions.assertNotNull(result2);
+        Assertions.assertTrue(result2.getSensitiveText2().contains("***"));
         Assertions.assertTrue(result2.getSensitiveText2().contains("***"));
         // clear sensitive rules
         ObjectDataMaskingUtils.clearClassRules(DefaultObjectSanitizerDemo2.class);
-        result2 = ObjectDataMaskingUtils.mask(mockDemo2());
+        result2 = ObjectDataMaskingUtils.maskWithDeepCopy(target);
         Assertions.assertNotNull(result2);
         Assertions.assertFalse(result2.getSensitiveText2().contains("***"));
     }
