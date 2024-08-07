@@ -109,13 +109,13 @@ public final class WindObjectDigestUtils {
         for (String name : sortedNames) {
             Field field = fieldMaps.get(name);
             AssertUtils.notNull(field, String.format("field name = %s not found", name));
-            Object value = null;
             try {
-                value = field.get(target);
+                result.append(name).append(WindConstants.EQ)
+                        .append(getValueText(field.get(target)))
+                        .append(joiner);
             } catch (IllegalAccessException exception) {
                 throw new BaseException(DefaultExceptionCode.COMMON_ERROR, String.format("get object value error, name = %s", name), exception);
             }
-            result.append(name).append(WindConstants.EQ).append(getValueText(value)).append(joiner);
         }
         result.deleteCharAt(result.length() - 1);
         return result.toString();
@@ -181,9 +181,7 @@ public final class WindObjectDigestUtils {
         Map<Object, Object> sortedKeyParams = new TreeMap<>(map);
         return sortedKeyParams.entrySet()
                 .stream()
-                .map(entry -> {
-                    return entry.getKey() + WindConstants.EQ + getValueText(entry.getValue());
-                })
+                .map(entry -> entry.getKey() + WindConstants.EQ + getValueText(entry.getValue()))
                 .filter(StringUtils::hasText)
                 .collect(Collectors.joining(WindConstants.AND));
     }
