@@ -11,7 +11,6 @@ import lombok.ToString;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -25,7 +24,6 @@ import java.util.Map;
  * @author wuxp
  * @date 2024-08-05 16:41
  **/
-@Disabled
 class WindObjectDigestUtilsTests {
 
 
