@@ -40,7 +40,7 @@ public class MaskRule {
     /**
      * 脱敏器
      */
-    private final ObjectMasker<?, ?> sanitizer;
+    private final ObjectMasker sanitizer;
 
     /**
      * 引用全局的 {@link ObjectMasker} 实现
@@ -49,7 +49,7 @@ public class MaskRule {
     private final Class<? extends ObjectMasker> globalSanitizerType;
 
     @SuppressWarnings("rawtypes")
-    public MaskRule(String fieldName, Collection<String> keys, ObjectMasker<?, ?> sanitizer,
+    public MaskRule(String fieldName, Collection<String> keys, ObjectMasker sanitizer,
                     Class<? extends ObjectMasker> globalSanitizerType) {
         this.fieldName = fieldName;
         this.keys = new HashSet<>(keys);
@@ -68,7 +68,7 @@ public class MaskRule {
      * @param sanitizer 自定义的脱敏器
      * @param keys      Map 类型字段的 Keys
      */
-    public static MaskRule mark(String fieldName, ObjectMasker<?, ?> sanitizer, String... keys) {
+    public static MaskRule mark(String fieldName, ObjectMasker sanitizer, String... keys) {
         AssertUtils.notNull(sanitizer, "argument sanitizer must not null");
         return new MaskRule(fieldName, keys == null ? Collections.emptyList() : Arrays.asList(keys), sanitizer, null);
     }

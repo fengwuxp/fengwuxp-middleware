@@ -18,7 +18,9 @@ import java.util.Map;
  * @author wuxp
  * @date 2024-08-02 15:18
  **/
-class ObjectDataMaskingUtilsTests {
+class ObjectDataMaskerTests {
+
+    private final ObjectDataMasker maker = new ObjectDataMasker();
 
     private DefaultObjectSanitizerDemo1 demo1;
 
@@ -28,26 +30,23 @@ class ObjectDataMaskingUtilsTests {
         demo1.setSensitiveMaps(ObjectMaskPrinterTests.buildSensitiveMaps());
         demo1.setSensitiveText(JSON.toJSONString(ObjectMaskPrinterTests.buildSensitiveMaps()));
 
+        maker.registerRule(DefaultObjectSanitizerDemo2.class,
+                MaskRule.mark(DefaultObjectSanitizerDemo2.Fields.sensitiveMaps2, Collections.singletonList("$.data.values[0].ak"), MapObjectMasker.class));
 
-        ObjectDataMaskingUtils.registerRule(DefaultObjectSanitizerDemo2.class,
-                DefaultObjectSanitizerDemo2.Fields.sensitiveMaps2,
-                Collections.singletonList("$.data.values[0].ak"),
-                MapObjectMasker.class);
-
-        ObjectDataMaskingUtils.registerRule(DefaultObjectSanitizerDemo2.class,
+        maker.registerRule(DefaultObjectSanitizerDemo2.class,
                 MaskRule.mark(DefaultObjectSanitizerDemo2.Fields.sensitiveText2, Arrays.asList("$.data.values[0].ak", "$.data.ak"), JsonStringMasker.class)
         );
     }
 
     @Test
     void testRequiredMask() {
-        Assertions.assertTrue(ObjectDataMaskingUtils.requiredSanitize(DefaultObjectSanitizerDemo1.class));
-        Assertions.assertTrue(ObjectDataMaskingUtils.requiredSanitize(DefaultObjectSanitizerDemo2.class));
+        Assertions.assertTrue(maker.requiredSanitize(DefaultObjectSanitizerDemo1.class));
+        Assertions.assertTrue(maker.requiredSanitize(DefaultObjectSanitizerDemo2.class));
     }
 
     @Test
     void testMask() {
-        DefaultObjectSanitizerDemo1 result = ObjectDataMaskingUtils.mask(demo1);
+        DefaultObjectSanitizerDemo1 result = maker.mask(demo1);
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.getSensitiveText().contains("***"));
     }
@@ -55,15 +54,21 @@ class ObjectDataMaskingUtilsTests {
     @Test
     void testMask2() {
         DefaultObjectSanitizerDemo2 target = mockDemo2();
-        DefaultObjectSanitizerDemo2 result2 = ObjectDataMaskingUtils.maskWithDeepCopy(target);
+        DefaultObjectSanitizerDemo2 result2 = maker.maskWithDeepCopy(target);
         Assertions.assertNotNull(result2);
-        Assertions.assertTrue(result2.getSensitiveText2().contains("***"));
+        Assertions.assertFalse(target.getSensitiveText2().contains("***"));
         Assertions.assertTrue(result2.getSensitiveText2().contains("***"));
         // clear sensitive rules
-        ObjectDataMaskingUtils.clearClassRules(DefaultObjectSanitizerDemo2.class);
-        result2 = ObjectDataMaskingUtils.maskWithDeepCopy(target);
+        maker.clearRules(DefaultObjectSanitizerDemo2.class);
+        result2 = maker.maskWithDeepCopy(target);
         Assertions.assertNotNull(result2);
         Assertions.assertFalse(result2.getSensitiveText2().contains("***"));
+    }
+
+    @Test
+    void testMask3() {
+        Long result = maker.maskWithDeepCopy(1L);
+        Assertions.assertEquals(1L, result);
     }
 
     private DefaultObjectSanitizerDemo2 mockDemo2() {

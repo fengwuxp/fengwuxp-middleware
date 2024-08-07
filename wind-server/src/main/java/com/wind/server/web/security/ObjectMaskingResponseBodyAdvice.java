@@ -1,7 +1,7 @@
 package com.wind.server.web.security;
 
 import com.wind.common.query.supports.Pagination;
-import com.wind.mask.ObjectDataMaskingUtils;
+import com.wind.mask.ObjectDataMasker;
 import com.wind.server.web.supports.ApiResp;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -32,10 +32,12 @@ import static com.wind.common.WindConstants.WIND_SERVER_OBJECT_MASK_ADVICE;
 @RestControllerAdvice()
 public class ObjectMaskingResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
+    public final static ObjectDataMasker RESPONSE_BODY_MASKER = new ObjectDataMasker();
+
     @Override
     public boolean supports(MethodParameter returnType, @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
         Class<?> returnTypeClass = Objects.requireNonNull(returnType.getMethod()).getReturnType();
-        return returnTypeClass.isAssignableFrom(ApiResp.class) || ObjectDataMaskingUtils.requiredSanitize(returnTypeClass);
+        return returnTypeClass.isAssignableFrom(ApiResp.class) || RESPONSE_BODY_MASKER.requiredSanitize(returnTypeClass);
     }
 
     @Override
@@ -52,13 +54,13 @@ public class ObjectMaskingResponseBodyAdvice implements ResponseBodyAdvice<Objec
     private void sanitizeReturnValue(Object result) {
         if (result instanceof Pagination) {
             // 分页对象
-            ((Pagination<?>) result).getRecords().forEach(ObjectDataMaskingUtils::mask);
+            ((Pagination<?>) result).getRecords().forEach(RESPONSE_BODY_MASKER::mask);
         } else if (result instanceof Collection) {
             // 集合对象
-            ((Collection<?>) result).forEach(ObjectDataMaskingUtils::mask);
+            ((Collection<?>) result).forEach(RESPONSE_BODY_MASKER::mask);
 
         } else {
-            ObjectDataMaskingUtils.mask(result);
+            RESPONSE_BODY_MASKER.mask(result);
         }
     }
 }

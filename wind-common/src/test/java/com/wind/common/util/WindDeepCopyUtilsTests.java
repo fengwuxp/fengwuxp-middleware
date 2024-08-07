@@ -18,6 +18,12 @@ import java.util.Set;
 class WindDeepCopyUtilsTests {
 
     @Test
+    void testSimpleType() {
+        Integer result = WindDeepCopyUtils.copy(1);
+        Assertions.assertEquals(1, result);
+    }
+
+    @Test
     void testDeepCopyList() {
         List<Integer> result = WindDeepCopyUtils.copy(Arrays.asList(1, 2, 3));
         Assertions.assertEquals(3, result.size());
