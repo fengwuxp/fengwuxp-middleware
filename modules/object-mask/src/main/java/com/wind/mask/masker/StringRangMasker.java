@@ -12,24 +12,24 @@ import java.util.Collection;
  * @author wuxp
  * @date 2024-08-07 17:07
  **/
-public class TextRangMasker implements ObjectMasker<String, String> {
+public class StringRangMasker implements ObjectMasker<String, String> {
 
     private final int begin;
 
     private final int end;
 
-    public TextRangMasker(int begin, int end) {
+    public StringRangMasker(int begin, int end) {
         AssertUtils.isTrue(begin <= end, "argument begin must lte end");
         this.begin = begin;
         this.end = end;
     }
 
-    public static TextRangMasker phone() {
-        return new TextRangMasker(3, 7);
+    public static StringRangMasker phone() {
+        return new StringRangMasker(3, 7);
     }
 
-    public static TextRangMasker secret() {
-        return new TextRangMasker(-1, -1);
+    public static StringRangMasker secret() {
+        return new StringRangMasker(-1, -1);
     }
 
     @Override

@@ -81,6 +81,11 @@ public final class WindReflectUtils {
         return fields[0];
     }
 
+    @NotNull
+    public static Field[] getFields(Class<?> clazz) {
+        return findFields(clazz, getFieldNames(clazz));
+    }
+
     /**
      * 获取类的所有字段名称
      *
@@ -110,10 +115,11 @@ public final class WindReflectUtils {
     }
 
     private static List<Field> getClazzFields(Class<?> clazz) {
-        if (clazz == Object.class) {
+        if (clazz == null || clazz == Object.class) {
             return Collections.emptyList();
         }
-        List<Field> result = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
+        Field[] fields = clazz.getDeclaredFields();
+        List<Field> result = new ArrayList<>(Arrays.asList(fields));
         result.addAll(getClazzFields(clazz.getSuperclass()));
         return result;
     }

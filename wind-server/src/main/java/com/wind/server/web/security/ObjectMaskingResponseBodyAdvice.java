@@ -1,6 +1,7 @@
 package com.wind.server.web.security;
 
 import com.wind.common.query.supports.Pagination;
+import com.wind.mask.MaskRuleRegistry;
 import com.wind.mask.ObjectDataMasker;
 import com.wind.server.web.supports.ApiResp;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,6 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import java.util.Collection;
 import java.util.Objects;
 
 import static com.wind.common.WindConstants.ENABLED_NAME;
@@ -32,12 +32,14 @@ import static com.wind.common.WindConstants.WIND_SERVER_OBJECT_MASK_ADVICE;
 @RestControllerAdvice()
 public class ObjectMaskingResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
-    public final static ObjectDataMasker RESPONSE_BODY_MASKER = new ObjectDataMasker();
+    public final static MaskRuleRegistry RESPONSE_BODY_REGISTRY = new MaskRuleRegistry();
+
+    private final static ObjectDataMasker MASKER = new ObjectDataMasker(RESPONSE_BODY_REGISTRY);
 
     @Override
     public boolean supports(MethodParameter returnType, @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
         Class<?> returnTypeClass = Objects.requireNonNull(returnType.getMethod()).getReturnType();
-        return returnTypeClass.isAssignableFrom(ApiResp.class) || RESPONSE_BODY_MASKER.requiredSanitize(returnTypeClass);
+        return returnTypeClass.isAssignableFrom(ApiResp.class) || RESPONSE_BODY_REGISTRY.requireMask(returnTypeClass);
     }
 
     @Override
@@ -54,13 +56,9 @@ public class ObjectMaskingResponseBodyAdvice implements ResponseBodyAdvice<Objec
     private void sanitizeReturnValue(Object result) {
         if (result instanceof Pagination) {
             // 分页对象
-            ((Pagination<?>) result).getRecords().forEach(RESPONSE_BODY_MASKER::mask);
-        } else if (result instanceof Collection) {
-            // 集合对象
-            ((Collection<?>) result).forEach(RESPONSE_BODY_MASKER::mask);
-
+            MASKER.mask(((Pagination<?>) result).getRecords());
         } else {
-            RESPONSE_BODY_MASKER.mask(result);
+            MASKER.mask(result);
         }
     }
 }

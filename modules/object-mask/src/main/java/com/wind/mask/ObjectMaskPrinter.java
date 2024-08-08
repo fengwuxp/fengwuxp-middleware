@@ -2,6 +2,7 @@ package com.wind.mask;
 
 import com.wind.common.WindConstants;
 import com.wind.common.annotations.VisibleForTesting;
+import com.wind.common.util.WindReflectUtils;
 import com.wind.mask.annotation.Sensitive;
 import com.wind.mask.masker.MaskerFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +12,6 @@ import org.springframework.util.ReflectionUtils;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,10 +20,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import static com.wind.mask.MaskRuleGroup.convertMapFiledRule;
+import static com.wind.mask.MaskRuleGroup.convertMapRules;
 
 /**
  * 对象脱敏打印器
@@ -49,13 +47,10 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
      */
     private static final int MIN_LENGTH = REMOVE_LENGTH + 1;
 
-    private final Map<Class<?>, ObjectMasker<?, ?>> globalSanitizers;
+    private final MaskRuleRegistry rueRegistry;
 
-    private final ObjectMaskRuleRegistry rueRegistry;
-
-    public ObjectMaskPrinter(ObjectMaskRuleRegistry rueRegistry, Collection<ObjectMasker<?, ?>> globalSanitizers) {
+    public ObjectMaskPrinter(MaskRuleRegistry rueRegistry) {
         this.rueRegistry = rueRegistry;
-        this.globalSanitizers = globalSanitizers.stream().collect(Collectors.toMap(Object::getClass, Function.identity()));
     }
 
     @Override
@@ -181,8 +176,7 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
             if (ClassUtils.isPrimitiveOrWrapper(clazz) || clazz.isEnum()) {
                 return true;
             }
-            return ClassUtils.isAssignable(Date.class, clazz) ||
-                    ClassUtils.isAssignable(Temporal.class, clazz);
+            return ClassUtils.isAssignable(Date.class, clazz) || ClassUtils.isAssignable(Temporal.class, clazz);
         }
 
         /**
@@ -207,24 +201,25 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
             }
         }
 
-        private String printMap(Map<?, ?> map, MaskRule fieldRule) {
+        private String printMap(Map<?, ?> map, MaskRule maskRule) {
             if (map.isEmpty()) {
                 return "{}";
             }
             if (isOverPrintSize(map.size())) {
                 return toOverMaxSizeString(map.getClass());
             }
-            MaskRuleGroup group = fieldRule == null ? rueRegistry.getRuleGroup(Map.class) : convertMapFiledRule(
-                    fieldRule);
+            if (isCycleRef(map)) {
+                return "{" + String.format("%s[%s]", CYCLE_REF_FLAG, Integer.toHexString(hashCode())) + "}, ";
+            }
+            MaskRuleGroup group = maskRule == null ? rueRegistry.getRuleGroup(Map.class) : convertMapRules(maskRule);
             StringBuilder result = new StringBuilder();
             result.append('{');
             for (Map.Entry<?, ?> entry : map.entrySet()) {
                 Object key = entry.getKey();
                 result.append(key).append("=");
                 if (key instanceof String) {
-                    ObjectMasker<Object, Object> sanitizer = getSanitizer(group.matches((String) key));
-                    result.append(sanitizer == null ? checkCycleRefAndSanitize(entry.getValue(), fieldRule)
-                            : sanitizer.mask(entry.getValue()));
+                    WindMasker<Object, Object> masker = getMasker(group.matchesWithKey((String) key));
+                    result.append(masker == null ? checkCycleRefAndSanitize(entry.getValue(), maskRule) : masker.mask(entry.getValue()));
                 } else {
                     result.append(mask(entry.getValue()));
                 }
@@ -235,28 +230,30 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
             return result.toString();
         }
 
+        @SuppressWarnings({"unchecked", "rawtypes"})
         private String printObject(Object obj) {
             Class<?> clazz = obj.getClass();
             StringBuilder result = new StringBuilder(obj.getClass().getSimpleName()).append("(");
-            for (Field field : clazz.getDeclaredFields()) {
-                if (Modifier.isStatic(field.getModifiers())) {
-                    continue;
-                }
+            for (Field field : WindReflectUtils.getFields(clazz)) {
                 ReflectionUtils.makeAccessible(field);
                 Object value = ReflectionUtils.getField(field, obj);
-                MaskRule fieldRule = getFieldRuleGroup(field);
-                if (value instanceof Map && MaskRule.EMPTY == fieldRule) {
+                MaskRule rule = getFieldRuleGroup(field);
+                if (isCycleRef(value)) {
+                    result.append(field.getName()).append("=").append(String.format("%s[%s]", CYCLE_REF_FLAG, Integer.toHexString(hashCode()))).append(", ");
+                    continue;
+                }
+                if (value instanceof Map && MaskRule.EMPTY == rule) {
                     // Map 类型字段，未单独设置脱敏规则
-                    result.append(field.getName())
-                            .append("=")
-                            .append(printMap((Map<?, ?>) value, fieldRule))
-                            .append(", ");
+                    result.append(field.getName()).append("=").append(printMap((Map<?, ?>) value, rule)).append(", ");
                 } else {
-                    ObjectMasker<Object, Object> sanitizer = getSanitizer(fieldRule);
-                    result.append(field.getName())
-                            .append("=")
-                            .append(sanitizer == null ? checkCycleRefAndSanitize(value, fieldRule) : sanitizer.mask(value, fieldRule.getKeys()))
-                            .append(", ");
+                    WindMasker<Object, Object> masker = getMasker(rule);
+                    Object val;
+                    if (masker == null) {
+                        val = checkCycleRefAndSanitize(value, rule);
+                    } else {
+                        val = masker instanceof ObjectMasker ? ((ObjectMasker) masker).mask(value, rule.getKeys()) : masker.mask(value);
+                    }
+                    result.append(field.getName()).append("=").append(val).append(", ");
                 }
             }
             deleteLastBlank(result);
@@ -270,9 +267,9 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
             String name = field.getName();
             if (annotation == null) {
                 MaskRuleGroup ruleGroup = rueRegistry.getRuleGroup(field.getDeclaringClass());
-                return ruleGroup == null ? MaskRule.EMPTY : ruleGroup.matches(name);
+                return ruleGroup == null ? MaskRule.EMPTY : ruleGroup.matchesWithName(name);
             }
-            return new MaskRule(name, Arrays.asList(annotation.names()), MaskerFactory.getObjectSanitizer(annotation.sanitizer()), null);
+            return new MaskRule(name, Arrays.asList(annotation.names()), MaskerFactory.getMasker(annotation.masker()));
         }
 
         private String printPrimitiveArray(Object o) {
@@ -304,13 +301,11 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
         }
 
         @SuppressWarnings("unchecked")
-        private ObjectMasker<Object, Object> getSanitizer(MaskRule rule) {
+        private WindMasker<Object, Object> getMasker(MaskRule rule) {
             if (rule == null) {
                 return null;
             }
-            ObjectMasker<?, ?> result = rule.getGlobalSanitizerType() == null ? rule.getSanitizer() : globalSanitizers
-                    .get(rule.getGlobalSanitizerType());
-            return (ObjectMasker<Object, Object>) result;
+            return (WindMasker<Object, Object>) rule.getMasker();
         }
 
         private void deleteLastBlank(StringBuilder builder) {

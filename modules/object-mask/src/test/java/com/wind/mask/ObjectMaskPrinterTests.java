@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,9 +47,9 @@ class ObjectMaskPrinterTests {
     private ObjectMaskPrinter createPrinter() {
         List<MaskRuleGroup> ruleGroups = MaskRuleGroup.builder()
                 .form(Map.class)
-                .mark(ObjectMasker.ASTERISK)
+                .of(ObjectMasker.ASTERISK)
                 .build();
-        return new ObjectMaskPrinter(new ObjectMaskRuleRegistry(ruleGroups), Collections.singletonList(ObjectMasker.ASTERISK));
+        return new ObjectMaskPrinter(new MaskRuleRegistry(ruleGroups));
     }
 
     @Test
@@ -205,10 +204,10 @@ class ObjectMaskPrinterTests {
     }
 
     @Data
-    @Sensitive(names = {"code", "ak"}, sanitizer = ExampleObjectMasker.class)
+    @Sensitive(names = {"code", "ak"}, masker = ExampleObjectMasker.class)
     static class ObjectSanitizePrinterExample {
 
-        @Sensitive(sanitizer = ExampleObjectMasker.class)
+        @Sensitive(masker = ExampleObjectMasker.class)
         private String name;
 
         private String ak;
@@ -225,10 +224,10 @@ class ObjectMaskPrinterTests {
 
         private Map<String, Object> depthObject;
 
-        @Sensitive(names = {"$.data.values[0].ak"}, sanitizer = MapObjectMasker.class)
+        @Sensitive(names = {"$.data.values[0].ak"}, masker = MapObjectMasker.class)
         private Map<String, Object> sensitiveMaps;
 
-        @Sensitive(names = {"$.data.values[0].ak", "$.data.ak"}, sanitizer = JsonStringMasker.class)
+        @Sensitive(names = {"$.data.values[0].ak", "$.data.ak"}, masker = JsonStringMasker.class)
         private String sensitiveText;
     }
 }

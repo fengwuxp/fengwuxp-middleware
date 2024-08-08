@@ -212,9 +212,8 @@ public class ContextAnnotationMethodParameterInjector implements MethodParameter
         }
 
         private Map<Field, ContextVariable> parseFields(Class<?> clazz) {
-            Field[] fields = WindReflectUtils.findFields(clazz, WindReflectUtils.getFieldNames(clazz));
             Map<Field, ContextVariable> result = new HashMap<>();
-            Arrays.stream(fields).forEach(field -> {
+            Arrays.stream(WindReflectUtils.getFields(clazz)).forEach(field -> {
                 ContextVariable annotation = AnnotatedElementUtils.getMergedAnnotation(field, ContextVariable.class);
                 if (annotation != null) {
                     result.put(field, annotation);

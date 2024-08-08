@@ -1,7 +1,5 @@
 package com.wind.mask;
 
-import com.wind.common.WindConstants;
-
 import java.util.Collection;
 import java.util.Collections;
 
@@ -10,12 +8,7 @@ import java.util.Collections;
  *
  * @author wuxp
  */
-public interface ObjectMasker<T, R> {
-
-    /**
-     * 将对象强制以星号的方式打印
-     */
-    ObjectMasker<Object, String> ASTERISK = (value, keys) -> value == null ? WindConstants.NULL : "******";
+public interface ObjectMasker<T, R> extends WindMasker<T, R> {
 
     /**
      * 将一个 java 对象脱敏

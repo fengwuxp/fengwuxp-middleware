@@ -1,8 +1,7 @@
 package com.wind.logging.logback.mask;
 
-import com.wind.mask.MaskRule;
-import com.wind.mask.ObjectMasker;
-import com.wind.mask.masker.TextRangMasker;
+import com.wind.mask.MaskRuleGroup;
+import com.wind.mask.masker.StringRangMasker;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.wind.logging.logback.mask.MaskingMessageConverter.LOG_MASKER;
+import java.util.List;
 
 /**
  * @author wuxp
@@ -24,8 +23,10 @@ class MaskingMessageConverterTests {
 
     @Test
     void testLogin() {
-        LOG_MASKER.registerRule(LogbackMaskUser.class, MaskRule.mark(LogbackMaskUser.Fields.mobilePhone, TextRangMasker.phone()));
-        LOG_MASKER.registerRule(LogbackMaskUser.class, MaskRule.mark(LogbackMaskUser.Fields.password, TextRangMasker.secret()));
+        List<MaskRuleGroup> groups = MaskRuleGroup.builder().form(LogbackMaskUser.class)
+                .of(LogbackMaskUser.Fields.mobilePhone, StringRangMasker.phone())
+                .of(LogbackMaskUser.Fields.password, StringRangMasker.secret())
+                .build();
         LogbackMaskUser user = new LogbackMaskUser();
         String mobilePhone = "18900234567";
         user.setMobilePhone(mobilePhone);

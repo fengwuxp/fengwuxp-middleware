@@ -1,156 +1,129 @@
 package com.wind.mask;
 
-import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
-import com.wind.common.util.WindDeepCopyUtils;
 import com.wind.common.util.WindReflectUtils;
 import com.wind.mask.annotation.Sensitive;
-import com.wind.mask.masker.MaskerFactory;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
- * 数据对象脱敏器，支持通过注解 {@link Sensitive} 或 手动注册 {@link ObjectDataMasker#registerRule(Class, MaskRule)} 脱敏规则的方式
+ * 数据对象脱敏器，支持通过注解 {@link Sensitive} 或 手动注册 {@link MaskRuleRegistry#registerRule(MaskRuleGroup)}} 脱敏规则的方式
  *
  * @author wuxp
- * @date 2024-08-07 16:41
+ * @date 2024-08-08 09:20
  **/
-public class ObjectDataMasker {
+@AllArgsConstructor
+public class ObjectDataMasker implements WindMasker<Object, Object> {
 
-    private final Map<Class<?>, Set<ObjectDataMasker.ObjectDesensitizationRule>> maskFields = new ConcurrentHashMap<>();
+    private final MaskRuleRegistry registry;
 
-    /**
-     * 使用源对象脱敏
-     * 注意：该方法会改变源对象
-     *
-     * @param target 需要脱敏的对象
-     * @return 脱敏后的对象
-     */
-    public <T> T mask(@Nullable T target) {
-        return this.mask(target, o -> o);
+    private Function<Object, Object> objectCopyer;
+
+    public ObjectDataMasker(MaskRuleRegistry registry) {
+        this(registry, o -> o);
     }
 
-    /**
-     * 使用原对象脱敏
-     * 注意: 该方法会 deep copy 原对象，如果对象中某些数据类型的构造方法不可见将导致 copy 失败
-     *
-     * @param target 需要脱敏的对象
-     * @return 脱敏后的对象
-     */
-    public <T> T maskWithDeepCopy(@Nullable T target) {
-        return this.mask(target, WindDeepCopyUtils::copy);
+    @SuppressWarnings({"unchecked"})
+    public <T> T maskAs(Object target) {
+        return (T) mask(target);
     }
 
-    /**
-     * 对象脱敏
-     *
-     * @param target     需要脱敏的对象
-     * @param deepCopyer 深拷贝函数
-     * @return 脱敏后的对象
-     */
-    @Nullable
-    public <T> T mask(@Nullable T target, Function<T, T> deepCopyer) {
+    @Override
+    @SuppressWarnings({"unchecked"})
+    public Object mask(Object target) {
         if (target == null) {
             return null;
         }
-        T result = deepCopyer.apply(target);
         Class<?> clazz = target.getClass();
-        if (requiredSanitize(clazz)) {
-            Collection<ObjectDataMasker.ObjectDesensitizationRule> sensitiveFields = getSensitiveFields(clazz);
-            for (ObjectDataMasker.ObjectDesensitizationRule rule : sensitiveFields) {
+        if (clazz.isArray()) {
+            //  数组
+            return ClassUtils.isPrimitiveArray(clazz) ? target : maskArray((Object[]) target);
+        } else if (ClassUtils.isAssignable(Collection.class, clazz)) {
+            // 集合
+            return maskCollection((Collection<Object>) target);
+        } else if (target instanceof Map) {
+            if (registry.requireMask(Map.class)) {
+                // Map
+                return maskMap((Map<Object, Object>) objectCopyer.apply(target));
+            }
+        } else if (registry.requireMask(clazz)) {
+            return maskObject(objectCopyer.apply(target));
+        }
+        return target;
+    }
+
+    private Object maskObject(Object object) {
+        Class<?> clazz = object.getClass();
+        if (registry.requireMask(clazz)) {
+            for (MaskRule rule : registry.getRuleGroup(clazz).getRules()) {
                 try {
-                    sanitizeField(rule, result);
+                    maskObjectField(rule, object);
                 } catch (Exception exception) {
-                    throw new BaseException(DefaultExceptionCode.COMMON_ERROR, "object sanitize error", exception);
+                    throw new BaseException(DefaultExceptionCode.COMMON_ERROR, "object mask error", exception);
                 }
             }
         }
-        return result;
+        return object;
     }
 
-    /**
-     * 是否需要脱敏
-     *
-     * @param clazz 类类型
-     * @return true 需要
-     */
-    public boolean requiredSanitize(Class<?> clazz) {
-        return (clazz.isAnnotationPresent(Sensitive.class) && WindReflectUtils.findFields(clazz, Sensitive.class).length > 0) || !maskFields.getOrDefault(clazz, Collections.emptySet()).isEmpty();
-    }
-
-    public void registerRule(Class<?> target, MaskRule rule) {
-        AssertUtils.notNull(target, "argument target must not null");
-        AssertUtils.notNull(rule, "argument rule must not empty");
-        Set<ObjectDataMasker.ObjectDesensitizationRule> ruleMetas = maskFields.computeIfAbsent(target, k -> new HashSet<>());
-        ruleMetas.add(new ObjectDataMasker.ObjectDesensitizationRule(WindReflectUtils.findField(target, rule.getFieldName()), rule.getKeys().toArray(new String[0]), rule.getSanitizer()));
-    }
-
-    public void clearRules(Class<?> target) {
-        maskFields.remove(target);
-    }
-
-    public void clearRules(Class<?> target, Collection<String> fileNames) {
-        maskFields.compute(target, (key, rules) -> {
-            if (rules == null) {
-                return null;
-            }
-            return rules.stream().filter(ruleMeta -> !fileNames.contains(ruleMeta.field.getName())).collect(Collectors.toSet());
-        });
-
-    }
-
-    public void clearRules() {
-        maskFields.clear();
-    }
-
-    private Collection<ObjectDataMasker.ObjectDesensitizationRule> getSensitiveFields(Class<?> clazz) {
-        Set<ObjectDataMasker.ObjectDesensitizationRule> ruleMetas = maskFields.getOrDefault(clazz, Collections.emptySet());
-        return ruleMetas.isEmpty() ? findRulesOnAnnotation(clazz) : ruleMetas;
-    }
-
-    private List<ObjectDataMasker.ObjectDesensitizationRule> findRulesOnAnnotation(Class<?> clazz) {
-        return Arrays.stream(WindReflectUtils.findFields(clazz, Sensitive.class)).map(field -> {
-            Sensitive annotation = field.getAnnotation(Sensitive.class);
-            return new ObjectDataMasker.ObjectDesensitizationRule(field, annotation.names(), MaskerFactory.getObjectSanitizer(annotation.sanitizer()));
-        }).collect(Collectors.toList());
-    }
-
-
-    private void sanitizeField(ObjectDataMasker.ObjectDesensitizationRule rule, Object val) throws Exception {
-        Field field = rule.field;
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private void maskObjectField(MaskRule rule, Object val) throws Exception {
+        Field field = WindReflectUtils.findField(val.getClass(), rule.getName());
         Object o = field.get(val);
         if (o == null) {
             return;
         }
-        field.set(val, rule.sanitizer.mask(o, Arrays.asList(rule.names)));
+        WindMasker masker = rule.getMasker();
+        if (masker instanceof ObjectMasker) {
+            field.set(val, ((ObjectMasker) masker).mask(o, rule.getKeys()));
+        } else {
+            field.set(val, masker.mask(o));
+        }
     }
 
+    private Object[] maskArray(Object[] array) {
+        Class<?> componentType = array.getClass().getComponentType();
+        if (registry.requireMask(componentType)) {
+            Object[] result = (Object[]) objectCopyer.apply(array);
+            for (Object v : result) {
+                this.maskObject(v);
+            }
+            return result;
+        }
+        return array;
+    }
 
-    @AllArgsConstructor
-    @Getter
-    private static class ObjectDesensitizationRule {
+    @SuppressWarnings({"unchecked"})
+    private Collection<Object> maskCollection(Collection<Object> objects) {
+        if (objects.isEmpty()) {
+            return objects;
+        }
+        Class<?> elementType = objects.iterator().next().getClass();
+        if (registry.requireMask(elementType)) {
+            Collection<Object> result = (Collection<Object>) objectCopyer.apply(objects);
+            result.forEach(this::maskObject);
+            return result;
+        }
+        return objects;
+    }
 
-        private final Field field;
-
-        private final String[] names;
-
-        /**
-         * 脱敏器
-         */
-        private final ObjectMasker<Object, Object> sanitizer;
+    @SuppressWarnings({"unchecked"})
+    private Map<Object, Object> maskMap(Map<Object, Object> map) {
+        // TODO 优化为增对 json path 支持
+        MaskRuleGroup group = registry.getRuleGroup(Map.class);
+        map.replaceAll((key, value) -> {
+            if (key instanceof String && value instanceof String) {
+                return group.matchesWithKey((String) key).getMasker().mask(value);
+            }
+            return maskAs(value);
+        });
+        return map;
     }
 }

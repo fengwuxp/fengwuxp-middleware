@@ -110,7 +110,7 @@ public class CacheRbacResourceService implements RbacResourceService, Applicatio
         log.debug("begin refresh rbac resource");
         WindLock lock = lockFactory.apply(REFRESH_RBAC_CACHE_LOCK_KEY);
         try {
-            if (lock.tryLock(300, 10 * 1000, TimeUnit.MICROSECONDS)) {
+            if (lock.tryLock(1, 20, TimeUnit.SECONDS)) {
                 try {
                     refreshPermissionCache();
                     refreshRoleCache();
