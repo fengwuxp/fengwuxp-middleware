@@ -1,10 +1,9 @@
 package com.wind.mask.masker;
 
+import com.wind.common.annotations.VisibleForTesting;
 import com.wind.common.exception.AssertUtils;
-import com.wind.mask.ObjectMasker;
+import com.wind.mask.WindMasker;
 import org.springframework.util.StringUtils;
-
-import java.util.Collection;
 
 /**
  * 基于内容范围的文本脱敏器
@@ -12,7 +11,10 @@ import java.util.Collection;
  * @author wuxp
  * @date 2024-08-07 17:07
  **/
-public class StringRangMasker implements ObjectMasker<String, String> {
+public class StringRangMasker implements WindMasker<String, String> {
+
+    @VisibleForTesting
+    static final int MAX_MASK_SIZE = 8;
 
     private final int begin;
 
@@ -33,14 +35,14 @@ public class StringRangMasker implements ObjectMasker<String, String> {
     }
 
     @Override
-    public String mask(String text, Collection<String> keys) {
+    public String mask(String text) {
         if (StringUtils.hasText(text)) {
             int length = text.length();
             if (begin <= -1 || end <= -1) {
                 // 全部脱敏
                 return "******";
             }
-            if (length <= begin || end > length) {
+            if (length <= begin) {
                 // 不需要脱敏
                 return text;
             }
@@ -51,20 +53,25 @@ public class StringRangMasker implements ObjectMasker<String, String> {
 
     private String maskText(String input) {
         // 例：用 '*' 替换除了开头和结尾外的字符
-        if (input.length() <= 2) {
+        int length = input.length();
+        if (length <= 2) {
             // 太短，不需要脱敏
             return input;
         }
         StringBuilder masked = new StringBuilder();
-        masked.append(input, 0, begin);
         // 保留开头字符
-        int distance = end - begin;
-        for (int i = 0; i < distance; i++) {
+        masked.append(input, 0, begin);
+        int distance = Integer.min(end, length) - begin;
+        // 最多只保留 {@link MAX_MASK_SIZE} 位字符串
+        int maskSize = Integer.min(distance, MAX_MASK_SIZE);
+        for (int i = 0; i < maskSize; i++) {
             // TODO 待优化
             masked.append('*');
         }
-        // 保留结尾字符
-        masked.append(input, end, input.length());
+        if (end < length) {
+            // 保留结尾字符
+            masked.append(input, end, length);
+        }
         return masked.toString();
     }
 }
