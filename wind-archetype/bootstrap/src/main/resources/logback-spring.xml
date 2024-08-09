@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <conversionRule conversionWord="msg" converterClass="com.wind.logging.logback.mask.MaskingMessageConverter"/>
     <!-- 从 spring配置中引用   -->
     <springProperty name="APP_NAME" scope="context" source="spring.application.name"/>
     <springProperty name="LOG_FILE_PATH" source="logging.file.path" defaultValue="${user.home}/logs/${APP_NAME}"/>
@@ -7,9 +8,9 @@
     <contextName>${APP_NAME}</contextName>
 
     <!-- 控制台日志-->
-    <property name="CONSOLE_LOG_PATTERN" value="%X{traceId:-} | %clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+    <property name="CONSOLE_LOG_PATTERN" value="%X{traceId:-} | %clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %msg%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
     <!-- 文件日志-->
-    <property name="FILE_LOG_PATTERN" value="%X{traceId:-} | %d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+    <property name="FILE_LOG_PATTERN" value="%X{traceId:-} | %d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %msg%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
     <property name="LOGBACK_ROLLINGPOLICY_MAX_HISTORY" value="30"/>
     <property name="LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP" value="20GB"/>
     <property name="LOGBACK_ROLLINGPOLICY_MAX_FILE_SIZE" value="10MB"/>
@@ -19,6 +20,8 @@
     <!-- see   http://logback.qos.ch/manual/configuration.html -->
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+    <!--  ELK  -->
+    <include resource="com/wind/logging/logback/kafka-appender.xml"/>
     <!-- 解决debug模式下循环发送的问题 -->
     <logger name="org.apache.http.impl.conn.Wire" level="WARN"/>
     <!--为了防止进程退出时，内存中的数据丢失，请加上此选项-->

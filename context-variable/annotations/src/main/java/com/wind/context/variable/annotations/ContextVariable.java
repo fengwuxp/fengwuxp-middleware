@@ -32,7 +32,7 @@ public @interface ContextVariable {
     String expression() default "";
 
     /**
-     * @return 注入时是允许否覆盖原有值
+     * @return 注入时是否覆盖原有值
      */
     boolean override() default true;
 }

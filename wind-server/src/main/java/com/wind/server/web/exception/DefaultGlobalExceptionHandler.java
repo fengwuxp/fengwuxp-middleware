@@ -107,7 +107,7 @@ public class DefaultGlobalExceptionHandler {
     @ExceptionHandler(DuplicateKeyException.class)
     @ResponseBody
     public ApiResp<Void> duplicateKeyException(Exception exception) {
-        log.error("唯一键冲突异常", exception);
+        log.error("唯一键冲突", exception);
         return RestfulApiRespFactory.error(SpringI18nMessageUtils.getMessage(DB_DUPLICATE_KEY_I18N_KEY, "数据已存在"));
     }
 
@@ -127,7 +127,7 @@ public class DefaultGlobalExceptionHandler {
     @ExceptionHandler({BaseException.class})
     @ResponseBody
     public ApiResp<Integer> handleBusinessServiceException(BaseException exception) {
-        log.error("业务异常，code：{}，errorMessage：{}", exception.getTextCode(), exception.getMessage(), exception);
+        log.error("业务异常，code = {}，errorMessage: {}", exception.getTextCode(), exception.getMessage(), exception);
         return RestfulApiRespFactory.withThrowable(exception);
     }
 
@@ -139,7 +139,7 @@ public class DefaultGlobalExceptionHandler {
     @ResponseBody
     public ApiResp<Void> handleException(Exception exception) {
         Throwable throwable = exception;
-        log.error("捕获到异常：{}，errorMessage：{}", exception.getClass().getName(), exception.getMessage(), exception);
+        log.error("捕获到异常: {}，errorMessage: {}", exception.getClass().getName(), exception.getMessage(), exception);
         if (throwable instanceof UndeclaredThrowableException) {
             // 获取真正的异常
             InvocationTargetException invocationTargetException = (InvocationTargetException) ((UndeclaredThrowableException) throwable).getUndeclaredThrowable();

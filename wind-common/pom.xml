@@ -40,6 +40,14 @@
             <groupId>com.wind.middleware</groupId>
             <artifactId>wind-tracer</artifactId>
         </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

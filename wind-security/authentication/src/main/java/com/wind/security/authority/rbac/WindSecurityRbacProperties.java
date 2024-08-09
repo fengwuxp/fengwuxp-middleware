@@ -20,8 +20,11 @@ public class WindSecurityRbacProperties {
 
     /**
      * 开启缓存刷新
+     * 默认：不开启
+     *
+     * @see com.wind.security.core.rbac.RbacResourceChangeEvent
      */
-    private boolean enableRefreshCache = true;
+    private boolean enableRefreshCache = false;
 
     /**
      * 默认的角色值前缀

@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 public final class SentinelFlowLimitUtils {
 
     /**
-     * 消息消费流控
+     * 资源流控
      *
      * @param resource 限流资源
      * @return 完成流控的 {@link Consumer} 实例

@@ -34,7 +34,7 @@
         <module>wind-archetype</module>
         <module>tools</module>
         <module>modules/office</module>
-        <module>modules/object-sensitive</module>
+        <module>modules/object-mask</module>
         <module>modules/payment</module>
         <module>modules/script</module>
         <module>modules/sequence-generate</module>
@@ -44,7 +44,7 @@
     </modules>
 
     <properties>
-        <revision>1.0.12-SNAPSHOT</revision>
+        <revision>1.0.14-SNAPSHOT</revision>
         <!--   占位使用     -->
         <jacoco-coverage-agent/>
         <tests.fork.count/>
@@ -96,6 +96,7 @@
         <springdoc-openapi-ui.version>1.7.0</springdoc-openapi-ui.version>
         <googleauth.version>1.5.0</googleauth.version>
         <bcprov.version>1.77</bcprov.version>
+        <json-path.version>2.9.0</json-path.version>
         <jetbrains-annotations.version>24.1.0</jetbrains-annotations.version>
         <podam.version>7.2.11.RELEASE</podam.version>
         <awaitility.version>4.2.0</awaitility.version>
@@ -260,7 +261,7 @@
             </dependency>
             <dependency>
                 <groupId>com.wind.middleware</groupId>
-                <artifactId>wind-object-sensitive</artifactId>
+                <artifactId>wind-object-mask</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -529,6 +530,11 @@
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-ext-jdk18on</artifactId>
                 <version>${bcprov.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jayway.jsonpath</groupId>
+                <artifactId>json-path</artifactId>
+                <version>${json-path.version}</version>
             </dependency>
             <dependency>
                 <groupId>uk.co.jemos.podam</groupId>
@@ -884,7 +890,7 @@
     </profiles>
 
     <organization>
-        <name>wupxp</name>
+        <name>Wuxp</name>
         <url>https://github.com/fengwuxp</url>
     </organization>
 

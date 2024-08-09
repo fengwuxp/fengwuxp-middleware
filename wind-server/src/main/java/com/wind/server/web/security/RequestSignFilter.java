@@ -107,6 +107,7 @@ public class RequestSignFilter implements Filter, Ordered {
                 response.addHeader(headerNames.getDebugSignQuery(), signatureRequest.getQueryString());
             }
         }
+        log.error("sign verify error, signature request = {}", signatureRequest);
         badRequest(response, "sign verify error");
     }
 
