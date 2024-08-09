@@ -2,11 +2,11 @@ package com.wind.mask;
 
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
+import com.wind.common.util.WindDeepCopyUtils;
 import com.wind.common.util.WindReflectUtils;
 import com.wind.mask.annotation.Sensitive;
 import lombok.AllArgsConstructor;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -15,6 +15,7 @@ import java.util.function.Function;
 
 /**
  * 数据对象脱敏器，支持通过注解 {@link Sensitive} 或 手动注册 {@link MaskRuleRegistry#registerRule(MaskRuleGroup)}} 脱敏规则的方式
+ * 如果希望脱敏时不影响原有对象，请使用 {@link #ofDeepCopy(MaskRuleRegistry)} 创建实例
  *
  * @author wuxp
  * @date 2024-08-08 09:20
@@ -28,6 +29,10 @@ public class ObjectDataMasker implements WindMasker<Object, Object> {
 
     public ObjectDataMasker(MaskRuleRegistry registry) {
         this(registry, o -> o);
+    }
+
+    public static ObjectDataMasker ofDeepCopy(MaskRuleRegistry registry) {
+        return new ObjectDataMasker(registry, WindDeepCopyUtils::copy);
     }
 
     @SuppressWarnings({"unchecked"})

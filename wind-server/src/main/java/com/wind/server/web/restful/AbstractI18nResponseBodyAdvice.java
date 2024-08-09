@@ -46,7 +46,7 @@ public abstract class AbstractI18nResponseBodyAdvice implements ResponseBodyAdvi
     }
 
     @Override
-    public boolean supports(MethodParameter returnType, @Nonnull Class converterType) {
+    public boolean supports(@org.jetbrains.annotations.NotNull MethodParameter returnType, @Nonnull Class converterType) {
         if (Objects.equals(defaultLocal.getLanguage(), SpringI18nMessageUtils.requireLocale().getLanguage())) {
             return false;
         }
