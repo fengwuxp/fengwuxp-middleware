@@ -1,6 +1,5 @@
 package com.wind.security.core.rbac;
 
-import com.wind.common.spring.SpringApplicationContextUtils;
 import com.wind.common.spring.SpringEventPublishUtils;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
@@ -62,6 +61,11 @@ public class RbacResourceChangeEvent extends ApplicationEvent {
         refreshUserRoleTextIds(idAsText(userIds));
     }
 
+    // 刷新所有资源
+    public static void refreshAll() {
+        publish(new RbacResourceChangeEvent(null, RbacResource.class));
+    }
+
     public static void refreshPermissionTextIds(Collection<String> ids) {
         publish(new RbacResourceChangeEvent(ids, RbacResource.Permission.class));
     }
@@ -81,4 +85,5 @@ public class RbacResourceChangeEvent extends ApplicationEvent {
     private static Collection<String> idAsText(Collection<Long> ids) {
         return ids.stream().map(String::valueOf).collect(Collectors.toSet());
     }
+
 }

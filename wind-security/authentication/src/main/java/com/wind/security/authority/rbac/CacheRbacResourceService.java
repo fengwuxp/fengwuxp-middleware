@@ -75,6 +75,7 @@ public class CacheRbacResourceService implements RbacResourceService, Applicatio
         return getUserRoleCache();
     }
 
+    // TODO 待优化或 remove
     public void startScheduleRefreshCache() {
         log.info("start schedule refresh cache task");
         refresh();
@@ -100,6 +101,10 @@ public class CacheRbacResourceService implements RbacResourceService, Applicatio
             // TODO 单个用户刷新
             refreshUserRoleCache();
         }
+        if (event.getResourceType() == RbacResource.class) {
+            // 刷新所有 rbac 资源
+            refreshRbacResources();
+        }
     }
 
     private void scheduleRefresh() {
@@ -112,9 +117,7 @@ public class CacheRbacResourceService implements RbacResourceService, Applicatio
         try {
             if (lock.tryLock(1, 20, TimeUnit.SECONDS)) {
                 try {
-                    refreshPermissionCache();
-                    refreshRoleCache();
-                    refreshUserRoleCache();
+                    refreshRbacResources();
                 } finally {
                     lock.unlock();
                 }
@@ -125,6 +128,12 @@ public class CacheRbacResourceService implements RbacResourceService, Applicatio
         } finally {
             scheduleRefresh();
         }
+    }
+
+    private void refreshRbacResources() {
+        refreshPermissionCache();
+        refreshRoleCache();
+        refreshUserRoleCache();
     }
 
     private void refreshUserRoleCache() {
