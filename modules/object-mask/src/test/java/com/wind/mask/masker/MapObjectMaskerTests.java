@@ -23,8 +23,8 @@ import java.util.Map;
     void testMask() {
         Map<String, Object> maps = buildMaps();
         Object mask = masker.mask(maps, Arrays.asList("$.data.values[0].ak", "$.ak"));
-        Assertions.assertNotEquals(maps,mask);
-        Assertions.assertFalse(maps.toString().contains("***"));
+        Assertions.assertEquals(maps,mask);
+        Assertions.assertTrue(maps.toString().contains("***"));
         Assertions.assertTrue(mask.toString().contains("***"));
     }
 

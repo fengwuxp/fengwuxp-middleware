@@ -1,5 +1,6 @@
 package com.wind.logging.logback.mask;
 
+import com.wind.common.exception.BaseException;
 import com.wind.mask.MaskRuleGroup;
 import com.wind.mask.masker.StringRangMasker;
 import lombok.Data;
@@ -32,6 +33,7 @@ class MaskingMessageConverterTests {
         user.setMobilePhone(mobilePhone);
         user.setPassword("123213");
         LOG.info("test = {}", user);
+        LOG.error("test = {}", user, BaseException.badRequest("Bad Request"));
         Assertions.assertEquals(mobilePhone, user.getMobilePhone());
     }
 

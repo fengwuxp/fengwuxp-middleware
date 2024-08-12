@@ -95,7 +95,7 @@ public class MaskingMessageConverter extends ClassicConverter {
         if (o == null) {
             return null;
         }
-        if (isIgnoreMask(o)) {
+        if (isIgnoreMask(o) || o instanceof Throwable) {
             return null;
         }
         Class<?> clazz = o.getClass();
