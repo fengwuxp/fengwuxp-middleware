@@ -2,7 +2,7 @@
     <conversionRule conversionWord="msg" converterClass="com.wind.logging.logback.mask.MaskingMessageConverter"/>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <Pattern><![CDATA[ [%-5level] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%t] [%logger.%method:%line] -- %msg%n ]]></Pattern>
+            <Pattern><![CDATA[ [%-5level] [%X{localhostIpv4:-}] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%t] [%logger.%method:%line] -- %msg%n ]]></Pattern>
         </encoder>
     </appender>
 

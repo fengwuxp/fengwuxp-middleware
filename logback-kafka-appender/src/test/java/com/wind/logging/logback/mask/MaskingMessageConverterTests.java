@@ -1,11 +1,16 @@
 package com.wind.logging.logback.mask;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.wind.common.exception.BaseException;
 import com.wind.mask.MaskRuleGroup;
 import com.wind.mask.masker.StringRangMasker;
+import com.wind.trace.thread.WindThreadTracer;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -22,6 +27,15 @@ class MaskingMessageConverterTests {
 
     private static final Logger LOG = LoggerFactory.getLogger(MaskingMessageConverterTests.class);
 
+    static {
+        WindThreadTracer.TRACER.trace();
+    }
+
+    @AfterEach
+    void after(){
+        WindThreadTracer.TRACER.clear();
+    }
+
     @Test
     void testLogin() {
         List<MaskRuleGroup> groups = MaskRuleGroup.builder().form(LogbackMaskUser.class)
@@ -33,8 +47,18 @@ class MaskingMessageConverterTests {
         user.setMobilePhone(mobilePhone);
         user.setPassword("123213");
         LOG.info("test = {}", user);
-        LOG.error("test = {}", user, BaseException.badRequest("Bad Request"));
+        BaseException badRequest = BaseException.badRequest("Bad Request");
+        LOG.error("test = {}, message  = {}", user, badRequest.getMessage(), badRequest);
         Assertions.assertEquals(mobilePhone, user.getMobilePhone());
+    }
+
+    @Test
+    void testException() {
+        try {
+            JSONArray objects = JSON.parseArray("[" + RandomStringUtils.randomAlphabetic(2000) + "]");
+        } catch (Exception exception) {
+            LOG.error("test info  = {},parse json error, message  = {}", RandomStringUtils.randomAlphabetic(200), exception.getMessage(), exception);
+        }
     }
 
     @Data
