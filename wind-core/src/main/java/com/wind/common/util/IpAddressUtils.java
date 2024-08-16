@@ -21,6 +21,9 @@ import java.util.Enumeration;
 @Slf4j
 public final class IpAddressUtils {
 
+    // ip 缓存
+    private static final String HOST_IP_V4 = IpAddressUtils.getLocalIpv4();
+
     private IpAddressUtils() {
         throw new AssertionError();
     }
@@ -152,6 +155,15 @@ public final class IpAddressUtils {
             return WindConstants.UNKNOWN;
         }
         return address.getHostAddress();
+    }
+
+    /**
+     * 从缓存中获取 本机 ip 地址
+     *
+     * @return 本机 host
+     */
+    public static String getLocalIpv4WithCache() {
+        return HOST_IP_V4;
     }
 
     /**

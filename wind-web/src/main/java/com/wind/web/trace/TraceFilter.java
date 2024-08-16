@@ -64,7 +64,7 @@ public class TraceFilter extends OncePerRequestFilter {
         try {
             if (!ServiceInfoUtils.isOnline()) {
                 // 线下环境增加服务端 ip 返回
-                response.setHeader(REAL_SERVER_IP, IpAddressUtils.getLocalIpv4());
+                response.setHeader(REAL_SERVER_IP, IpAddressUtils.getLocalIpv4WithCache());
             }
             // 提前写入 traceId 到响应头，避免 response committed 后无法写回
             response.setHeader(WIND_TRANCE_ID_HEADER_NAME, trace(request));
@@ -88,7 +88,7 @@ public class TraceFilter extends OncePerRequestFilter {
         contextVariables.put(HTTP_REQUEST_HOST_ATTRIBUTE_NAME, getReqeustSourceHost(request));
         contextVariables.put(HTTP_REQUEST_UR_TRACE_NAME, request.getRequestURI());
         contextVariables.put(HTTP_USER_AGENT_HEADER_NAME, request.getHeader(HttpHeaders.USER_AGENT));
-        contextVariables.put(LOCAL_HOST_IP_V4, IpAddressUtils.getLocalIpv4());
+        contextVariables.put(LOCAL_HOST_IP_V4, IpAddressUtils.getLocalIpv4WithCache());
         WindTracer.TRACER.trace(traceId, contextVariables);
         return WindTracer.TRACER.getTraceId();
     }

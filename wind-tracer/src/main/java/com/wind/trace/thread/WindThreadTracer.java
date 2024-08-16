@@ -26,12 +26,9 @@ import static com.wind.common.WindConstants.TRACE_ID_NAME;
  **/
 public final class WindThreadTracer implements WindTracer {
 
-
-    private static final String HOST_IP_V4 = IpAddressUtils.getLocalIpv4();
-
     static {
         // 默认填充本机 ip
-        MDC.put(LOCAL_HOST_IP_V4, HOST_IP_V4);
+        MDC.put(LOCAL_HOST_IP_V4, IpAddressUtils.getLocalIpv4WithCache());
     }
 
     /**
@@ -53,7 +50,7 @@ public final class WindThreadTracer implements WindTracer {
     public void trace(String traceId, @NotNull Map<String, Object> contextVariables) {
         //  使用 MDC 保存
         MDC.put(TRACE_ID_NAME, StringUtils.hasText(traceId) ? traceId : TRACE_ID.next());
-        MDC.put(LOCAL_HOST_IP_V4, HOST_IP_V4);
+        MDC.put(LOCAL_HOST_IP_V4, IpAddressUtils.getLocalIpv4WithCache());
         Objects.requireNonNull(contextVariables, "argument contextVariables must not null")
                 .forEach((key, val) -> {
                     if (val instanceof String) {
@@ -106,7 +103,7 @@ public final class WindThreadTracer implements WindTracer {
     public void clear() {
         MDC.clear();
         // 保证 MDC 中一直存在 本机 ip 的属性 TODO 待优化
-        MDC.put(LOCAL_HOST_IP_V4, HOST_IP_V4);
+        MDC.put(LOCAL_HOST_IP_V4, IpAddressUtils.getLocalIpv4WithCache());
     }
 
 }
