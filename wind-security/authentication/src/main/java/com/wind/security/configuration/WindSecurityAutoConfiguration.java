@@ -5,14 +5,13 @@ import com.wind.common.locks.LockFactory;
 import com.wind.security.authentication.WindAuthenticationProperties;
 import com.wind.security.authentication.jwt.JwtProperties;
 import com.wind.security.authentication.jwt.JwtTokenCodec;
-import com.wind.security.authority.rbac.CacheRbacResourceService;
-import com.wind.security.authority.rbac.CaffeineRbacResourceCacheManager;
 import com.wind.security.authority.rbac.SimpleSecurityAccessOperations;
 import com.wind.security.authority.rbac.WebRequestAuthorizationManager;
+import com.wind.security.authority.rbac.WindRbacUserResourceService;
 import com.wind.security.authority.rbac.WindSecurityRbacProperties;
 import com.wind.security.core.SecurityAccessOperations;
-import com.wind.security.core.rbac.RbacResourceCacheManager;
-import com.wind.security.core.rbac.RbacResourceService;
+import com.wind.security.core.rbac.RbacResourceSupplier;
+import com.wind.security.core.rbac.RbacUserResourceService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -20,7 +19,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
 import static com.wind.common.WindConstants.ENABLED_NAME;
 import static com.wind.common.WindConstants.TRUE;
@@ -75,28 +73,9 @@ public class WindSecurityAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(RbacResourceCacheManager.class)
-    public CaffeineRbacResourceCacheManager caffeineRbacResourceCacheSupplier(WindSecurityRbacProperties properties) {
-        return new CaffeineRbacResourceCacheManager(properties.getCacheEffectiveTime());
-    }
-
-    @Bean
     @ConditionalOnMissingBean(LockFactory.class)
     public LockFactory jdkLockFactory() {
         return new JdkLockFactory();
-    }
-
-    @Bean
-    @Primary
-    @ConditionalOnProperty(prefix = RBAC_PREFIX + ".cache", name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
-    @ConditionalOnBean({WindSecurityRbacProperties.class, RbacResourceCacheManager.class, RbacResourceService.class, LockFactory.class})
-    public CacheRbacResourceService cacheRbacResourceService(RbacResourceService delegate, RbacResourceCacheManager cacheManager,
-                                                             LockFactory lockFactory, WindSecurityRbacProperties properties) {
-        CacheRbacResourceService result = new CacheRbacResourceService(delegate, cacheManager, lockFactory, properties.getCacheEffectiveTime());
-        if (properties.isEnableRefreshCache()) {
-            result.startScheduleRefreshCache();
-        }
-        return result;
     }
 
     @Bean
@@ -106,9 +85,16 @@ public class WindSecurityAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean({WindSecurityRbacProperties.class, RbacResourceService.class})
-    public WebRequestAuthorizationManager webRequestAuthorizationManager(RbacResourceService rbacResourceService, SecurityAccessOperations securityAccessOperations, WindSecurityRbacProperties properties) {
-        return new WebRequestAuthorizationManager(rbacResourceService, securityAccessOperations, properties.isMatchesRequestAllPermission());
+    @ConditionalOnBean({RbacResourceSupplier.class})
+    @ConditionalOnProperty(prefix = RBAC_PREFIX + ".cache", name = ENABLED_NAME, havingValue = TRUE, matchIfMissing = true)
+    public RbacUserResourceService windRbacUserResourceService(RbacResourceSupplier rbacResourceSupplier) {
+        return new WindRbacUserResourceService(rbacResourceSupplier);
+    }
+
+    @Bean
+    @ConditionalOnBean({WindSecurityRbacProperties.class, RbacResourceSupplier.class})
+    public WebRequestAuthorizationManager webRequestAuthorizationManager(RbacResourceSupplier rbacResourceSupplier, SecurityAccessOperations securityAccessOperations, WindSecurityRbacProperties properties) {
+        return new WebRequestAuthorizationManager(rbacResourceSupplier, securityAccessOperations, properties.isMatchesRequestAllPermission());
     }
 
 }

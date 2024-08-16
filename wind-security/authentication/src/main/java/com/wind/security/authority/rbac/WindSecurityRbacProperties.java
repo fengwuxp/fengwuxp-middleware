@@ -2,8 +2,6 @@ package com.wind.security.authority.rbac;
 
 import lombok.Data;
 
-import java.time.Duration;
-
 /**
  * rbac 相关配置
  *
@@ -12,19 +10,6 @@ import java.time.Duration;
  **/
 @Data
 public class WindSecurityRbacProperties {
-
-    /**
-     * rbac resource 缓存有效期
-     */
-    private Duration cacheEffectiveTime = Duration.ofMinutes(3);
-
-    /**
-     * 开启缓存刷新
-     * 默认：不开启
-     *
-     * @see com.wind.security.core.rbac.RbacResourceChangeEvent
-     */
-    private boolean enableRefreshCache = false;
 
     /**
      * 默认的角色值前缀

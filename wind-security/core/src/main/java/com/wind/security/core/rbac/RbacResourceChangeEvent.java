@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 /**
- * rbac 资源发生变更
+ * rbac 资源变更事件
  *
  * @author wuxp
  * @date 2023-09-26 09:57

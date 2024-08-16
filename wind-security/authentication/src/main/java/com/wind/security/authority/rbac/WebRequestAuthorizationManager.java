@@ -1,7 +1,7 @@
 package com.wind.security.authority.rbac;
 
 import com.wind.security.core.SecurityAccessOperations;
-import com.wind.security.core.rbac.RbacResourceService;
+import com.wind.security.core.rbac.RbacResourceSupplier;
 import com.wind.security.web.util.RequestMatcherUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ public class WebRequestAuthorizationManager implements AuthorizationManager<Requ
 
     private static final AuthorizationDecision ACCESS_DENIED = new AuthorizationDecision(false);
 
-    private final RbacResourceService rbacResourceService;
+    private final RbacResourceSupplier rbacResourceSupplier;
 
     private final SecurityAccessOperations securityAccessOperations;
 
@@ -95,7 +95,7 @@ public class WebRequestAuthorizationManager implements AuthorizationManager<Requ
 
     private Map<String, Set<RequestMatcher>> getRequestPermissionMatchers() {
         Map<String, Set<RequestMatcher>> result = new HashMap<>();
-        rbacResourceService.getPermissions().stream()
+        rbacResourceSupplier.getPermissions().stream()
                 .filter(Objects::nonNull)
                 .forEach(permission -> result.put(permission.getId(), RequestMatcherUtils.convertMatchers(permission.getAttributes())));
         return result;
