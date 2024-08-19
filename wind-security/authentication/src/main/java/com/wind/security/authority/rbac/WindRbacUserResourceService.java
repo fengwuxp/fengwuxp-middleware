@@ -4,6 +4,7 @@ import com.wind.security.core.rbac.RbacResource;
 import com.wind.security.core.rbac.RbacResourceSupplier;
 import com.wind.security.core.rbac.RbacUserResourceService;
 import lombok.AllArgsConstructor;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.Set;
@@ -34,6 +35,9 @@ public class WindRbacUserResourceService implements RbacUserResourceService {
     public Set<RbacResource.Role> getOwnerRoles(String userId) {
         // TODO 待优化
         Set<String> roleIds = findOwnerRoleIds(userId);
+        if (CollectionUtils.isEmpty(roleIds)) {
+            return Collections.emptySet();
+        }
         return rbacResourceSupplier.getRoles().stream().filter(role -> roleIds.contains(role.getId())).collect(Collectors.toSet());
     }
 }
