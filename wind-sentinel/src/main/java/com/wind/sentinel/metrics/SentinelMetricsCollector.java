@@ -87,7 +87,7 @@ public class SentinelMetricsCollector implements MetricExtension {
 
     @Override
     public void addPass(String resource, int n, Object... args) {
-        Metrics.counter(resourceType + PASS_REQUESTS_TOTAL, getResourceTags(resource, args)).increment(n);
+        Metrics.counter(genName(PASS_REQUESTS_TOTAL), getResourceTags(resource, args)).increment(n);
     }
 
     @Override
@@ -99,33 +99,33 @@ public class SentinelMetricsCollector implements MetricExtension {
                 Tag.of(APP_TAG_NAME, ex.getRuleLimitApp()),
                 Tag.of(ORIGIN_TAG_NAME, origin)
         ));
-        Metrics.counter(resourceType + BLOCK_REQUESTS_TOTAL, tags).increment(n);
+        Metrics.counter(genName(BLOCK_REQUESTS_TOTAL), tags).increment(n);
     }
 
     @Override
     public void addSuccess(String resource, int n, Object... args) {
-        Metrics.counter(resourceType + SUCCESS_REQUESTS_TOTAL, getResourceTags(resource, args)).increment(n);
+        Metrics.counter(genName(SUCCESS_REQUESTS_TOTAL), getResourceTags(resource, args)).increment(n);
     }
 
     @Override
     public void addException(String resource, int n, Throwable throwable) {
         Tags tags = Tags.of(RESOURCE_TAG_NAME, resource, EXCEPTION_TAG_NAME, throwable.getClass().getSimpleName());
-        Metrics.counter(resourceType + EXCEPTION_REQUESTS_TOTAL, tags).increment(n);
+        Metrics.counter(genName(EXCEPTION_REQUESTS_TOTAL), tags).increment(n);
     }
 
     @Override
     public void addRt(String resource, long rt, Object... args) {
-        Metrics.timer(resourceType + REQUESTS_LATENCY_SECONDS, getResourceTags(resource, args)).record(rt, TimeUnit.MICROSECONDS);
+        Metrics.timer(genName(REQUESTS_LATENCY_SECONDS), getResourceTags(resource, args)).record(rt, TimeUnit.MICROSECONDS);
     }
 
     @Override
     public void increaseThreadNum(String resource, Object... args) {
-        Metrics.gauge(resourceType + CURRENT_THREADS, getResourceTags(resource, args), getThreadCounter(resource), AtomicLong::incrementAndGet);
+        Metrics.gauge(genName(CURRENT_THREADS), getResourceTags(resource, args), getThreadCounter(resource), AtomicLong::incrementAndGet);
     }
 
     @Override
     public void decreaseThreadNum(String resource, Object... args) {
-        Metrics.gauge(resourceType + CURRENT_THREADS, getResourceTags(resource, args), getThreadCounter(resource), AtomicLong::decrementAndGet);
+        Metrics.gauge(genName(CURRENT_THREADS), getResourceTags(resource, args), getThreadCounter(resource), AtomicLong::decrementAndGet);
     }
 
     private AtomicLong getThreadCounter(String resource) {
@@ -145,5 +145,9 @@ public class SentinelMetricsCollector implements MetricExtension {
                 .map(Tags.class::cast)
                 .flatMap(Tags::stream)
                 .collect(Collectors.toList());
+    }
+
+    private String genName(String name) {
+        return resourceType + "." + name;
     }
 }
