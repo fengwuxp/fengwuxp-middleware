@@ -2,7 +2,8 @@ package com.wind.script.spring;
 
 
 import com.wind.common.WindConstants;
-import com.wind.script.ConditionalNode;
+import com.wind.script.ConditionalExpression;
+import com.wind.script.expression.LogicalOp;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -32,9 +33,9 @@ public final class SpringExpressionGenerator {
      * @param node 节点 不支持为空
      * @return 表达式
      */
-    public static String generate(ConditionalNode node) {
+    public static String generate(ConditionalExpression node) {
         String parentCode = JOINER.join(node.getLeft(), node.getRight(), node.getOp());
-        List<ConditionalNode> children = node.getChildren();
+        List<ConditionalExpression> children = node.getChildren();
         String childrenCode = getRight(children, node.getRelation());
         if (StringUtils.hasText(parentCode) && !StringUtils.hasText(childrenCode)) {
             return parentCode;
@@ -54,7 +55,7 @@ public final class SpringExpressionGenerator {
      * @param node 节点，支持为空
      * @return
      */
-    public static String generateNullAllowed(ConditionalNode node) {
+    public static String generateNullAllowed(ConditionalExpression node) {
         if (node == null) {
             return WindConstants.EMPTY;
         }
@@ -62,7 +63,7 @@ public final class SpringExpressionGenerator {
         return generate(node);
     }
 
-    private static String getRight(List<ConditionalNode> children, ConditionalNode.LogicalRelation logicalRelation) {
+    private static String getRight(List<ConditionalExpression> children, LogicalOp relation) {
         if (ObjectUtils.isEmpty(children)) {
             return WindConstants.EMPTY;
         }
@@ -79,7 +80,7 @@ public final class SpringExpressionGenerator {
                     }
                     return String.format("%s", code);
                 })
-                .collect(Collectors.joining(String.format(" %s ", logicalRelation)));
+                .collect(Collectors.joining(String.format(" %s ", relation)));
     }
 
 }

@@ -1,5 +1,7 @@
 package com.wind.script;
 
+import com.wind.script.expression.Op;
+
 /**
  * 条件表达式连接器
  *
@@ -18,5 +20,5 @@ public interface ConditionalExpressionJoiner<T> {
      * @param op    操作符
      * @return 操作表达式
      */
-    String join(T left, T right, ConditionalNode.Op op);
+    String join(T left, T right, Op op);
 }

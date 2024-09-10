@@ -11,7 +11,6 @@ import java.util.Map;
 
 class SpringExpressionEvaluatorTest {
 
-
     @Test
     void testEval1() {
         Map<String, Object> evaluationContext = new HashMap<>();

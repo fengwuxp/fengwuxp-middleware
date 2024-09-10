@@ -14,14 +14,14 @@ import com.wind.transaction.core.request.WithdrawPreDepositRequest;
 public interface PreDepositAccountService {
 
     /**
-     * 账号充值
+     * 充值
      *
      * @param request 充值请求
      */
     void recharge(RechargePreDepositRequest request);
 
     /**
-     * 账号提现
+     * 提现
      *
      * @param request 提现请求
      */

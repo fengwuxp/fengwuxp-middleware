@@ -6,8 +6,8 @@ import com.google.common.collect.ImmutableSet;
 import com.wind.common.WindConstants;
 import com.wind.common.exception.AssertUtils;
 import com.wind.script.ConditionalExpressionJoiner;
-import com.wind.script.ConditionalNode;
-import com.wind.script.ConditionalNode.Op;
+import com.wind.script.ConditionalExpression;
+import com.wind.script.expression.Op;
 import com.wind.script.expression.Operand;
 import org.springframework.util.StringUtils;
 
@@ -23,14 +23,14 @@ import java.util.stream.Collectors;
 
 /**
  * 基于 spring expression 语法实现的条件表达式连接器
- * 由于表达式是根据 {@link ConditionalNode} 生成的，只能有限性支持 spring expression 的语法
+ * 由于表达式是根据 {@link ConditionalExpression} 生成的，只能有限性支持 spring expression 的语法
  * 以下语法不会被生成
  * 1：new 关键字，例如：new xxx.File('/xxx').delete()
  * 2：调用静态类方法，例如：T(java.lang.System.exit(0))
  *
  * @author wuxp
  * @version SpringExpressionConditionalJoiner.java, v 0.1 2022年08月16日 18:08 wuxp
- * @doc https://docs.spring.io/spring-framework/reference/core/expressions.html
+ * @docs https://docs.spring.io/spring-framework/reference/core/expressions.html
  * @see ConditionalExpressionJoiner
  */
 public class SpringExpressionConditionalExpressionJoiner implements ConditionalExpressionJoiner<Operand> {
@@ -49,7 +49,7 @@ public class SpringExpressionConditionalExpressionJoiner implements ConditionalE
         JOINERS.put(Op.NOT_NULL, (left, right, op) -> String.format("%s %s", left, Op.NOT_NULL.getOperator()));
 
         JOINERS.put(Op.CONTAINS, (left, right, op) -> String.format("%s.%s(%s)", left, Op.CONTAINS.getOperator(), right));
-        JOINERS.put(Op.NOT_CONTAINS, (left, right, op) -> String.format("!%s.%s(%s)", left, Op.CONTAINS.getOperator(), right));
+        JOINERS.put(Op.NOT_CONTAINS, (left, right, op) -> "!" + JOINERS.get(Op.CONTAINS).join(left, right, Op.CONTAINS));
 
         JOINERS.put(Op.IN_RANG, (left, right, op) -> {
             String[] rang = parseExpressionToArray(right);
@@ -60,8 +60,7 @@ public class SpringExpressionConditionalExpressionJoiner implements ConditionalE
             return String.format("(%s < %s or %s > %s)", left, rang[0], left, rang[1]);
         });
         JOINERS.put(Op.GLOBAL_METHOD, (left, right, op) -> {
-            Map<String, String> configs = JSON.parseObject(right, new TypeReference<Map<String, String>>() {
-            });
+            Map<String, String> configs = JSON.parseObject(right, new TypeReference<Map<String, String>>() {});
             String result = configs.get("result");
             if (StringUtils.hasText(result)) {
                 checkExpression(result);

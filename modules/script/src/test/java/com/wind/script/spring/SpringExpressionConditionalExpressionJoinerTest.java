@@ -1,7 +1,7 @@
 package com.wind.script.spring;
 
 import com.wind.common.exception.BaseException;
-import com.wind.script.ConditionalNode.Op;
+import com.wind.script.expression.Op;
 import com.wind.script.expression.Operand;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
