@@ -100,7 +100,7 @@ class ObjectDataMaskerTests {
 
     @Data
     @Sensitive()
-    static class DefaultObjectSanitizerDemo1 {
+    public static class DefaultObjectSanitizerDemo1 {
 
         @Sensitive(names = {"$.data.values[0].ak"}, masker = MapObjectMasker.class)
         private Map<String, Object> sensitiveMaps;
@@ -111,7 +111,7 @@ class ObjectDataMaskerTests {
 
     @Data
     @FieldNameConstants
-    static class DefaultObjectSanitizerDemo2 {
+    public static class DefaultObjectSanitizerDemo2 {
 
         private Map<String, Object> sensitiveMaps2;
 

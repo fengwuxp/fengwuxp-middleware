@@ -26,12 +26,14 @@ class WindDeepCopyUtilsTests {
     @Test
     void testDeepCopyList() {
         List<Integer> result = WindDeepCopyUtils.copy(Arrays.asList(1, 2, 3));
+        Assertions.assertNotNull(result);
         Assertions.assertEquals(3, result.size());
     }
 
     @Test
     void testDeepCopySet() {
         Set<Integer> result = WindDeepCopyUtils.copy(Collections.singleton(13));
+        Assertions.assertNotNull(result);
         Assertions.assertEquals(1, result.size());
     }
 
@@ -54,7 +56,7 @@ class WindDeepCopyUtilsTests {
 
 
     @Data
-    static class DeepCopyExample {
+    public static class DeepCopyExample {
 
         private String userName;
 
