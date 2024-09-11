@@ -41,7 +41,6 @@
         <module>tests</module>
         <module>wind-rocketmq</module>
         <module>modules/mybatis-flex-extends</module>
-        <module>modules/metrics</module>
     </modules>
 
     <properties>

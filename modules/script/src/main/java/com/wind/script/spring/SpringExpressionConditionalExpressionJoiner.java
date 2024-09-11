@@ -6,9 +6,10 @@ import com.google.common.collect.ImmutableSet;
 import com.wind.common.WindConstants;
 import com.wind.common.exception.AssertUtils;
 import com.wind.script.ConditionalExpressionJoiner;
-import com.wind.script.ConditionalExpression;
+import com.wind.script.expression.ExpressionDescriptor;
 import com.wind.script.expression.Op;
 import com.wind.script.expression.Operand;
+import com.wind.script.expression.OperandType;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 
 /**
  * 基于 spring expression 语法实现的条件表达式连接器
- * 由于表达式是根据 {@link ConditionalExpression} 生成的，只能有限性支持 spring expression 的语法
+ * 由于表达式是根据 {@link ExpressionDescriptor} 生成的，只能有限性支持 spring expression 的语法
  * 以下语法不会被生成
  * 1：new 关键字，例如：new xxx.File('/xxx').delete()
  * 2：调用静态类方法，例如：T(java.lang.System.exit(0))
@@ -110,30 +111,30 @@ public class SpringExpressionConditionalExpressionJoiner implements ConditionalE
         }
         Object value = operand.getValue();
         AssertUtils.notNull(value, "操作数的值不能为 null");
-        if (Objects.equals(Operand.OperandSource.CONTEXT_VARIABLE, operand.getSource())) {
+        if (Objects.equals(OperandType.VARIABLE, operand.getType())) {
             // context 上下文变量
             return String.format("%s%s", WindConstants.SHARP, value);
         }
         if (value instanceof Collection) {
-            return toSpringExpressionArray((Collection<?>) value, operand.getSource());
+            return toSpringExpressionArray((Collection<?>) value, operand.getType());
         }
         if (value.getClass().isArray()) {
-            return toSpringExpressionArray(Arrays.asList((Object[]) value), operand.getSource());
+            return toSpringExpressionArray(Arrays.asList((Object[]) value), operand.getType());
         }
-        return toExpression(value, operand.getSource());
+        return toExpression(value, operand.getType());
     }
 
-    private String toSpringExpressionArray(Collection<?> collection, Operand.OperandSource source) {
+    private String toSpringExpressionArray(Collection<?> collection, OperandType type) {
         String val = collection.stream()
-                .map(item -> toExpression(item, source))
+                .map(item -> toExpression(item, type))
                 .collect(Collectors.joining(WindConstants.COMMA));
         return String.format("{%s}", val);
     }
 
-    private String toExpression(Object o, Operand.OperandSource source) {
+    private String toExpression(Object o, OperandType type) {
         // TODO 其他类型判断
         if (o instanceof String) {
-            if (Objects.equals(source, Operand.OperandSource.SCRIPT)) {
+            if (Objects.equals(type, OperandType.EXPRESSION)) {
                 String text = (String) o;
                 AssertUtils.isTrue(!text.startsWith(WindConstants.AT), "不允许使用 @ 开头，访问 spring context bean 对象");
                 return text;

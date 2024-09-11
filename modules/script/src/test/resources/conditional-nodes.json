@@ -1,23 +1,23 @@
 {
   "left": {
-    "source": "CONTEXT_VARIABLE",
+    "type": "VARIABLE",
     "value": "name"
   },
   "op": "EQ",
   "right": {
-    "source": "SCRIPT",
+    "type": "EXPRESSION",
     "value": "'张三'"
   },
   "relation": "AND",
   "children": [
     {
       "right": {
-        "source": "CONTEXT_VARIABLE",
+        "type": "VARIABLE",
         "value": "env"
       },
       "op": "CONTAINS",
       "left": {
-        "source": "CONSTANT",
+        "type": "CONSTANT",
         "value": [
           "dev",
           "sit"
@@ -26,12 +26,12 @@
     },
     {
       "left": {
-        "source": "CONTEXT_VARIABLE",
+        "type": "VARIABLE",
         "value": "age"
       },
       "op": "IN_RANG",
       "right": {
-        "source": "CONSTANT",
+        "type": "CONSTANT",
         "value": [
           16,
           45
@@ -41,12 +41,12 @@
       "children": [
         {
           "right": {
-            "source": "CONTEXT_VARIABLE",
+            "type": "VARIABLE",
             "value": "city"
           },
           "op": "CONTAINS",
           "left": {
-            "source": "CONSTANT",
+            "type": "CONSTANT",
             "value": [
               "杭州",
               "上海"
@@ -55,12 +55,12 @@
         },
         {
           "left": {
-            "source": "CONTEXT_VARIABLE",
+            "type": "VARIABLE",
             "value": "tags['example']"
           },
           "op": "NOT_EQ",
           "right": {
-            "source": "CONSTANT",
+            "type": "CONSTANT",
             "value": "demo"
           }
         }

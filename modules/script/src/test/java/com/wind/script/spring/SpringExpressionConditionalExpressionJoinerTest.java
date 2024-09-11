@@ -3,6 +3,7 @@ package com.wind.script.spring;
 import com.wind.common.exception.BaseException;
 import com.wind.script.expression.Op;
 import com.wind.script.expression.Operand;
+import com.wind.script.expression.OperandType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -28,12 +29,12 @@ class SpringExpressionConditionalExpressionJoinerTest {
                 joiner.join(createContextVariable("user.age"), createConstant(Arrays.asList(1, 100)), Op.NOT_CONTAINS));
         Assertions.assertEquals("#user == null", joiner.join(createContextVariable("user"), null, Op.IS_NULL));
         Assertions.assertEquals("#user != null", joiner.join(createContextVariable("user"), null, Op.NOT_NULL));
-        Assertions.assertEquals("#user.name == getUserName(#user))", joiner.join(createContextVariable("user.name"), createContextVariable("getUserName(#user))", Operand.OperandSource.SCRIPT), Op.EQ));
+        Assertions.assertEquals("#user.name == getUserName(#user))", joiner.join(createContextVariable("user.name"), createContextVariable("getUserName(#user))", OperandType.EXPRESSION), Op.EQ));
     }
 
     @Test()
     void testCallSpringBeanError() {
-        BaseException exception = Assertions.assertThrows(BaseException.class, () -> joiner.join(createContextVariable("user.name"), createContextVariable("@example.getUserName(#user))", Operand.OperandSource.SCRIPT), Op.EQ));
+        BaseException exception = Assertions.assertThrows(BaseException.class, () -> joiner.join(createContextVariable("user.name"), createContextVariable("@example.getUserName(#user))", OperandType.EXPRESSION), Op.EQ));
         Assertions.assertEquals("不允许使用 @ 开头，访问 spring context bean 对象", exception.getMessage());
     }
 
@@ -42,11 +43,11 @@ class SpringExpressionConditionalExpressionJoinerTest {
     }
 
     private static Operand createContextVariable(String text) {
-        return createContextVariable(text, Operand.OperandSource.CONTEXT_VARIABLE);
+        return createContextVariable(text, OperandType.VARIABLE);
     }
 
-    private static Operand createContextVariable(String text, Operand.OperandSource source) {
-        return Operand.immutable(text, source);
+    private static Operand createContextVariable(String text, OperandType type) {
+        return new Operand(text, type);
     }
 
 

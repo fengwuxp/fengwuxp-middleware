@@ -3,9 +3,10 @@ package com.wind.script.spring;
 import com.alibaba.fastjson2.JSON;
 import com.google.common.collect.ImmutableMap;
 import com.wind.common.exception.BaseException;
-import com.wind.script.ConditionalExpression;
+import com.wind.script.expression.ExpressionDescriptor;
 import com.wind.script.expression.Op;
 import com.wind.script.expression.Operand;
+import com.wind.script.expression.OperandType;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -37,8 +38,8 @@ class SpringExpressionGeneratorTests {
     void generate() throws Exception {
         URI filepath = ResourceUtils.getURL("classpath:conditional-nodes.json").toURI();
         String json = IOUtils.toString(Files.newInputStream(Paths.get(filepath)), StandardCharsets.UTF_8);
-        ConditionalExpression conditionalExpression = JSON.parseObject(json, ConditionalExpression.class);
-        String spel = SpringExpressionGenerator.generate(conditionalExpression);
+        ExpressionDescriptor descriptor = JSON.parseObject(json, ExpressionDescriptor.class);
+        String spel = SpringExpressionGenerator.generate(descriptor);
         Assertions.assertEquals(EXPECTED_EXPRESSION, spel);
         Expression expression = expressionParser.parseExpression(spel);
         StandardEvaluationContext context = new StandardEvaluationContext();
@@ -52,24 +53,24 @@ class SpringExpressionGeneratorTests {
 
     @Test
     void generateOpByExpression() {
-        ConditionalExpression node = mockGlobalMethodNode(".success");
+        ExpressionDescriptor node = mockGlobalMethodNode(".success");
         String spel = SpringExpressionGenerator.generate(node);
         Assertions.assertEquals("#root.execCmd('test-cmd',#name,'张三',{'a':'b'}).success", spel);
     }
 
     @Test
     void generateOpByExpressionNoArgs() {
-        ConditionalExpression node = new ConditionalExpression();
+        ExpressionDescriptor node = new ExpressionDescriptor();
         node.setOp(Op.GLOBAL_METHOD);
-        node.setLeft(Operand.immutable("root.getExample", Operand.OperandSource.SCRIPT));
-        node.setRight(Operand.immutable("{}", Operand.OperandSource.SCRIPT));
+        node.setLeft(new Operand("root.getExample", OperandType.EXPRESSION));
+        node.setRight(new Operand("{}", OperandType.EXPRESSION));
         String spel = SpringExpressionGenerator.generate(node);
         Assertions.assertEquals("#root.getExample()", spel);
     }
 
     @Test()
     void generateOpByExpressionWithDisabled1() {
-        ConditionalExpression node = mockGlobalMethodNode("success == 1 and new xxx.File('/xxx').delete()");
+        ExpressionDescriptor node = mockGlobalMethodNode("success == 1 and new xxx.File('/xxx').delete()");
         BaseException exception = Assertions.assertThrows(BaseException.class, () -> SpringExpressionGenerator.generate(node));
         Assertions.assertEquals("不允许使用：new 操作符", exception.getMessage());
     }
@@ -77,7 +78,7 @@ class SpringExpressionGeneratorTests {
 
     @Test()
     void generateOpByExpressionWithDisabled2() {
-        ConditionalExpression node = mockGlobalMethodNode("success == 1 and T(java.lang.System.exit(0))");
+        ExpressionDescriptor node = mockGlobalMethodNode("success == 1 and T(java.lang.System.exit(0))");
         BaseException exception = Assertions.assertThrows(BaseException.class, () -> SpringExpressionGenerator.generate(node));
         Assertions.assertEquals("不允许使用：T( 操作符", exception.getMessage());
     }
@@ -98,10 +99,10 @@ class SpringExpressionGeneratorTests {
         Assertions.assertEquals(Boolean.FALSE, expression.getValue(new StandardEvaluationContext(), Boolean.class));
     }
 
-    private static ConditionalExpression mockGlobalMethodNode(String expression) {
-        ConditionalExpression result = new ConditionalExpression();
+    private static ExpressionDescriptor mockGlobalMethodNode(String expression) {
+        ExpressionDescriptor result = new ExpressionDescriptor();
         result.setOp(Op.GLOBAL_METHOD);
-        result.setLeft(Operand.immutable("root.execCmd", Operand.OperandSource.SCRIPT));
+        result.setLeft(new Operand("root.execCmd", OperandType.EXPRESSION));
         List<String> args = new ArrayList<>();
         args.add("#name");
         args.add("'张三'");
@@ -111,7 +112,7 @@ class SpringExpressionGeneratorTests {
                 "args", JSON.toJSONString(args),
                 "result", expression
         );
-        result.setRight(Operand.immutable(JSON.toJSONString(config), Operand.OperandSource.SCRIPT));
+        result.setRight(new Operand(JSON.toJSONString(config), OperandType.EXPRESSION));
         String jsonString = JSON.toJSONString(result);
         Assertions.assertNotNull(jsonString);
         return result;

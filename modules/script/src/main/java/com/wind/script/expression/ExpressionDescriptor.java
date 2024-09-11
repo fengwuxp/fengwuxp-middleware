@@ -1,8 +1,5 @@
-package com.wind.script;
+package com.wind.script.expression;
 
-import com.wind.script.expression.LogicalOp;
-import com.wind.script.expression.Op;
-import com.wind.script.expression.Operand;
 import lombok.Data;
 
 import java.util.List;
@@ -14,7 +11,7 @@ import java.util.List;
  * @date 2023-09-23 07:44
  **/
 @Data
-public class ConditionalExpression {
+public class ExpressionDescriptor {
 
     /**
      * 逻辑运算关系 AND、OR
@@ -37,7 +34,7 @@ public class ConditionalExpression {
     private Operand right;
 
     /**
-     * 子节点
+     * 子表达式
      */
-    private List<ConditionalExpression> children;
+    private List<ExpressionDescriptor> children;
 }

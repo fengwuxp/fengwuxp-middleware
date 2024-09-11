@@ -2,7 +2,7 @@ package com.wind.script.spring;
 
 
 import com.wind.common.WindConstants;
-import com.wind.script.ConditionalExpression;
+import com.wind.script.expression.ExpressionDescriptor;
 import com.wind.script.expression.LogicalOp;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -33,9 +33,9 @@ public final class SpringExpressionGenerator {
      * @param node 节点 不支持为空
      * @return 表达式
      */
-    public static String generate(ConditionalExpression node) {
+    public static String generate(ExpressionDescriptor node) {
         String parentCode = JOINER.join(node.getLeft(), node.getRight(), node.getOp());
-        List<ConditionalExpression> children = node.getChildren();
+        List<ExpressionDescriptor> children = node.getChildren();
         String childrenCode = getRight(children, node.getRelation());
         if (StringUtils.hasText(parentCode) && !StringUtils.hasText(childrenCode)) {
             return parentCode;
@@ -50,12 +50,12 @@ public final class SpringExpressionGenerator {
     }
 
     /**
-     * 根据ConditionalNode生成对应的spel表达式
+     * 根据 {@link ExpressionDescriptor}生成对应的 Spel 表达式
      *
      * @param node 节点，支持为空
-     * @return
+     * @return Spel 表达式
      */
-    public static String generateNullAllowed(ConditionalExpression node) {
+    public static String generateNullAllowed(ExpressionDescriptor node) {
         if (node == null) {
             return WindConstants.EMPTY;
         }
@@ -63,7 +63,7 @@ public final class SpringExpressionGenerator {
         return generate(node);
     }
 
-    private static String getRight(List<ConditionalExpression> children, LogicalOp relation) {
+    private static String getRight(List<ExpressionDescriptor> children, LogicalOp relation) {
         if (ObjectUtils.isEmpty(children)) {
             return WindConstants.EMPTY;
         }

@@ -1,27 +1,34 @@
 package com.wind.script.expression;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.NotNull;
 
 /**
- * 表达式操作数，{@link #getValue()}用于在表达式中计算
+ * 表达式操作数，{@link #value}用于在表达式中计算
  *
  * @author wuxp
  * @date 2024-05-10 13:38
  **/
-public interface Operand {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Operand {
 
     /**
-     * @return 操作数值
+     * 操作数 value
      */
-    Object getValue();
+    @NotNull
+    private Object value;
 
     /**
-     * @return 操作数来源
+     * 操作数类型
      */
-    OperandSource getSource();
+    @NotNull
+    private OperandType type;
+
 
     /**
      * 生成一个常量操作数
@@ -29,42 +36,7 @@ public interface Operand {
      * @param value 常量值
      * @return Operand 实例
      */
-    static Operand ofConst(Object value) {
-        return immutable(value, OperandSource.CONSTANT);
-    }
-
-    @JsonCreator()
-    static Operand immutable(@JsonProperty("value") Object value, @JsonProperty("source") OperandSource source) {
-        return new ImmutableOperand(value, source);
-    }
-
-    /**
-     * 操作数来源
-     */
-    enum OperandSource {
-
-        /**
-         * 上下文变量
-         */
-        CONTEXT_VARIABLE,
-
-        /**
-         * 常量(字面量)
-         */
-        CONSTANT,
-
-        /**
-         * 脚本调用或执行
-         */
-        SCRIPT
-    }
-
-    @Getter
-    @AllArgsConstructor
-    class ImmutableOperand implements Operand {
-
-        private final Object value;
-
-        private final OperandSource source;
+    public static Operand ofConst(Object value) {
+        return new Operand(value, OperandType.CONSTANT);
     }
 }

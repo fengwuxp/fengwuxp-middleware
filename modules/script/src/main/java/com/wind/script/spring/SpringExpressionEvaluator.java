@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * {@link #TEMPLATE} 模板字符串解析支持
  *
  * @author wuxp
- * @doc https://docs.spring.io/spring-framework/reference/core/expressions.html
+ * @docs https://docs.spring.io/spring-framework/reference/core/expressions.html
  * @date 2023-09-23 10:07
  **/
 @Slf4j
