@@ -63,6 +63,17 @@ public final class SpringExpressionEvaluator {
         this.context = context;
     }
 
+
+    /**
+     * @param expression spring 表达式
+     * @return 执行结果
+     */
+    @SuppressWarnings("unchecked")
+    @Nullable
+    public <T> T eval(String expression) {
+        return (T) eval(expression, new StandardEvaluationContext(), Object.class);
+    }
+
     /**
      * @param expression        spring 表达式
      * @param evaluationContext 执行上下文
@@ -123,7 +134,8 @@ public final class SpringExpressionEvaluator {
 
     @Nonnull
     private static EvaluationContext getEvaluationContext(Map<String, Object> variables) {
-        EvaluationContext evaluationContext = new StandardEvaluationContext();
+        StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
+        evaluationContext.getMethodResolvers().add(new WindSecurityReflectiveMethodResolver());
         variables.forEach(evaluationContext::setVariable);
         return evaluationContext;
     }

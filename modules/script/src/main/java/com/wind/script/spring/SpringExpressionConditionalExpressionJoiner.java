@@ -40,6 +40,10 @@ public class SpringExpressionConditionalExpressionJoiner implements ConditionalE
 
     private static final Map<Op, ConditionalExpressionJoiner<String>> JOINERS = new EnumMap<>(Op.class);
 
+    private static final String SPRING_CONTAINS_OP_EXPRESSION = "T(com.wind.script.spring.SpringExpressionOperators).contains(%s,%s)";
+
+    private static final String SPRING_IN_RANGE_OP_EXPRESSION = "T(com.wind.script.spring.SpringExpressionOperators).inRange(%s,%s)";
+
     /**
      * 不允许使用的操作符号
      */
@@ -49,19 +53,17 @@ public class SpringExpressionConditionalExpressionJoiner implements ConditionalE
         JOINERS.put(Op.IS_NULL, (left, right, op) -> String.format("%s %s", left, Op.IS_NULL.getOperator()));
         JOINERS.put(Op.NOT_NULL, (left, right, op) -> String.format("%s %s", left, Op.NOT_NULL.getOperator()));
 
-        JOINERS.put(Op.CONTAINS, (left, right, op) -> String.format("%s.%s(%s)", left, Op.CONTAINS.getOperator(), right));
+        JOINERS.put(Op.CONTAINS, (left, right, op) -> String.format(SPRING_CONTAINS_OP_EXPRESSION, left, right));
         JOINERS.put(Op.NOT_CONTAINS, (left, right, op) -> "!" + JOINERS.get(Op.CONTAINS).join(left, right, Op.CONTAINS));
 
         JOINERS.put(Op.IN_RANG, (left, right, op) -> {
             String[] rang = parseExpressionToArray(right);
-            return String.format("(%s >= %s and %s <= %s)", left, rang[0], left, rang[1]);
+            return String.format(SPRING_IN_RANGE_OP_EXPRESSION, left, right);
         });
-        JOINERS.put(Op.NOT_IN_RANG, (left, right, op) -> {
-            String[] rang = parseExpressionToArray(right);
-            return String.format("(%s < %s or %s > %s)", left, rang[0], left, rang[1]);
-        });
+        JOINERS.put(Op.NOT_IN_RANG, (left, right, op) -> "!" + JOINERS.get(Op.IN_RANG).join(left, right, Op.CONTAINS));
         JOINERS.put(Op.GLOBAL_METHOD, (left, right, op) -> {
-            Map<String, String> configs = JSON.parseObject(right, new TypeReference<Map<String, String>>() {});
+            Map<String, String> configs = JSON.parseObject(right, new TypeReference<Map<String, String>>() {
+            });
             String result = configs.get("result");
             if (StringUtils.hasText(result)) {
                 checkExpression(result);

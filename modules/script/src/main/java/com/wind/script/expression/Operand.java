@@ -39,4 +39,8 @@ public class Operand {
     public static Operand ofConst(Object value) {
         return new Operand(value, OperandType.CONSTANT);
     }
+
+    public static Operand of(Object value, OperandType type) {
+        return new Operand(value, type);
+    }
 }

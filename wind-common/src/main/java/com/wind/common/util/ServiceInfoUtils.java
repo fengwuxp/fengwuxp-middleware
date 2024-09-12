@@ -44,7 +44,7 @@ public final class ServiceInfoUtils {
     }
 
     @Nullable
-    private static String getProperty(String key) {
+    public static String getProperty(String key) {
         String result = System.getProperty(key, System.getenv(key));
         if (StringUtils.hasText(result)) {
             return result;
