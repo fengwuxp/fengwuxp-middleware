@@ -16,9 +16,9 @@ import java.util.Set;
  * @author wuxp
  * @date 2024-09-12 11:35
  **/
-public class WindSecurityReflectiveMethodResolver extends ReflectiveMethodResolver {
+public final class WindSecurityReflectiveMethodResolver extends ReflectiveMethodResolver {
 
-    private static final String ALL_PACKAGE_NAMES = "spring.expression.allow.packages";
+    private static final String ALL_PACKAGE_NAMES_PROPERTY_NAME = "spring.expression.allow.packages";
 
     private static final Set<String> DEFAULT_PACKAGES = ImmutableSet.of("com.wind");
 
@@ -45,7 +45,7 @@ public class WindSecurityReflectiveMethodResolver extends ReflectiveMethodResolv
     }
 
     private static Set<String> loadPackages() {
-        String packages = ServiceInfoUtils.getProperty(ALL_PACKAGE_NAMES);
+        String packages = ServiceInfoUtils.getSystemProperty(ALL_PACKAGE_NAMES_PROPERTY_NAME);
         if (packages == null) {
             return DEFAULT_PACKAGES;
         }

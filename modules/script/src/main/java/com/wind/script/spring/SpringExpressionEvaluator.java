@@ -15,8 +15,10 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.lang.Nullable;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 快捷执行 spring expression 支持
@@ -28,6 +30,8 @@ import java.util.concurrent.TimeUnit;
  **/
 @Slf4j
 public final class SpringExpressionEvaluator {
+
+    private static final AtomicBoolean SECURITY_MODE = new AtomicBoolean(true);
 
     private static final ParserContext TEMPLATE_PARSER_CONTEXT = new TemplateParserContext(WindConstants.DELIM_START, WindConstants.DELIM_END);
 
@@ -71,7 +75,7 @@ public final class SpringExpressionEvaluator {
     @SuppressWarnings("unchecked")
     @Nullable
     public <T> T eval(String expression) {
-        return (T) eval(expression, new StandardEvaluationContext(), Object.class);
+        return (T) eval(expression, getEvaluationContext(Collections.emptyMap()), Object.class);
     }
 
     /**
@@ -135,8 +139,20 @@ public final class SpringExpressionEvaluator {
     @Nonnull
     private static EvaluationContext getEvaluationContext(Map<String, Object> variables) {
         StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
-        evaluationContext.getMethodResolvers().add(new WindSecurityReflectiveMethodResolver());
+        if (SECURITY_MODE.get()) {
+            evaluationContext.getMethodResolvers().clear();
+            evaluationContext.getMethodResolvers().add(new WindSecurityReflectiveMethodResolver());
+        }
         variables.forEach(evaluationContext::setVariable);
         return evaluationContext;
+    }
+
+    /**
+     * 开启安全模式
+     *
+     * @param enable 是否启用
+     */
+    public static void setSecurityMode(boolean enable) {
+        SECURITY_MODE.set(enable);
     }
 }

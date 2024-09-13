@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,8 @@ import java.util.stream.Collectors;
  */
 @AllArgsConstructor
 public class SentinelMetricsCollector implements MetricExtension {
+
+    private static final AtomicBoolean ENABLE_METRICS_COLLECT = new AtomicBoolean(false);
 
     /**
      * Prefix used for all Sentinel metric names.
@@ -87,45 +90,59 @@ public class SentinelMetricsCollector implements MetricExtension {
 
     @Override
     public void addPass(String resource, int n, Object... args) {
-        Metrics.counter(genName(PASS_REQUESTS_TOTAL), getResourceTags(resource, args)).increment(n);
+        if (ENABLE_METRICS_COLLECT.get()) {
+            Metrics.counter(genName(PASS_REQUESTS_TOTAL), getResourceTags(resource, args)).increment(n);
+        }
     }
 
     @Override
     public void addBlock(String resource, int n, String origin, BlockException ex, Object... args) {
-        List<Tag> tags = new ArrayList<>(getArgsTags(args));
-        tags.addAll(Arrays.asList(
-                Tag.of(RESOURCE_TAG_NAME, ex.getRule().getResource()),
-                Tag.of(BLOCK_EXCEPTION_TAG_NAME, ex.getClass().getSimpleName()),
-                Tag.of(APP_TAG_NAME, ex.getRuleLimitApp()),
-                Tag.of(ORIGIN_TAG_NAME, origin)
-        ));
-        Metrics.counter(genName(BLOCK_REQUESTS_TOTAL), tags).increment(n);
+        if (ENABLE_METRICS_COLLECT.get()) {
+            List<Tag> tags = new ArrayList<>(getArgsTags(args));
+            tags.addAll(Arrays.asList(
+                    Tag.of(RESOURCE_TAG_NAME, ex.getRule().getResource()),
+                    Tag.of(BLOCK_EXCEPTION_TAG_NAME, ex.getClass().getSimpleName()),
+                    Tag.of(APP_TAG_NAME, ex.getRuleLimitApp()),
+                    Tag.of(ORIGIN_TAG_NAME, origin)
+            ));
+            Metrics.counter(genName(BLOCK_REQUESTS_TOTAL), tags).increment(n);
+        }
     }
 
     @Override
     public void addSuccess(String resource, int n, Object... args) {
-        Metrics.counter(genName(SUCCESS_REQUESTS_TOTAL), getResourceTags(resource, args)).increment(n);
+        if (ENABLE_METRICS_COLLECT.get()) {
+            Metrics.counter(genName(SUCCESS_REQUESTS_TOTAL), getResourceTags(resource, args)).increment(n);
+        }
     }
 
     @Override
     public void addException(String resource, int n, Throwable throwable) {
-        Tags tags = Tags.of(RESOURCE_TAG_NAME, resource, EXCEPTION_TAG_NAME, throwable.getClass().getSimpleName());
-        Metrics.counter(genName(EXCEPTION_REQUESTS_TOTAL), tags).increment(n);
+        if (ENABLE_METRICS_COLLECT.get()) {
+            Tags tags = Tags.of(RESOURCE_TAG_NAME, resource, EXCEPTION_TAG_NAME, throwable.getClass().getSimpleName());
+            Metrics.counter(genName(EXCEPTION_REQUESTS_TOTAL), tags).increment(n);
+        }
     }
 
     @Override
     public void addRt(String resource, long rt, Object... args) {
-        Metrics.timer(genName(REQUESTS_LATENCY_SECONDS), getResourceTags(resource, args)).record(rt, TimeUnit.MICROSECONDS);
+        if (ENABLE_METRICS_COLLECT.get()) {
+            Metrics.timer(genName(REQUESTS_LATENCY_SECONDS), getResourceTags(resource, args)).record(rt, TimeUnit.MICROSECONDS);
+        }
     }
 
     @Override
     public void increaseThreadNum(String resource, Object... args) {
-        Metrics.gauge(genName(CURRENT_THREADS), getResourceTags(resource, args), getThreadCounter(resource), AtomicLong::incrementAndGet);
+        if (ENABLE_METRICS_COLLECT.get()) {
+            Metrics.gauge(genName(CURRENT_THREADS), getResourceTags(resource, args), getThreadCounter(resource), AtomicLong::incrementAndGet);
+        }
     }
 
     @Override
     public void decreaseThreadNum(String resource, Object... args) {
-        Metrics.gauge(genName(CURRENT_THREADS), getResourceTags(resource, args), getThreadCounter(resource), AtomicLong::decrementAndGet);
+        if (ENABLE_METRICS_COLLECT.get()) {
+            Metrics.gauge(genName(CURRENT_THREADS), getResourceTags(resource, args), getThreadCounter(resource), AtomicLong::decrementAndGet);
+        }
     }
 
     private AtomicLong getThreadCounter(String resource) {
@@ -149,5 +166,9 @@ public class SentinelMetricsCollector implements MetricExtension {
 
     private String genName(String name) {
         return resourceType + "." + name;
+    }
+
+    public static void setEnableMetricsCollect(boolean enable) {
+        ENABLE_METRICS_COLLECT.set(enable);
     }
 }
