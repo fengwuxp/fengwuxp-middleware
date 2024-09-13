@@ -30,7 +30,7 @@ import java.util.Map;
  **/
 class SpringExpressionGeneratorTests {
 
-    private static final String EXPECTED_EXPRESSION = "#name == '张三' AND ({'dev','sit'}.contains(#env) AND ((#age >= 16 and #age <= 45) OR ({'杭州','上海'}.contains(#city) OR #tags['example'] != 'demo')))";
+    private static final String EXPECTED_EXPRESSION = "#name == '张三' AND (T(com.wind.script.spring.SpringExpressionOperators).contains({'dev','sit'},#env) AND (T(com.wind.script.spring.SpringExpressionOperators).inRange(#age,{16,45}) OR (T(com.wind.script.spring.SpringExpressionOperators).contains({'杭州','上海'},#city) OR #tags['example'] != 'demo')))";
 
     private final ExpressionParser expressionParser = new SpelExpressionParser();
 

@@ -20,7 +20,7 @@ public final class WindSecurityReflectiveMethodResolver extends ReflectiveMethod
 
     private static final String ALL_PACKAGE_NAMES_PROPERTY_NAME = "spring.expression.allow.packages";
 
-    private static final Set<String> DEFAULT_PACKAGES = ImmutableSet.of("com.wind");
+    private static final Set<String> DEFAULT_PACKAGES = ImmutableSet.of("java.lang.Class", "com.wind");
 
     private final Set<String> packages;
 
