@@ -1,5 +1,6 @@
 package com.wind.script.spring;
 
+import com.google.common.collect.ImmutableMap;
 import com.wind.common.exception.BaseException;
 import com.wind.script.expression.Op;
 import com.wind.script.expression.Operand;
@@ -49,6 +50,11 @@ class SpringExpressionConditionalExpressionJoinerTest {
         Assertions.assertEquals("T(com.wind.script.spring.SpringExpressionOperators).contains(1,'new Integer[]{1, 2}')", expression);
         result = SpringExpressionEvaluator.DEFAULT.eval(expression);
         Assertions.assertEquals(Boolean.TRUE, result);
+
+        expression = joiner.join(Operand.ofConst(1), Operand.of("values", OperandType.VARIABLE), Op.CONTAINS);
+        Assertions.assertEquals("T(com.wind.script.spring.SpringExpressionOperators).contains(1,#values)", expression);
+        result = SpringExpressionEvaluator.DEFAULT.eval(expression, ImmutableMap.of("values", Arrays.asList(1, 2, 4)));
+        Assertions.assertEquals(Boolean.TRUE, result);
     }
 
     @Test
@@ -81,6 +87,7 @@ class SpringExpressionConditionalExpressionJoinerTest {
         Boolean result = SpringExpressionEvaluator.DEFAULT.eval(expression);
         Assertions.assertNotEquals(Boolean.TRUE, result);
     }
+
 
     private static Operand createConstant(Object val) {
         return Operand.ofConst(val);

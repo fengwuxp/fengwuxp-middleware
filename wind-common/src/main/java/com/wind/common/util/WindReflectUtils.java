@@ -1,12 +1,15 @@
 package com.wind.common.util;
 
 import com.wind.common.exception.AssertUtils;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.core.ResolvableType;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 import javax.validation.constraints.NotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -122,5 +125,23 @@ public final class WindReflectUtils {
         List<Field> result = new ArrayList<>(Arrays.asList(fields));
         result.addAll(getClazzFields(clazz.getSuperclass()));
         return result;
+    }
+
+    /**
+     * 解析对象实现的接口上设置的泛型
+     *
+     * @param bean 对象
+     * @return 接口上设置的泛型
+     */
+    public static Type[] resolveSuperInterfaceGenericType(@NotNull Object bean) {
+        AssertUtils.notNull(bean, "argument bean must not null");
+        Class<?> targetClass = AopUtils.getTargetClass(bean);
+        ResolvableType resolvableType = ResolvableType.forClass(targetClass);
+        ResolvableType[] interfaces = resolvableType.getInterfaces();
+        ResolvableType[] generics = interfaces[0].getGenerics();
+        AssertUtils.notEmpty(generics, () -> targetClass.getName() + " 未设置泛型");
+        return Arrays.stream(generics)
+                .map(ResolvableType::getType)
+                .toArray(Type[]::new);
     }
 }
