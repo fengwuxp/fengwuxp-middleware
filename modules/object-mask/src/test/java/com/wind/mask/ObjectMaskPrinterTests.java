@@ -84,7 +84,6 @@ class ObjectMaskPrinterTests {
         map.put("test2", example);
         map.put("cycle", map);
         String result = printer.mask(map);
-        Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("@ref["));
     }
 
@@ -92,7 +91,6 @@ class ObjectMaskPrinterTests {
     void testSanitizeCycleObject() {
         example.setObjectSanitizePrinterExample(example);
         String result = printer.mask(example);
-        Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("@ref["));
     }
 
@@ -103,7 +101,6 @@ class ObjectMaskPrinterTests {
         map.put("test2", example);
         map.put("cycle", map);
         String result = printer.mask(map);
-        Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("@ref["));
     }
 

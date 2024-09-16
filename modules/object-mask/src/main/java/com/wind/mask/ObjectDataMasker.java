@@ -125,7 +125,8 @@ public class ObjectDataMasker implements WindMasker<Object, Object> {
         MaskRuleGroup group = registry.getRuleGroup(Map.class);
         map.replaceAll((key, value) -> {
             if (key instanceof String && value instanceof String) {
-                return group.matchesWithKey((String) key).getMasker().mask(value);
+                MaskRule rule = group.matchesWithKey((String) key);
+                return rule == null ? value : rule.getMasker().mask(value);
             }
             return maskAs(value);
         });

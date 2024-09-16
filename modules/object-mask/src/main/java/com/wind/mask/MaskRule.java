@@ -25,8 +25,6 @@ public class MaskRule {
 
     private static final String[] REGEX_PARTS = {"*", "$", "^", "+"};
 
-    static final MaskRule EMPTY = new MaskRule(WindConstants.EMPTY, Collections.emptyList(), o -> o);
-
     /**
      * 需要脱敏的字段名称或表达式
      */

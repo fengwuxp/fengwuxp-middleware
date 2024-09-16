@@ -10,7 +10,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
-import javax.validation.constraints.NotNull;
 import java.lang.reflect.Field;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
@@ -105,10 +104,17 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
             return checkCycleRefAndSanitize(obj, null);
         }
 
-        private String checkCycleRefAndSanitize(Object value, @Nullable MaskRule fieldRule) {
+        private String checkCycleRefAndSanitize(Object value, @Nullable MaskRule maskRule) {
             if (value == null) {
                 return WindConstants.NULL;
             }
+            if (isCycleRef(value)) {
+                return String.format("%s[%s]", CYCLE_REF_FLAG, Integer.toHexString(hashCode()));
+            }
+            if (maskRule != null) {
+                return printWithMaskRule(value, maskRule);
+            }
+
             if (value instanceof String) {
                 // TODO 单纯的字符串先不支持脱敏
                 return (String) value;
@@ -128,17 +134,24 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
                 // 不需要脱敏的类型
                 return String.valueOf(value);
             }
-            if (isCycleRef(value)) {
-                return String.format("%s[%s]", CYCLE_REF_FLAG, Integer.toHexString(hashCode()));
-            }
             if (depthCounter.incrementAndGet() > maxPrintDepth) {
                 return String.format("%s 对象打印深度超过了：%d", value.getClass().getName(), maxPrintDepth);
             }
             try {
-                return sanitizeByRule(value, fieldRule);
+                return sanitizeByRule(value, maskRule);
             } finally {
                 depthCounter.decrementAndGet();
             }
+        }
+
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        private String printWithMaskRule(Object value, MaskRule fieldRule) {
+            WindMasker<Object, Object> masker = getMasker(fieldRule);
+            if (masker == null) {
+                return checkCycleRefAndSanitize(value, null);
+            }
+            Object result = masker instanceof ObjectMasker ? ((ObjectMasker) masker).mask(value, fieldRule.getKeys()) : masker.mask(value);
+            return String.valueOf(result);
         }
 
         private boolean isCycleRef(Object value) {
@@ -208,9 +221,6 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
             if (isOverPrintSize(map.size())) {
                 return toOverMaxSizeString(map.getClass());
             }
-            if (isCycleRef(map)) {
-                return "{" + String.format("%s[%s]", CYCLE_REF_FLAG, Integer.toHexString(hashCode())) + "}, ";
-            }
             MaskRuleGroup group = maskRule == null ? rueRegistry.getRuleGroup(Map.class) : convertMapRules(maskRule);
             StringBuilder result = new StringBuilder();
             result.append('{');
@@ -218,8 +228,8 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
                 Object key = entry.getKey();
                 result.append(key).append("=");
                 if (key instanceof String) {
-                    WindMasker<Object, Object> masker = getMasker(group.matchesWithKey((String) key));
-                    result.append(masker == null ? checkCycleRefAndSanitize(entry.getValue(), maskRule) : masker.mask(entry.getValue()));
+                    MaskRule rule = group.matchesWithKey((String) key);
+                    result.append(rule == null ? checkCycleRefAndSanitize(entry.getValue(), maskRule) : getMasker(rule).mask(entry.getValue()));
                 } else {
                     result.append(mask(entry.getValue()));
                 }
@@ -230,44 +240,27 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
             return result.toString();
         }
 
-        @SuppressWarnings({"unchecked", "rawtypes"})
         private String printObject(Object obj) {
             Class<?> clazz = obj.getClass();
             StringBuilder result = new StringBuilder(obj.getClass().getSimpleName()).append("(");
             for (Field field : WindReflectUtils.getFields(clazz)) {
                 ReflectionUtils.makeAccessible(field);
                 Object value = ReflectionUtils.getField(field, obj);
-                MaskRule rule = getFieldRuleGroup(field);
-                if (isCycleRef(value)) {
-                    result.append(field.getName()).append("=").append(String.format("%s[%s]", CYCLE_REF_FLAG, Integer.toHexString(hashCode()))).append(", ");
-                    continue;
-                }
-                if (value instanceof Map && MaskRule.EMPTY == rule) {
-                    // Map 类型字段，未单独设置脱敏规则
-                    result.append(field.getName()).append("=").append(printMap((Map<?, ?>) value, rule)).append(", ");
-                } else {
-                    WindMasker<Object, Object> masker = getMasker(rule);
-                    Object val;
-                    if (masker == null) {
-                        val = checkCycleRefAndSanitize(value, rule);
-                    } else {
-                        val = masker instanceof ObjectMasker ? ((ObjectMasker) masker).mask(value, rule.getKeys()) : masker.mask(value);
-                    }
-                    result.append(field.getName()).append("=").append(val).append(", ");
-                }
+                MaskRule rule = getFieldMaskRule(field);
+                result.append(field.getName()).append("=").append(checkCycleRefAndSanitize(value, rule)).append(", ");
             }
             deleteLastBlank(result);
             result.append(')');
             return result.toString();
         }
 
-        @NotNull
-        private MaskRule getFieldRuleGroup(Field field) {
+        @Nullable
+        private MaskRule getFieldMaskRule(Field field) {
             Sensitive annotation = field.getAnnotation(Sensitive.class);
             String name = field.getName();
             if (annotation == null) {
                 MaskRuleGroup ruleGroup = rueRegistry.getRuleGroup(field.getDeclaringClass());
-                return ruleGroup == null ? MaskRule.EMPTY : ruleGroup.matchesWithName(name);
+                return ruleGroup == null ? null : ruleGroup.matchesWithName(name);
             }
             return new MaskRule(name, Arrays.asList(annotation.names()), MaskerFactory.getMasker(annotation.masker()));
         }

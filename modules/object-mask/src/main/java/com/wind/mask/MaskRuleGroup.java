@@ -4,6 +4,7 @@ import com.wind.common.util.WindReflectUtils;
 import com.wind.mask.annotation.Sensitive;
 import com.wind.mask.masker.MaskerFactory;
 import lombok.Data;
+import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.Field;
@@ -45,26 +46,26 @@ public final class MaskRuleGroup {
         this.rules = new LinkedHashSet<>(rules);
     }
 
-    @NotNull
+    @Nullable
     public MaskRule matchesWithName(String fieldName) {
         if (fieldName == null && rules.isEmpty()) {
-            return MaskRule.EMPTY;
+            return null;
         }
         return rules.stream()
                 .filter(rule -> rule.eq(fieldName))
                 .findFirst()
-                .orElse(MaskRule.EMPTY);
+                .orElse(null);
     }
 
-    @NotNull
+    @Nullable
     public MaskRule matchesWithKey(String key) {
         if (key == null && rules.isEmpty()) {
-            return MaskRule.EMPTY;
+            return null;
         }
         return rules.stream()
                 .filter(rule -> rule.matches(key))
                 .findFirst()
-                .orElse(MaskRule.EMPTY);
+                .orElse(null);
     }
 
 
@@ -156,7 +157,7 @@ public final class MaskRuleGroup {
         /**
          * 标记 {@link java.util.Map} 类型的字段
          *
-         * @param masker  脱敏器实例
+         * @param masker     脱敏器实例
          * @param fieldNames 需要脱敏的字段名称
          * @param keys       需要脱敏的 Map keys
          * @return RuleBuilder
@@ -197,6 +198,12 @@ public final class MaskRuleGroup {
 
         private List<MaskRule> parsesRules() {
             List<MaskRule> result = new ArrayList<>();
+            Sensitive clazzAnnotation = clazz.getAnnotation(Sensitive.class);
+            if (clazzAnnotation != null) {
+                for (String name : clazzAnnotation.names()) {
+                    result.add(MaskRule.mark(name, MaskerFactory.getMasker(clazzAnnotation.masker()), name));
+                }
+            }
             for (Field field : WindReflectUtils.findFields(clazz, Sensitive.class)) {
                 Sensitive annotation = field.getAnnotation(Sensitive.class);
                 result.add(MaskRule.mark(field.getName(), MaskerFactory.getMasker(annotation.masker()), annotation.names()));
