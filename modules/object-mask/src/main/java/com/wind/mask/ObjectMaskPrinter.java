@@ -1,5 +1,6 @@
 package com.wind.mask;
 
+import com.google.common.collect.ImmutableSet;
 import com.wind.common.WindConstants;
 import com.wind.common.annotations.VisibleForTesting;
 import com.wind.common.util.WindReflectUtils;
@@ -18,6 +19,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.wind.mask.MaskRuleGroup.convertMapRules;
@@ -30,6 +32,16 @@ import static com.wind.mask.MaskRuleGroup.convertMapRules;
  **/
 @Slf4j
 public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
+
+    /**
+     * 不需要计算循环引用的类类型
+     */
+    private static final Set<Class<?>> IGNORE_CYCLE_REF_CLASSES = ImmutableSet.of(
+            CharSequence.class,
+            Number.class,
+            Date.class,
+            Temporal.class
+    );
 
     /**
      * 对象 toString 时，连接字段的字符
@@ -157,6 +169,11 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
         }
 
         private boolean isCycleRef(Object value) {
+            Class<?> clazz = value.getClass();
+            if (ClassUtils.isPrimitiveOrWrapper(clazz) || ClassUtils.isPrimitiveWrapperArray(clazz) || clazz.isEnum() ||
+                    IGNORE_CYCLE_REF_CLASSES.stream().anyMatch(c -> ClassUtils.isAssignable(c, clazz))) {
+                return false;
+            }
             // 是否为循序引用（通过对象地址比较）
             boolean result = references.stream().anyMatch(o -> o == value);
             if (!result) {
