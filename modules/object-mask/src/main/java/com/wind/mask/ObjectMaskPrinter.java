@@ -109,12 +109,8 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
                 return WindConstants.NULL;
             }
             if (isCycleRef(value)) {
-                return String.format("%s[%s]", CYCLE_REF_FLAG, Integer.toHexString(hashCode()));
+                return printCycleRefClassHashCode(value);
             }
-            if (maskRule != null) {
-                return printWithMaskRule(value, maskRule);
-            }
-
             if (value instanceof String) {
                 // TODO 单纯的字符串先不支持脱敏
                 return (String) value;
@@ -146,9 +142,15 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
 
         @SuppressWarnings({"unchecked", "rawtypes"})
         private String printWithMaskRule(Object value, MaskRule fieldRule) {
+            if (value == null) {
+                return WindConstants.NULL;
+            }
             WindMasker<Object, Object> masker = getMasker(fieldRule);
             if (masker == null) {
                 return checkCycleRefAndSanitize(value, null);
+            }
+            if (isCycleRef(value)) {
+                return printCycleRefClassHashCode(value);
             }
             Object result = masker instanceof ObjectMasker ? ((ObjectMasker) masker).mask(value, fieldRule.getKeys()) : masker.mask(value);
             return String.valueOf(result);
@@ -156,12 +158,17 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
 
         private boolean isCycleRef(Object value) {
             // 是否为循序引用（通过对象地址比较）
-            boolean isCycleRef = references.stream().anyMatch(o -> o == value);
-            if (!isCycleRef) {
+            boolean result = references.stream().anyMatch(o -> o == value);
+            if (!result) {
                 // 非循环引用，加入引用队列
                 references.add(value);
             }
-            return isCycleRef;
+            return result;
+        }
+
+        private String printCycleRefClassHashCode(Object value) {
+            // 由于实例中存在循环引用，这里只打印对象的类的 hashCode
+            return String.format("%s[%s]", CYCLE_REF_FLAG, Integer.toHexString(value.getClass().hashCode()));
         }
 
         /**
@@ -229,7 +236,7 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
                 result.append(key).append("=");
                 if (key instanceof String) {
                     MaskRule rule = group.matchesWithKey((String) key);
-                    result.append(rule == null ? checkCycleRefAndSanitize(entry.getValue(), maskRule) : getMasker(rule).mask(entry.getValue()));
+                    result.append(printWithMaskRule(entry.getValue(), rule == null ? maskRule : rule));
                 } else {
                     result.append(mask(entry.getValue()));
                 }
@@ -247,7 +254,7 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
                 ReflectionUtils.makeAccessible(field);
                 Object value = ReflectionUtils.getField(field, obj);
                 MaskRule rule = getFieldMaskRule(field);
-                result.append(field.getName()).append("=").append(checkCycleRefAndSanitize(value, rule)).append(", ");
+                result.append(field.getName()).append("=").append(printWithMaskRule(value, rule)).append(", ");
             }
             deleteLastBlank(result);
             result.append(')');
