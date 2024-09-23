@@ -61,7 +61,7 @@ public class WebFilterConfiguration {
     public FilterRegistrationBean<IndexHtmlResourcesFilter> webIndexHtmlResourcesFilter(ApplicationContext context) {
         FilterRegistrationBean<IndexHtmlResourcesFilter> result = new FilterRegistrationBean<>();
         result.setFilter(new IndexHtmlResourcesFilter(context.getBean(INDEX_HTML_RESOURCE_LOADER_BEAN_NAME, Function.class)));
-        result.setOrder(WindWebFilterOrdered.INDEX_HTML_FILTER.getOrder());
+        result.setOrder(WindWebFilterOrdered.INDEX_HTML_RESOURCES_FILTER.getOrder());
         return result;
     }
 
