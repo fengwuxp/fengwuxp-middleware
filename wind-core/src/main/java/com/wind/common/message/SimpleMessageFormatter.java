@@ -4,7 +4,7 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * 解析占位符为：{} 格式的消息表达式
- * 例如：你好，我是：{}，来自 {}，今年 {} 岁， 很高兴认识{}
+ * 例如：你好，我是：{}，来自 {}，今年 {} 岁， 很高兴认识 {}
  *
  * @author wuxp
  * @date 2023-10-30 07:47

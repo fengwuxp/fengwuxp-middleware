@@ -1,5 +1,6 @@
 package com.wind.server.web.restful;
 
+import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
 import com.wind.common.exception.ExceptionCode;
@@ -10,6 +11,8 @@ import com.wind.trace.WindTracer;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 
 /**
  * 统一响应工厂
@@ -17,6 +20,8 @@ import org.springframework.util.StringUtils;
  * @author wuxp
  */
 public final class RestfulApiRespFactory {
+
+    private static final AtomicReference<FriendlyExceptionMessageConverter> CONVERTER = new AtomicReference<>(FriendlyExceptionMessageConverter.none());
 
     private RestfulApiRespFactory() {
         throw new AssertionError();
@@ -121,15 +126,20 @@ public final class RestfulApiRespFactory {
             ExceptionCode code = ((BaseException) throwable).getCode();
             if (code instanceof DefaultExceptionCode) {
                 HttpStatus status = HttpStatus.resolve(Integer.parseInt(code.getCode()));
-                return of(status == null ? HttpStatus.INTERNAL_SERVER_ERROR : status, null, code, errorMessage);
+                return of(status == null ? HttpStatus.INTERNAL_SERVER_ERROR : status, null, code, CONVERTER.get().convert(throwable, errorMessage));
             }
-            return error(code, errorMessage);
+            return error(code, CONVERTER.get().convert(throwable, errorMessage));
         }
         return error(errorMessage);
     }
 
     private static <T> ApiResp<T> of(HttpStatus httpStatus, T data, ExceptionCode code, String errorMessage) {
         return new ImmutableWebApiResponse<>(httpStatus, data, code, errorMessage, WindTracer.TRACER.getTraceId());
+    }
+
+    public static void configureFriendlyExceptionMessageConverter(FriendlyExceptionMessageConverter converter) {
+        AssertUtils.notNull(converter, "argument convert must not null");
+        CONVERTER.set(converter);
     }
 
 }

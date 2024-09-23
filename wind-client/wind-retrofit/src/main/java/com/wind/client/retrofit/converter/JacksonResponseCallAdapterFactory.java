@@ -3,6 +3,7 @@ package com.wind.client.retrofit.converter;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
 import lombok.AllArgsConstructor;
@@ -68,6 +69,7 @@ public class JacksonResponseCallAdapterFactory extends CallAdapter.Factory {
             }
         }
 
+        @SuppressWarnings("unchecked")
         private Object parseErrorResp(ResponseBody errorBody) throws IOException {
             JavaType javaType = objectMapper.getTypeFactory().constructType(responseType);
             ObjectReader reader = objectMapper.readerFor(javaType);

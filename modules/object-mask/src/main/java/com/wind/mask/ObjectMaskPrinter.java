@@ -1,6 +1,5 @@
 package com.wind.mask;
 
-import com.google.common.collect.ImmutableSet;
 import com.wind.common.WindConstants;
 import com.wind.common.annotations.VisibleForTesting;
 import com.wind.common.util.WindReflectUtils;
@@ -17,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,12 +36,13 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
     /**
      * 不需要计算循环引用的类类型
      */
-    private static final Set<Class<?>> IGNORE_CYCLE_REF_CLASSES = ImmutableSet.of(
-            CharSequence.class,
-            Number.class,
-            Date.class,
-            Temporal.class
-    );
+    private static final Set<Class<?>> IGNORE_CYCLE_REF_CLASSES = new HashSet<>(
+            Arrays.asList(
+                    CharSequence.class,
+                    Number.class,
+                    Date.class,
+                    Temporal.class
+            ));
 
     /**
      * 对象 toString 时，连接字段的字符
@@ -73,6 +74,15 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
             log.warn("sanitize object error", throwable);
             return WindConstants.EMPTY;
         }
+    }
+
+    /**
+     * 添加忽略计算循环引用的类类型
+     *
+     * @param classes 类类型
+     */
+    public static void addIgnoreCycleRefClasses(Class<?>... classes) {
+        IGNORE_CYCLE_REF_CLASSES.addAll(Arrays.asList(classes));
     }
 
     /**

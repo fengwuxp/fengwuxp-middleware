@@ -1,7 +1,6 @@
 package com.wind.common.i18n;
 
 import com.wind.common.WindConstants;
-import com.wind.common.exception.BaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.lang.Nullable;
@@ -25,10 +24,6 @@ public final class SpringI18nMessageUtils {
 
     private SpringI18nMessageUtils() {
         throw new AssertionError();
-    }
-
-    static {
-        BaseException.setI18nMessageFormatter(SpringI18nMessageUtils::getMessage);
     }
 
     /**

@@ -1,6 +1,8 @@
 package com.wind.server.i18n;
 
 import com.wind.common.i18n.SpringI18nMessageUtils;
+import com.wind.server.web.restful.FriendlyExceptionMessageConverter;
+import com.wind.server.web.restful.RestfulApiRespFactory;
 import com.wind.web.util.HttpServletRequestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
@@ -43,6 +45,7 @@ public class SpringI18nMessageSourceInitializer implements ApplicationListener<A
                 LOCALE_RESOLVER.set(new AcceptI18nHeaderLocaleResolver(Arrays.asList("Wind-Language", "Accept-Language")));
                 SpringI18nMessageUtils.setMessageSource(event.getApplicationContext().getBean(MessageSource.class));
                 SpringI18nMessageUtils.setLocaleSupplier(SpringI18nMessageSourceInitializer::getWebRequestLocal);
+                RestfulApiRespFactory.configureFriendlyExceptionMessageConverter(FriendlyExceptionMessageConverter.i18n());
                 log.info("enabled i18n supported");
             } catch (Exception ignore) {
                 log.info("un enabled i18n supported");

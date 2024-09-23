@@ -3,8 +3,10 @@ package com.wind.server.web.exception;
 
 import com.wind.common.exception.BaseException;
 import com.wind.common.i18n.SpringI18nMessageUtils;
+import com.wind.server.web.restful.FriendlyExceptionMessageConverter;
 import com.wind.server.web.restful.RestfulApiRespFactory;
 import com.wind.server.web.supports.ApiResp;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.dao.DataAccessException;
@@ -38,6 +40,7 @@ import static com.wind.common.WindConstants.WIND_SERVER_PROPERTIES_PREFIX;
 @Slf4j
 @ConditionalOnProperty(prefix = WIND_SERVER_PROPERTIES_PREFIX, name = "enabled-global-exception", havingValue = "true", matchIfMissing = true)
 @RestControllerAdvice()
+@AllArgsConstructor
 public class DefaultGlobalExceptionHandler {
 
     /**
@@ -49,6 +52,8 @@ public class DefaultGlobalExceptionHandler {
      * 数据库访问异常消息 i18n key
      */
     private static final String DB_ACCESS_DATA_I18N_KEY = "$.db.access.data.exception";
+
+    private final FriendlyExceptionMessageConverter friendlyExceptionMessageConverter;
 
     /**
      * 参数校验异常处理
