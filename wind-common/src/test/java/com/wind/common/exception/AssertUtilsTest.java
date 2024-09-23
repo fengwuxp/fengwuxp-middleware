@@ -12,16 +12,6 @@ import java.util.Map;
 
 class AssertUtilsTest {
 
-    @BeforeEach
-    void setup() {
-        BaseException.setI18nMessageFormatter(MessageFormatter.java());
-    }
-
-    @AfterEach
-    void after() {
-        BaseException.setI18nMessageFormatter(MessageFormatter.none());
-    }
-
     @Test
     void testAssertUtils() {
         AssertUtils.isTrue(true, "isTrue error");
