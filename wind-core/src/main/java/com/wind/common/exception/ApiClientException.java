@@ -4,7 +4,7 @@ import com.wind.api.core.ApiResponse;
 import lombok.Getter;
 
 /**
- * Api Client Exeception
+ * Api Client Exception
  *
  * @author wuxp
  * @date 2024-02-28 17:34

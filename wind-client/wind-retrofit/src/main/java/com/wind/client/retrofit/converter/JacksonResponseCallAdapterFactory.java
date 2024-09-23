@@ -3,7 +3,6 @@ package com.wind.client.retrofit.converter;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.wind.common.exception.AssertUtils;
 import com.wind.common.exception.BaseException;
 import com.wind.common.exception.DefaultExceptionCode;
 import lombok.AllArgsConstructor;
@@ -65,7 +64,7 @@ public class JacksonResponseCallAdapterFactory extends CallAdapter.Factory {
                 Response<R> response = call.execute();
                 return response.isSuccessful() ? response.body() : parseErrorResp(response.errorBody());
             } catch (IOException exception) {
-                throw new BaseException(DefaultExceptionCode.COMMON_ERROR, "convert resp body error", exception);
+                throw new BaseException(DefaultExceptionCode.COMMON_ERROR, "convert resp body error, case by: " + exception.getMessage(), exception);
             }
         }
 
@@ -81,6 +80,5 @@ public class JacksonResponseCallAdapterFactory extends CallAdapter.Factory {
             }
         }
     }
-
 
 }

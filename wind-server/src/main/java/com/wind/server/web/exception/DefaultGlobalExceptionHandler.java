@@ -3,7 +3,6 @@ package com.wind.server.web.exception;
 
 import com.wind.common.exception.BaseException;
 import com.wind.common.i18n.SpringI18nMessageUtils;
-import com.wind.server.web.restful.FriendlyExceptionMessageConverter;
 import com.wind.server.web.restful.RestfulApiRespFactory;
 import com.wind.server.web.supports.ApiResp;
 import lombok.AllArgsConstructor;
@@ -52,8 +51,6 @@ public class DefaultGlobalExceptionHandler {
      * 数据库访问异常消息 i18n key
      */
     private static final String DB_ACCESS_DATA_I18N_KEY = "$.db.access.data.exception";
-
-    private final FriendlyExceptionMessageConverter friendlyExceptionMessageConverter;
 
     /**
      * 参数校验异常处理
