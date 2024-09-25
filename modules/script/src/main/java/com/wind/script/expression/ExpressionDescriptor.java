@@ -16,7 +16,7 @@ public class ExpressionDescriptor {
     /**
      * 逻辑运算关系 AND、OR
      */
-    private LogicalOp relation;
+    private LogicalOp conjunctions;
 
     /**
      * 左操作数

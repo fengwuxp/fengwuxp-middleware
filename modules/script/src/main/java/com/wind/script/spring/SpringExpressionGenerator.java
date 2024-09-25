@@ -36,7 +36,7 @@ public final class SpringExpressionGenerator {
     public static String generate(ExpressionDescriptor node) {
         String parentCode = JOINER.join(node.getLeft(), node.getRight(), node.getOp());
         List<ExpressionDescriptor> children = node.getChildren();
-        String childrenCode = getRight(children, node.getRelation());
+        String childrenCode = getRight(children, node.getConjunctions());
         if (StringUtils.hasText(parentCode) && !StringUtils.hasText(childrenCode)) {
             return parentCode;
         }
@@ -44,9 +44,9 @@ public final class SpringExpressionGenerator {
             return childrenCode;
         }
         if (children != null && children.size() > 1) {
-            return String.format("%s %s (%s)", parentCode, node.getRelation(), childrenCode);
+            return String.format("%s %s (%s)", parentCode, node.getConjunctions(), childrenCode);
         }
-        return String.format("%s %s %s", parentCode, node.getRelation(), childrenCode);
+        return String.format("%s %s %s", parentCode, node.getConjunctions(), childrenCode);
     }
 
     /**

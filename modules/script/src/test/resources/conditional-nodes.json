@@ -8,7 +8,7 @@
     "type": "EXPRESSION",
     "value": "'张三'"
   },
-  "relation": "AND",
+  "conjunctions": "AND",
   "children": [
     {
       "right": {
@@ -37,7 +37,7 @@
           45
         ]
       },
-      "relation": "OR",
+      "conjunctions": "OR",
       "children": [
         {
           "right": {
