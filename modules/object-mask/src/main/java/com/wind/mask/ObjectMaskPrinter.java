@@ -123,10 +123,10 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
 
         @Override
         public String mask(Object obj, Collection<String> keys) {
-            return checkCycleRefAndSanitize(obj, null);
+            return checkCycleRefAndSanitize(obj, null, true);
         }
 
-        private String checkCycleRefAndSanitize(Object value, @Nullable MaskRule maskRule) {
+        private String checkCycleRefAndSanitize(Object value, @Nullable MaskRule maskRule, boolean countDeep) {
             if (value == null) {
                 return WindConstants.NULL;
             }
@@ -152,7 +152,7 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
                 // 不需要脱敏的类型
                 return String.valueOf(value);
             }
-            if (depthCounter.incrementAndGet() > maxPrintDepth) {
+            if (countDeep && depthCounter.incrementAndGet() > maxPrintDepth) {
                 return String.format("%s 对象打印深度超过了：%d", value.getClass().getName(), maxPrintDepth);
             }
             try {
@@ -169,7 +169,7 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
             }
             WindMasker<Object, Object> masker = getMasker(fieldRule);
             if (masker == null) {
-                return checkCycleRefAndSanitize(value, null);
+                return checkCycleRefAndSanitize(value, null, false);
             }
             if (isCycleRef(value)) {
                 return printCycleRefClassHashCode(value);
@@ -240,7 +240,7 @@ public final class ObjectMaskPrinter implements ObjectMasker<Object, String> {
             StringBuilder result = new StringBuilder();
             result.append('[');
             for (int i = 0; ; i++) {
-                result.append(checkCycleRefAndSanitize(objects[i], fieldRule));
+                result.append(checkCycleRefAndSanitize(objects[i], fieldRule, false));
                 if (i == iMax) {
                     return result.append(']').toString();
                 }
