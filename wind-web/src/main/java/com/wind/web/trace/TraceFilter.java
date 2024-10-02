@@ -2,7 +2,6 @@ package com.wind.web.trace;
 
 import com.google.common.collect.ImmutableSet;
 import com.wind.common.WindConstants;
-import com.wind.common.WindHttpConstants;
 import com.wind.common.util.IpAddressUtils;
 import com.wind.common.util.ServiceInfoUtils;
 import com.wind.server.web.restful.RestfulApiRespFactory;
@@ -23,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.wind.common.WindConstants.HTTP_REQUEST_UR_TRACE_NAME;
 import static com.wind.common.WindConstants.LOCAL_HOST_IP_V4;
@@ -44,6 +44,14 @@ public class TraceFilter extends OncePerRequestFilter {
      * 线下环境给 client 响应服务端真实 IP 方便定位问题
      */
     private static final String REAL_SERVER_IP = "Real-Server-Ip";
+
+    /**
+     * 需要 trace 的 http attribute name
+     *
+     * @key http attribute name
+     * @value trace context variable name
+     */
+    private static final Map<String, String> TRACE_HTTP_ATTRIBUTE_NAMES = new HashMap<>();
 
     /**
      * ip 头名称
@@ -85,10 +93,17 @@ public class TraceFilter extends OncePerRequestFilter {
         String requestSourceIp = getRequestSourceIp(request);
         request.setAttribute(HTTP_REQUEST_IP_ATTRIBUTE_NAME, requestSourceIp);
         contextVariables.put(HTTP_REQUEST_IP_ATTRIBUTE_NAME, requestSourceIp);
-        contextVariables.put(HTTP_REQUEST_HOST_ATTRIBUTE_NAME, getReqeustSourceHost(request));
+        contextVariables.put(HTTP_REQUEST_HOST_ATTRIBUTE_NAME, getRequestSourceHost(request));
         contextVariables.put(HTTP_REQUEST_UR_TRACE_NAME, request.getRequestURI());
         contextVariables.put(HTTP_USER_AGENT_HEADER_NAME, request.getHeader(HttpHeaders.USER_AGENT));
         contextVariables.put(LOCAL_HOST_IP_V4, IpAddressUtils.getLocalIpv4WithCache());
+        // trace http attributes
+        TRACE_HTTP_ATTRIBUTE_NAMES.forEach((k, v) -> {
+            Object attribute = request.getAttribute(k);
+            if (attribute != null) {
+                contextVariables.put(v, attribute);
+            }
+        });
         WindTracer.TRACER.trace(traceId, contextVariables);
         return WindTracer.TRACER.getTraceId();
     }
@@ -117,7 +132,7 @@ public class TraceFilter extends OncePerRequestFilter {
         return request.getRemoteAddr();
     }
 
-    private String getReqeustSourceHost(HttpServletRequest request) {
+    private String getRequestSourceHost(HttpServletRequest request) {
         try {
             String host = request.getHeader("Host");
             return host == null ? URI.create(request.getRequestURI()).getHost() : host;
@@ -125,5 +140,13 @@ public class TraceFilter extends OncePerRequestFilter {
             log.error("get request host error, request url = {}", request.getRequestURL());
             return WindConstants.UNKNOWN;
         }
+    }
+
+    public static void addTraceAttributeName(String httAttributeName, String traceContextVariableName) {
+        TRACE_HTTP_ATTRIBUTE_NAMES.put(httAttributeName, traceContextVariableName);
+    }
+
+    public static void clearTraceHttpAttributeNames() {
+        TRACE_HTTP_ATTRIBUTE_NAMES.clear();
     }
 }
