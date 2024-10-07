@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
  **/
 public final class WindReflectUtils {
 
+    private static final Field[] EMPTY = new Field[0];
+
     private static final Map<Class<?>, List<Field>> FIELDS = new ConcurrentReferenceHashMap<>();
 
     /**
@@ -39,8 +41,8 @@ public final class WindReflectUtils {
      */
     @NotNull
     public static Field[] findFields(Class<?> clazz, Class<? extends Annotation> annotationClass) {
-        AssertUtils.notNull(clazz, "argument clazz  must not null");
-        AssertUtils.notNull(annotationClass, "argument annotationClass  must not null");
+        AssertUtils.notNull(clazz, "argument clazz must not null");
+        AssertUtils.notNull(annotationClass, "argument annotationClass must not null");
         Field[] result = getMemberFields(clazz)
                 .stream()
                 .filter(field -> field.isAnnotationPresent(annotationClass))
@@ -58,8 +60,10 @@ public final class WindReflectUtils {
      */
     @NotNull
     public static Field[] findFields(Class<?> clazz, Collection<String> fieldNames) {
-        AssertUtils.notNull(clazz, "argument clazz  must not null");
-        AssertUtils.notEmpty(fieldNames, "argument fieldNames  must not empty");
+        if (fieldNames == null || fieldNames.isEmpty()) {
+            return EMPTY;
+        }
+        AssertUtils.notNull(clazz, "argument clazz must not null");
         Set<String> names = new HashSet<>(fieldNames);
         Field[] result = getMemberFields(clazz)
                 .stream()
@@ -96,7 +100,7 @@ public final class WindReflectUtils {
      * @return 字段名称列表
      */
     public static List<String> getFieldNames(Class<?> clazz) {
-        AssertUtils.notNull(clazz, "argument clazz  must not null");
+        AssertUtils.notNull(clazz, "argument clazz must not null");
         return getMemberFields(clazz)
                 .stream()
                 .map(Field::getName)
