@@ -11,7 +11,6 @@ import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -63,6 +62,7 @@ public final class WindThreadTracer implements WindTracer {
     @Override
     public WindTraceContext getTraceContext() {
         Map<String, Object> mdcContext = getMdcContext();
+        // TODO 待优化
         return new WindTraceContext() {
             @Override
             public String getTraceId() {
@@ -86,6 +86,11 @@ public final class WindThreadTracer implements WindTracer {
             public <T> T getContextVariable(String variableName) {
                 return (T) mdcContext.get(variableName);
             }
+
+            @Override
+            public void putContextVariable(String variableName, String variable) {
+                MDC.put(variableName, variable);
+            }
         };
     }
 
@@ -96,7 +101,7 @@ public final class WindThreadTracer implements WindTracer {
             context = Collections.singletonMap(TRACE_ID_NAME, TRACE_ID.next());
             context.forEach(MDC::put);
         }
-        return Collections.unmodifiableMap(new HashMap<>(context));
+        return Collections.unmodifiableMap(context);
     }
 
     @Override

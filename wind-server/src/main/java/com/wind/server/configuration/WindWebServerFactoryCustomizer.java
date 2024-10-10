@@ -31,6 +31,7 @@ public class WindWebServerFactoryCustomizer {
 
         @Override
         public void customize(TomcatServletWebServerFactory factory) {
+            log.info("enable tomcat http1 nio2 handle model");
             factory.setProtocol(Http11Nio2Protocol.class.getName());
             factory.addConnectorCustomizers(connector -> {
                 ProtocolHandler protocol = connector.getProtocolHandler();

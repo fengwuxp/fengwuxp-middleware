@@ -46,14 +46,6 @@ public class TraceFilter extends OncePerRequestFilter {
     private static final String REAL_SERVER_IP = "Real-Server-Ip";
 
     /**
-     * 需要 trace 的 http attribute name
-     *
-     * @key http attribute name
-     * @value trace context variable name
-     */
-    private static final Map<String, String> TRACE_HTTP_ATTRIBUTE_NAMES = new HashMap<>();
-
-    /**
      * ip 头名称
      */
     private static final Set<String> IP_HEAD_NAMES = ImmutableSet.copyOf(
@@ -97,13 +89,6 @@ public class TraceFilter extends OncePerRequestFilter {
         contextVariables.put(HTTP_REQUEST_UR_TRACE_NAME, request.getRequestURI());
         contextVariables.put(HTTP_USER_AGENT_HEADER_NAME, request.getHeader(HttpHeaders.USER_AGENT));
         contextVariables.put(LOCAL_HOST_IP_V4, IpAddressUtils.getLocalIpv4WithCache());
-        // trace http attributes
-        TRACE_HTTP_ATTRIBUTE_NAMES.forEach((k, v) -> {
-            Object attribute = request.getAttribute(k);
-            if (attribute != null) {
-                contextVariables.put(v, attribute);
-            }
-        });
         WindTracer.TRACER.trace(traceId, contextVariables);
         return WindTracer.TRACER.getTraceId();
     }
@@ -142,11 +127,10 @@ public class TraceFilter extends OncePerRequestFilter {
         }
     }
 
+    // TODO 待删除
+    @Deprecated
     public static void addTraceAttributeName(String httAttributeName, String traceContextVariableName) {
-        TRACE_HTTP_ATTRIBUTE_NAMES.put(httAttributeName, traceContextVariableName);
+
     }
 
-    public static void clearTraceHttpAttributeNames() {
-        TRACE_HTTP_ATTRIBUTE_NAMES.clear();
-    }
 }
