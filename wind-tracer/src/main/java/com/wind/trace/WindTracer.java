@@ -1,7 +1,9 @@
 package com.wind.trace;
 
+import com.wind.common.exception.AssertUtils;
 import com.wind.trace.thread.WindThreadTracer;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.util.Collections;
@@ -56,6 +58,24 @@ public interface WindTracer {
      */
     default String getTraceId() {
         return getTraceContext().getTraceId();
+    }
+
+    /**
+     * 添加上下文变量
+     *
+     * @param variableName 变量名称
+     * @param variable     变量值
+     */
+    void putContextVariable(@NotBlank String variableName, @NotNull String variable);
+
+    /**
+     * 添加上下文变量
+     *
+     * @param variables 变量 map
+     */
+    default void putContextVariables(@NotNull Map<String, String> variables) {
+        AssertUtils.notNull(variables, "argument variables must not null");
+        variables.forEach(this::putContextVariable);
     }
 
     /**

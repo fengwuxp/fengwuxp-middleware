@@ -86,12 +86,12 @@ public final class WindThreadTracer implements WindTracer {
             public <T> T getContextVariable(String variableName) {
                 return (T) mdcContext.get(variableName);
             }
-
-            @Override
-            public void putContextVariable(String variableName, String variable) {
-                MDC.put(variableName, variable);
-            }
         };
+    }
+
+    @Override
+    public void putContextVariable(String variableName, String variable) {
+        MDC.put(variableName, variable);
     }
 
     @NonNull
