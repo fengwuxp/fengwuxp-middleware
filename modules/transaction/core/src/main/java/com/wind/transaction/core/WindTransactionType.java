@@ -1,26 +1,30 @@
 package com.wind.transaction.core;
 
-import com.wind.common.enums.DescriptiveEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 交易类型
+ * 常用的交易类型
  *
  * @author wuxp
  * @date 2024-05-14 16:44
  **/
 @AllArgsConstructor
 @Getter
-public enum WindTransactionType implements DescriptiveEnum {
+public enum WindTransactionType implements AccountTransactionType {
 
     /**
-     * 充值
+     * 存款（充值）
      */
-    RECHARGE("充值"),
+    DEPOSIT("存款（充值）"),
 
     /**
-     * 支付
+     * 取款（提现）
+     */
+    WITHDRAW("取款（提现）"),
+
+    /**
+     * 退款
      */
     PAYMENT("支付"),
 
@@ -29,12 +33,10 @@ public enum WindTransactionType implements DescriptiveEnum {
      */
     REFUND("退款"),
 
-
     /**
-     * 手续费
+     * 手续费或服务费
      */
     FEE("手续费");
-
 
     private final String desc;
 }

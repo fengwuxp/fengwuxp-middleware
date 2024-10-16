@@ -157,6 +157,11 @@ public final class RetrofitClientFactory {
             return this;
         }
 
+        public RetrofitClientFactoryBuilder language(Locale language) {
+            this.language = language;
+            return this;
+        }
+
         public RetrofitClientFactoryBuilder readWriteTimeoutSeconds(int readWriteTimeoutSeconds) {
             this.readWriteTimeoutSeconds = readWriteTimeoutSeconds;
             return this;
@@ -193,8 +198,10 @@ public final class RetrofitClientFactory {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(baseUrl)
                     .client(httpClient)
-                    .addCallAdapterFactory(new JacksonResponseCallAdapterFactory(objectMapper, ImmutableApiResponse.class, RetrofitClientFactoryBuilder::defaultResponseExtractor))
-                    .addConverterFactory(new JacksonConverterFactory(objectMapper, ImmutableApiResponse.class, RetrofitClientFactoryBuilder::defaultResponseExtractor))
+                    .addCallAdapterFactory(new JacksonResponseCallAdapterFactory(objectMapper, ImmutableApiResponse.class,
+                            RetrofitClientFactoryBuilder::defaultResponseExtractor))
+                    .addConverterFactory(new JacksonConverterFactory(objectMapper, ImmutableApiResponse.class,
+                            RetrofitClientFactoryBuilder::defaultResponseExtractor))
                     .build();
 
             return new RetrofitClientFactory(retrofit);

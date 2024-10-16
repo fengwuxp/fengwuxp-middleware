@@ -22,9 +22,8 @@ public interface BasedOnFreezeTransactionAccountService {
     TransactionAccount getAccount(TransactionAccountId id);
 
     /**
-     * 转入金额到账户，一般是充值或退款到账
-     * {@link TransactionAccount#getAmount()}
-     * {@link TransactionAccount#getRefundedAmount()} ()}
+     * 转入金额到账户，仅累加 {@link TransactionAccount#getAmount()}
+     *
      * @param request 转入请求
      */
     void transferIn(TransactionAccountId id, TransferRequest request);
@@ -32,7 +31,6 @@ public interface BasedOnFreezeTransactionAccountService {
     /**
      * 基于冻结余额的账户支出，累加 {@link TransactionAccount#getExpensesAmount()}，扣除{@link TransactionAccount#getFreezeAmount()}
      * 支出 {@param request#getAmount()} 额度不能大于已冻结额度{@link TransactionAccount#getFreezeAmount()} ()}
-     * 如果支出类型是 {@link WindTransactionType#FEE} 则累加 {@link TransactionAccount#getFeeAmount()}
      *
      * @param id      账户标识
      * @param request 转出请求
@@ -48,6 +46,14 @@ public interface BasedOnFreezeTransactionAccountService {
      * @param request 转出请求
      */
     void freezeTransferOut(TransactionAccountId id, TransferRequest request);
+
+    /**
+     * 退回金额到账户，仅累加 {@link TransactionAccount#getRefundedAmount()}
+     *
+     * @param id      账户标识
+     * @param request 退款请求
+     */
+    void reimburse(TransactionAccountId id, TransferRequest request);
 
     /**
      * 冻结账户一部分额度，仅累加 {@link TransactionAccount#getFreezeAmount()}

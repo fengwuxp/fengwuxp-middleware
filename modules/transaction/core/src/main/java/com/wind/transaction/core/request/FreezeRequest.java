@@ -1,6 +1,7 @@
 package com.wind.transaction.core.request;
 
 
+import com.wind.transaction.core.AccountTransactionType;
 import com.wind.transaction.core.Money;
 import com.wind.transaction.core.TransactionContextVariables;
 import com.wind.transaction.core.WindTransactionType;
@@ -41,7 +42,7 @@ public class FreezeRequest {
      * 交易类型
      */
     @NotNull
-    private WindTransactionType transactionType;
+    private AccountTransactionType transactionType;
 
     /**
      * 业务场景
