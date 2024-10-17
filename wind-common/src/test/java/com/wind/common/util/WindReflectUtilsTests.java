@@ -22,7 +22,6 @@ public class WindReflectUtilsTests {
         Assertions.assertEquals(2,types.length);
     }
 
-
     static class Example implements Function<String, List<String>>{
 
         @Override

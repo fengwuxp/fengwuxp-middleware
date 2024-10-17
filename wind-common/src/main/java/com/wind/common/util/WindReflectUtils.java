@@ -4,6 +4,7 @@ import com.wind.common.exception.AssertUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ObjectUtils;
 
 import javax.validation.constraints.NotNull;
 import java.lang.annotation.Annotation;
@@ -142,6 +143,9 @@ public final class WindReflectUtils {
         Class<?> targetClass = AopUtils.getTargetClass(bean);
         ResolvableType resolvableType = ResolvableType.forClass(targetClass);
         ResolvableType[] interfaces = resolvableType.getInterfaces();
+        if (ObjectUtils.isEmpty(interfaces)) {
+            return new Type[0];
+        }
         ResolvableType[] generics = interfaces[0].getGenerics();
         AssertUtils.notEmpty(generics, () -> targetClass.getName() + " 未设置泛型");
         return Arrays.stream(generics)
